@@ -84,7 +84,7 @@ export default function Ortografiesta() {
         {/* Botones */}
         <div className="flex flex-col md:flex-row justify-center gap-4 md:gap-8 mb-12">
           <button
-            className="btn bg-gradient-to-b from-orange-400 to-orange-500 text-white text-xl md:text-2xl font-bold py-4 px-8 rounded-full shadow-lg transition-all hover:shadow-xl active:scale-95 flex items-center justify-center gap-2 relative overflow-hidden group"
+            className="btn bg-gradient-to-b from-orange-400 to-orange-500 text-white text-xl md:text-2xl font-bold py-4 px-8 rounded-full shadow-lg transition-all hover:shadow-xl active:scale-95 flex items-center justify-center gap-2 relative overflow-hidden group cursor-pointer"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-yellow-300/0 via-yellow-300/30 to-yellow-300/0 group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></div>
             <span className="relative flex items-center">
@@ -92,18 +92,11 @@ export default function Ortografiesta() {
               <span className="ml-2 text-2xl">🎮</span>
             </span>
           </button>
-          <button className="btn bg-gradient-to-b from-teal-400 to-teal-500 text-white text-xl md:text-2xl font-bold py-4 px-8 rounded-full shadow-lg transition-all hover:shadow-xl active:scale-95 relative overflow-hidden group">
+          <button className="btn bg-gradient-to-b from-teal-400 to-teal-500 text-white text-xl md:text-2xl font-bold py-4 px-8 rounded-full shadow-lg transition-all hover:shadow-xl active:scale-95 relative overflow-hidden group cursor-pointer">
             <div className="absolute inset-0 bg-gradient-to-r from-teal-200/0 via-teal-200/30 to-teal-200/0 group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></div>
             <span className="relative flex items-center">
               MI PROGRESO
               <span className="ml-2 text-2xl">📊</span>
-            </span>
-          </button>
-          <button className="btn bg-gradient-to-b from-red-400 to-red-500 text-white text-xl md:text-2xl font-bold py-4 px-8 rounded-full shadow-lg transition-all hover:shadow-xl active:scale-95 relative overflow-hidden group">
-            <div className="absolute inset-0 bg-gradient-to-r from-red-200/0 via-red-200/30 to-red-200/0 group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></div>
-            <span className="relative flex items-center">
-              SALIR
-              <span className="ml-2 text-2xl">🚪</span>
             </span>
           </button>
         </div>
