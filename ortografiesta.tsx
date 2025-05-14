@@ -1,7 +1,9 @@
 "use client"
 import {  useEffect } from "react"
 import { Star, Music, Volume2 } from "lucide-react"
+import { useRouter } from "next/navigation"
 export default function Ortografiesta() {
+  const router = useRouter()
   useEffect(() => {
     const style = document.createElement("style")
     style.textContent = `
@@ -19,6 +21,16 @@ export default function Ortografiesta() {
       document.head.removeChild(style)
     }
   }, [])
+
+
+  const navegarAUnidad = (unidad: number) => {
+    if (unidad === 1) {
+      router.push("/unidad_1")
+    } else {
+      // Para futuras unidades
+      alert("Esta unidad estará disponible próximamente")
+    }
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-300 to-yellow-200 overflow-hidden relative">
@@ -109,16 +121,19 @@ export default function Ortografiesta() {
         {/* Units */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {[
-            { title: "Sonidos y Letras", color: "bg-teal-400", icon: "🔤", emoji: "🎵" },
-            { title: "Uso de Mayúsculas", color: "bg-purple-600", icon: "🔠", emoji: "👑" },
-            { title: "Reglas de Acentuación", color: "bg-orange-400", icon: "✏️", emoji: "⭐" },
-            { title: "Palabras Homófonas", color: "bg-teal-400", icon: "🎭", emoji: "🎪" },
-            { title: "Reglas Ortográficas", color: "bg-teal-400", icon: "📝", emoji: "📚" },
-            { title: "Prácticas Creativas", color: "bg-purple-600", icon: "🎨", emoji: "👨‍🎨" },
+            { title: "Sonidos y Letras", color: "bg-teal-400", icon: "🔤", emoji: "🎵", unidad: 1 },
+            { title: "Uso de Mayúsculas", color: "bg-red-600", icon: "🔠", emoji: "👑", unidad: 2},
+            { title: "Reglas de Acentuación", color: "bg-orange-400", icon: "✏️", emoji: "⭐", unidad: 3},
+            { title: "Palabras Homófonas", color: "bg-green-400", icon: "🎭", emoji: "🎪", unidad: 4},
+            { title: "Reglas Ortográficas", color: "bg-blue-400", icon: "📝", emoji: "📚", unidad: 5},
+            { title: "Prácticas Creativas", color: "bg-purple-600", icon: "🎨", emoji: "👨‍🎨", unidad: 6},
           ].map((unit, index) => (
             <div
               key={index}
-              className={`${unit.color} rounded-3xl p-4 shadow-lg transition-all duration-300 cursor-pointer relative overflow-hidden group`}
+              className={`
+                ${unit.color} rounded-3xl p-4 shadow-lg transition-all duration-300 cursor-pointer relative overflow-hidden group` 
+              }
+              onClick={() => navegarAUnidad(unit.unidad)}
             >
               {/* Fondo con burbujas */}
               <div className="absolute inset-0 opacity-10">
