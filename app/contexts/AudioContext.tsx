@@ -1,0 +1,126 @@
+"use client"
+
+import { createContext, useContext, useState, useEffect } from 'react';
+
+// Define the context type
+interface AudioContextType {
+  audio: HTMLAudioElement | null;
+  isMusicPlaying: boolean;
+  isMuted: boolean;
+  toggleMusic: () => void;
+  toggleMute: () => void;
+  attemptAutoplay: () => Promise<void>;
+  enableAudio: () => void;
+}
+
+// Create the context
+const AudioContext = createContext<AudioContextType | null>(null);
+
+// Custom hook to use the audio context
+export const useAudio = () => {
+  const context = useContext(AudioContext);
+  if (!context) {
+    throw new Error('useAudio must be used within an AudioProvider');
+  }
+  return context;
+};
+
+// Provider component
+import { PropsWithChildren } from 'react';
+
+export function AudioProvider({ children }: PropsWithChildren<{}>) {
+  const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
+  const [isMusicPlaying, setIsMusicPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [isAudioInitialized, setIsAudioInitialized] = useState(false);
+
+  useEffect(() => {
+    // Only create the audio element once
+    if (!isAudioInitialized) {
+      const audioElement = new Audio('/sounds/infantil.m4a');
+      audioElement.loop = true;
+      audioElement.volume = 0.5;
+      setAudio(audioElement);
+      setIsAudioInitialized(true);
+    }
+
+    // Cleanup function
+    return () => {
+      // Don't destroy the audio element on unmount
+    };
+  }, [isAudioInitialized]);
+
+  const toggleMusic = () => {
+    if (audio) {
+      if (isMusicPlaying) {
+        audio.pause();
+        setIsMusicPlaying(false);
+      } else {
+        const playPromise = audio.play();
+        if (playPromise !== undefined) {
+          playPromise
+            .then(() => {
+              setIsMusicPlaying(true);
+            })
+            .catch(error => {
+              console.log("Play failed:", error);
+            });
+        }
+      }
+    }
+  };
+
+  const toggleMute = () => {
+    if (audio) {
+      audio.muted = !audio.muted;
+      setIsMuted(!isMuted);
+    }
+  };
+
+  const attemptAutoplay = async () => {
+    if (!audio || isMusicPlaying) return;
+    
+    try {
+      audio.muted = true;
+      await audio.play();
+      setTimeout(() => {
+        audio.muted = false;
+        setIsMusicPlaying(true);
+      }, 100);
+    } catch (err) {
+      console.log("Autoplay attempt failed:", err);
+      audio.muted = false;
+    }
+  };
+
+  const enableAudio = () => {
+    if (audio && audio.paused) {
+      const playPromise = audio.play();
+      if (playPromise !== undefined) {
+        playPromise
+          .then(() => {
+            setIsMusicPlaying(true);
+          })
+          .catch(error => {
+            console.log("Play failed:", error);
+          });
+      }
+    }
+  };
+
+  return (
+    <AudioContext.Provider
+      value={{
+        audio,
+        isMusicPlaying,
+        isMuted,
+        toggleMusic,
+        toggleMute,
+        attemptAutoplay,
+        enableAudio
+      }}
+    >
+      {children}
+    </AudioContext.Provider>
+  );
+}
