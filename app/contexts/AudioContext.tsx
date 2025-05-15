@@ -1,6 +1,6 @@
 "use client"
 
-import { createContext, useContext, useState, useEffect } from 'react';
+import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 
 // Define the context type
 interface AudioContextType {
@@ -26,16 +26,14 @@ export const useAudio = () => {
 };
 
 // Provider component
-import { PropsWithChildren } from 'react';
 
-export function AudioProvider({ children }: PropsWithChildren<{}>) {
+export function AudioProvider({ children }: { children: ReactNode }) {
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);
   const [isMusicPlaying, setIsMusicPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isAudioInitialized, setIsAudioInitialized] = useState(false);
 
   useEffect(() => {
-    // Only create the audio element once
     if (!isAudioInitialized) {
       const audioElement = new Audio('/sounds/infantil.m4a');
       audioElement.loop = true;
