@@ -42,9 +42,7 @@ export function AudioProvider({ children }: { children: ReactNode }) {
       setIsAudioInitialized(true);
     }
 
-    // Cleanup function
     return () => {
-      // Don't destroy the audio element on unmount
     };
   }, [isAudioInitialized]);
 

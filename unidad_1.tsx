@@ -110,7 +110,6 @@ export default function Unidad1() {
 
 
   useEffect(() => {
-    // Cargar avatar guardado
     const savedAvatar = localStorage.getItem('ortografia-avatar');
     if (savedAvatar) {
       setSelectedAvatar(savedAvatar);
@@ -120,7 +119,6 @@ export default function Unidad1() {
     { top: string; left: string; size: string; color: string }[]
   >([])
 
-  // Generar posiciones aleatorias para elementos decorativos una sola vez
   useEffect(() => {
     if (elementosDecorativosPos.length === 0) {
       const elementos = Array(20)
