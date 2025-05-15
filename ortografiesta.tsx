@@ -4,6 +4,8 @@ import { Star, Music, Volume2, VolumeX, Pause } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useAudio } from './app/contexts/AudioContext'
 
+
+
 export default function Ortografiesta() {
   const router = useRouter();
   const {
@@ -15,92 +17,75 @@ export default function Ortografiesta() {
     enableAudio
   } = useAudio();
 
-  const [showMusicPrompt, setShowMusicPrompt] = useState(true);
-  const [showAvatarSelector, setShowAvatarSelector] = useState(false);
-  const [selectedAvatar, setSelectedAvatar] = useState<string>("🐱");
+ const [showMusicPrompt, setShowMusicPrompt] = useState(true)
+  const [showAvatarSelector, setShowAvatarSelector] = useState(false)
+  const [selectedAvatar, setSelectedAvatar] = useState<string>('🐱')
 
-  // Efecto para cargar el avatar
+  // Carga inicial del avatar
   useEffect(() => {
-    const savedAvatar = localStorage.getItem('ortografia-avatar');
-    if (savedAvatar) {
-      setSelectedAvatar(savedAvatar);
-      setShowAvatarSelector(false); // Asegurar que no muestre el selector si ya tiene avatar
+    const saved = localStorage.getItem('ortografia-avatar')
+    if (saved) {
+      setSelectedAvatar(saved)
+      setShowAvatarSelector(false)
     } else {
-      setShowAvatarSelector(true);
+      setShowAvatarSelector(true)
     }
-  }, []);
+  }, [])
 
-  // Efecto principal para manejar audio y animaciones
+  // Efecto para audio + animaciones
   useEffect(() => {
-    const style = document.createElement("style");
+    const style = document.createElement('style')
     style.textContent = `
-    @keyframes wiggle {
-      0%, 100% { transform: rotate(-3deg); }
-      50% { transform: rotate(3deg); }
-    }
-    .animate-wiggle {
-      animation: wiggle 3s ease-in-out infinite;
-    }
+      @keyframes wiggle {
+        0%,100% { transform: rotate(-3deg) }
+        50%    { transform: rotate(3deg) }
+      }
+      .animate-wiggle { animation: wiggle 3s ease-in-out infinite }
+      @keyframes pop-in {
+        from { opacity: 0; transform: scale(0.5) }
+        to   { opacity: 1; transform: scale(1) }
+      }
+      .animate-pop-in { animation: pop-in 0.5s ease-out forwards }
+    `
+    document.head.appendChild(style)
 
-    .animate-pop-in {
-      animation: pop-in 0.5s ease-out forwards;
-    }
-  `;
-    document.head.appendChild(style);
-    let handleUserInteraction: () => void = () => { }; // Declaración inicial
-    const savedAvatar = localStorage.getItem('ortografia-avatar');
-    if (savedAvatar) {
-      const handleUserInteraction = () => {
-        enableAudio();
-        attemptAutoplay();
-        setShowMusicPrompt(false);
-        // Remover listeners después de la primera interacción
-        document.removeEventListener('click', handleUserInteraction);
-        document.removeEventListener('touchstart', handleUserInteraction);
-        document.removeEventListener('keydown', handleUserInteraction);
-      };
-
-      // Agregar listeners solo si ya tiene avatar
-      document.addEventListener('click', handleUserInteraction);
-      document.addEventListener('touchstart', handleUserInteraction);
-      document.addEventListener('keydown', handleUserInteraction);
-
-      // Intentar autoplay si ya tiene avatar
-      attemptAutoplay();
+    const saved = localStorage.getItem('ortografia-avatar')
+    if (saved) {
+      // listener global solo una vez
+      const onFirstInteraction = (e: Event) => {
+        enableAudio()
+        attemptAutoplay()
+          .then(() => setShowMusicPrompt(false))
+        // no hace falta quitar manual porque { once: true }
+      }
+      document.addEventListener('click', onFirstInteraction, { once: true })
+      document.addEventListener('touchstart', onFirstInteraction, { once: true })
+      document.addEventListener('keydown', onFirstInteraction, { once: true })
+      // intento de autoplay inmediato
+      attemptAutoplay().then(() => setShowMusicPrompt(false))
     }
 
     return () => {
-      document.head.removeChild(style);
-      // Limpiar listeners si existen
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('touchstart', handleUserInteraction);
-      document.removeEventListener('keydown', handleUserInteraction);
-    };
-  }, [attemptAutoplay, enableAudio]);
+      document.head.removeChild(style)
+    }
+  }, [attemptAutoplay, enableAudio])
 
-  // Modificar el handler del botón "Comenzar"
   const handleStart = () => {
-    localStorage.setItem('ortografia-avatar', selectedAvatar);
-    setShowAvatarSelector(false);
+    localStorage.setItem('ortografia-avatar', selectedAvatar)
+    setShowAvatarSelector(false)
+    enableAudio()
+    attemptAutoplay().then(() => setShowMusicPrompt(false))
+  }
 
-    // Activar audio después de seleccionar avatar
-    enableAudio();
-    attemptAutoplay().then(() => {
-      setShowMusicPrompt(false);
-    });
-
-    // Agregar listeners para futuras interacciones
-    const handleUserInteraction = () => {
-      setShowMusicPrompt(false);
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('touchstart', handleUserInteraction);
-      document.removeEventListener('keydown', handleUserInteraction);
-    };
-
-    document.addEventListener('click', handleUserInteraction);
-    document.addEventListener('touchstart', handleUserInteraction);
-    document.addEventListener('keydown', handleUserInteraction);
-  };
+  // Evita que el click en controles dispare el listener global
+  const handleToggleMusic = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    toggleMusic()
+  }
+  const handleToggleMute = (e: React.MouseEvent) => {
+    e.stopPropagation()
+    toggleMute()
+  }
 
 
 
@@ -174,30 +159,15 @@ export default function Ortografiesta() {
         </div>
 
         {/* Sound controls - more visible now */}
-        <div className="absolute top-4 right-4 flex gap-2">
-          <button
-            onClick={toggleMusic}
-            className="p-3 bg-white/90 rounded-full hover:bg-white transition-colors shadow-md"
-            title={isMusicPlaying ? "Pausar música" : "Iniciar música"}
-          >
-            {isMusicPlaying ? (
-              <Music className="w-6 h-6 text-purple-600" />
-            ) : (
-              <Pause className="w-6 h-6 text-purple-600" />
-            )}
-          </button>
-          <button
-            onClick={toggleMute}
-            className="p-3 bg-white/90 rounded-full hover:bg-white transition-colors shadow-md"
-            title={isMuted ? "Activar sonido" : "Silenciar"}
-          >
-            {isMuted ? (
-              <VolumeX className="w-6 h-6 text-purple-600" />
-            ) : (
-              <Volume2 className="w-6 h-6 text-purple-600" />
-            )}
-          </button>
-        </div>
+        <div className="audio-controls absolute top-4 right-4 flex gap-2">
+        <button
+          onClick={handleToggleMute}
+          className="p-3 bg-white/90 rounded-full hover:bg-white transition shadow-md cursor-pointer"
+          title={isMuted ? 'Activar sonido' : 'Silenciar'}
+        >
+          {isMuted ? <VolumeX className="w-6 h-6 text-purple-600" /> : <Volume2 className="w-6 h-6 text-purple-600" />}
+        </button>
+      </div>
         {/* Units */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {[
