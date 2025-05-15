@@ -1,11 +1,37 @@
 "use client"
-import {  useEffect } from "react"
-import { Star, Music, Volume2 } from "lucide-react"
+import { useEffect, useState } from "react"
+import { Star, Music, Volume2, VolumeX, Pause } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useAudio } from './app/contexts/AudioContext'
+
 export default function Ortografiesta() {
-  const router = useRouter()
+  const router = useRouter();
+  const { 
+    isMusicPlaying, 
+    isMuted, 
+    toggleMusic, 
+    toggleMute, 
+    attemptAutoplay, 
+    enableAudio 
+  } = useAudio();
+  
+  const [showMusicPrompt, setShowMusicPrompt] = useState(true);
+  const [showAvatarSelector, setShowAvatarSelector] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState<string>("🐱");
+
   useEffect(() => {
-    const style = document.createElement("style")
+    // Cargar avatar guardado
+    const savedAvatar = localStorage.getItem('ortografia-avatar');
+    if (savedAvatar) {
+      setSelectedAvatar(savedAvatar);
+    } else {
+      setShowAvatarSelector(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    // Create style for wiggle animation
+    const style = document.createElement("style");
     style.textContent = `
     @keyframes wiggle {
       0%, 100% { transform: rotate(-3deg); }
@@ -14,14 +40,37 @@ export default function Ortografiesta() {
     .animate-wiggle {
       animation: wiggle 3s ease-in-out infinite;
     }
-  `
-    document.head.appendChild(style)
+
+    .animate-pop-in {
+      animation: pop-in 0.5s ease-out forwards;
+    }
+    `;
+    document.head.appendChild(style);
+
+    // Try autoplay
+    attemptAutoplay();
+
+    // Add event listeners for user interaction
+    const handleUserInteraction = () => {
+      enableAudio();
+      setShowMusicPrompt(false);
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+      document.removeEventListener('keydown', handleUserInteraction);
+    };
+
+    document.addEventListener('click', handleUserInteraction);
+    document.addEventListener('touchstart', handleUserInteraction);
+    document.addEventListener('keydown', handleUserInteraction);
 
     return () => {
-      document.head.removeChild(style)
-    }
-  }, [])
-
+      document.head.removeChild(style);
+      // Clean up event listeners
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+      document.removeEventListener('keydown', handleUserInteraction);
+    };
+  }, [attemptAutoplay, enableAudio]);
 
   const navegarAUnidad = (unidad: number) => {
     if (unidad === 1) {
@@ -34,27 +83,8 @@ export default function Ortografiesta() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-300 to-yellow-200 overflow-hidden relative">
-      {/* Decorative elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className={`absolute rounded-full ${
-              i % 3 === 0 ? "bg-purple-500" : i % 3 === 1 ? "bg-teal-400" : "bg-orange-400"
-            }`}
-            style={{
-              width: `${Math.random() * 20 + 10}px`,
-              height: `${Math.random() * 20 + 10}px`,
-              top: `${Math.random() * 100}%`,
-              left: `${Math.random() * 100}%`,
-              opacity: 0.6,
-              animation: `float ${Math.random() * 5 + 5}s ease-in-out infinite`,
-              animationDelay: `${Math.random() * 5}s`,
-            }}
-          />
-        ))}
-      </div>
 
+      
       {/* Clouds */}
       <div
         className="absolute top-20 left-10 w-32 h-16 bg-white rounded-full opacity-80 animate-pulse"
@@ -68,6 +98,15 @@ export default function Ortografiesta() {
       <div className="container mx-auto px-4 py-8 relative z-10">
         {/* Header */}
         <header className="mb-12 text-center relative">
+          <div className="absolute top-4 left-4 flex items-center gap-2">
+            <button
+              onClick={() => setShowAvatarSelector(true)}
+              className="text-4xl bg-white p-2 rounded-full shadow-md hover:scale-110 transition-transform"
+              title="Cambiar avatar"
+            >
+              {selectedAvatar}
+            </button>
+          </div>
           <div className="inline-block relative">
             <div className="absolute -inset-4 bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 rounded-3xl opacity-75 blur-xl animate-pulse"></div>
             <h1 className="text-5xl md:text-6xl font-bold text-white bg-red-500 px-8 py-4 rounded-3xl shadow-lg inline-block relative">
@@ -101,48 +140,48 @@ export default function Ortografiesta() {
           </button>
         </div>
 
-        {/* Sound controls */}
+        {/* Sound controls - more visible now */}
         <div className="absolute top-4 right-4 flex gap-2">
-          <button className="p-2 bg-white/80 rounded-full hover:bg-white transition-colors">
-            <Music className="w-5 h-5 text-purple-600" />
+          <button
+            onClick={toggleMusic}
+            className="p-3 bg-white/90 rounded-full hover:bg-white transition-colors shadow-md"
+            title={isMusicPlaying ? "Pausar música" : "Iniciar música"}
+          >
+            {isMusicPlaying ? (
+              <Music className="w-6 h-6 text-purple-600" />
+            ) : (
+              <Pause className="w-6 h-6 text-purple-600" />
+            )}
           </button>
-          <button className="p-2 bg-white/80 rounded-full hover:bg-white transition-colors">
-            <Volume2 className="w-5 h-5 text-purple-600" />
+          <button
+            onClick={toggleMute}
+            className="p-3 bg-white/90 rounded-full hover:bg-white transition-colors shadow-md"
+            title={isMuted ? "Activar sonido" : "Silenciar"}
+          >
+            {isMuted ? (
+              <VolumeX className="w-6 h-6 text-purple-600" />
+            ) : (
+              <Volume2 className="w-6 h-6 text-purple-600" />
+            )}
           </button>
         </div>
-
         {/* Units */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {[
             { title: "Sonidos y Letras", color: "bg-teal-400", icon: "🔤", emoji: "🎵", unidad: 1 },
-            { title: "Uso de Mayúsculas", color: "bg-red-600", icon: "🔠", emoji: "👑", unidad: 2},
-            { title: "Reglas de Acentuación", color: "bg-orange-400", icon: "✏️", emoji: "⭐", unidad: 3},
-            { title: "Palabras Homófonas", color: "bg-green-400", icon: "🎭", emoji: "🎪", unidad: 4},
-            { title: "Reglas Ortográficas", color: "bg-blue-400", icon: "📝", emoji: "📚", unidad: 5},
-            { title: "Prácticas Creativas", color: "bg-purple-600", icon: "🎨", emoji: "👨‍🎨", unidad: 6},
+            { title: "Uso de Mayúsculas", color: "bg-red-600", icon: "🔠", emoji: "👑", unidad: 2 },
+            { title: "Reglas de Acentuación", color: "bg-orange-400", icon: "✏️", emoji: "⭐", unidad: 3 },
+            { title: "Palabras Homófonas", color: "bg-green-400", icon: "🎭", emoji: "🎪", unidad: 4 },
+            { title: "Reglas Ortográficas", color: "bg-blue-400", icon: "📝", emoji: "📚", unidad: 5 },
+            { title: "Prácticas Creativas", color: "bg-purple-600", icon: "🎨", emoji: "👨‍🎨", unidad: 6 },
           ].map((unit, index) => (
             <div
               key={index}
               className={`
-                ${unit.color} rounded-3xl p-4 shadow-lg transition-all duration-300 cursor-pointer relative overflow-hidden group` 
+                ${unit.color} rounded-3xl p-4 shadow-lg transition-all duration-300 cursor-pointer relative overflow-hidden group`
               }
               onClick={() => navegarAUnidad(unit.unidad)}
             >
-              {/* Fondo con burbujas */}
-              <div className="absolute inset-0 opacity-10">
-                {[...Array(6)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="absolute rounded-full bg-white"
-                    style={{
-                      width: `${Math.random() * 30 + 10}px`,
-                      height: `${Math.random() * 30 + 10}px`,
-                      top: `${Math.random() * 100}%`,
-                      left: `${Math.random() * 100}%`,
-                    }}
-                  />
-                ))}
-              </div>
 
               {/* Efecto de brillo en el borde */}
               <div className="absolute inset-0 rounded-3xl border-4 border-white/0 group-hover:border-white/30 transition-all duration-300"></div>
@@ -213,6 +252,47 @@ export default function Ortografiesta() {
           </div>
         </div>
       </div>
+
+      {showAvatarSelector && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-3xl text-center max-w-md animate-pop-in">
+            <h2 className="text-3xl font-bold mb-4 text-purple-600">¡Elige tu avatar!</h2>
+            <div className="grid grid-cols-3 gap-4 mb-6">
+              {['🐱', '🐶', '🦊', '🐻', '🐨', '🐵'].map((emoji) => (
+                <button
+                  key={emoji}
+                  onClick={() => setSelectedAvatar(emoji)}
+                  className={`text-5xl p-4 rounded-2xl transition-all ${selectedAvatar === emoji
+                    ? 'bg-yellow-400 scale-110'
+                    : 'bg-gray-100 hover:bg-yellow-200'
+                    }`}
+                >
+                  {emoji}
+                </button>
+              ))}
+            </div>
+            <button
+              onClick={() => {
+                localStorage.setItem('ortografia-avatar', selectedAvatar);
+                setShowAvatarSelector(false);
+
+                // Iniciar la música
+                if (audioRef && audioRef.paused) {
+                  audioRef.play().then(() => {
+                    setIsMusicPlaying(true);
+                    setShowMusicPrompt(false);
+                  }).catch(error => {
+                    console.log("Error al iniciar música:", error);
+                  });
+                }
+              }}
+              className="bg-green-500 text-white px-6 py-3 rounded-full text-xl font-bold hover:bg-green-600 transition-colors"
+            >
+              ¡Comenzar!
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
