@@ -6,28 +6,31 @@ import { useAudio } from './app/contexts/AudioContext'
 
 export default function Ortografiesta() {
   const router = useRouter();
-  const { 
-    isMusicPlaying, 
-    isMuted, 
-    toggleMusic, 
-    toggleMute, 
-    attemptAutoplay, 
-    enableAudio 
+  const {
+    isMusicPlaying,
+    isMuted,
+    toggleMusic,
+    toggleMute,
+    attemptAutoplay,
+    enableAudio
   } = useAudio();
-  
+
   const [showMusicPrompt, setShowMusicPrompt] = useState(true);
   const [showAvatarSelector, setShowAvatarSelector] = useState(false);
   const [selectedAvatar, setSelectedAvatar] = useState<string>("🐱");
 
+  // Efecto para cargar el avatar
   useEffect(() => {
     const savedAvatar = localStorage.getItem('ortografia-avatar');
     if (savedAvatar) {
       setSelectedAvatar(savedAvatar);
+      setShowAvatarSelector(false); // Asegurar que no muestre el selector si ya tiene avatar
     } else {
       setShowAvatarSelector(true);
     }
   }, []);
 
+  // Efecto principal para manejar audio y animaciones
   useEffect(() => {
     const style = document.createElement("style");
     style.textContent = `
@@ -42,15 +45,52 @@ export default function Ortografiesta() {
     .animate-pop-in {
       animation: pop-in 0.5s ease-out forwards;
     }
-    `;
+  `;
     document.head.appendChild(style);
+    let handleUserInteraction: () => void = () => { }; // Declaración inicial
+    const savedAvatar = localStorage.getItem('ortografia-avatar');
+    if (savedAvatar) {
+      const handleUserInteraction = () => {
+        enableAudio();
+        attemptAutoplay();
+        setShowMusicPrompt(false);
+        // Remover listeners después de la primera interacción
+        document.removeEventListener('click', handleUserInteraction);
+        document.removeEventListener('touchstart', handleUserInteraction);
+        document.removeEventListener('keydown', handleUserInteraction);
+      };
 
-    // Try autoplay
-    attemptAutoplay();
+      // Agregar listeners solo si ya tiene avatar
+      document.addEventListener('click', handleUserInteraction);
+      document.addEventListener('touchstart', handleUserInteraction);
+      document.addEventListener('keydown', handleUserInteraction);
 
-    // Add event listeners for user interaction
+      // Intentar autoplay si ya tiene avatar
+      attemptAutoplay();
+    }
+
+    return () => {
+      document.head.removeChild(style);
+      // Limpiar listeners si existen
+      document.removeEventListener('click', handleUserInteraction);
+      document.removeEventListener('touchstart', handleUserInteraction);
+      document.removeEventListener('keydown', handleUserInteraction);
+    };
+  }, [attemptAutoplay, enableAudio]);
+
+  // Modificar el handler del botón "Comenzar"
+  const handleStart = () => {
+    localStorage.setItem('ortografia-avatar', selectedAvatar);
+    setShowAvatarSelector(false);
+
+    // Activar audio después de seleccionar avatar
+    enableAudio();
+    attemptAutoplay().then(() => {
+      setShowMusicPrompt(false);
+    });
+
+    // Agregar listeners para futuras interacciones
     const handleUserInteraction = () => {
-      enableAudio();
       setShowMusicPrompt(false);
       document.removeEventListener('click', handleUserInteraction);
       document.removeEventListener('touchstart', handleUserInteraction);
@@ -60,15 +100,10 @@ export default function Ortografiesta() {
     document.addEventListener('click', handleUserInteraction);
     document.addEventListener('touchstart', handleUserInteraction);
     document.addEventListener('keydown', handleUserInteraction);
+  };
 
-    return () => {
-      document.head.removeChild(style);
-      // Clean up event listeners
-      document.removeEventListener('click', handleUserInteraction);
-      document.removeEventListener('touchstart', handleUserInteraction);
-      document.removeEventListener('keydown', handleUserInteraction);
-    };
-  }, [attemptAutoplay, enableAudio]);
+
+
 
   const navegarAUnidad = (unidad: number) => {
     if (unidad === 1) {
@@ -82,7 +117,7 @@ export default function Ortografiesta() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-300 to-yellow-200 overflow-hidden relative">
 
-      
+
       {/* Clouds */}
       <div
         className="absolute top-20 left-10 w-32 h-16 bg-white rounded-full opacity-80 animate-pulse"
@@ -260,7 +295,7 @@ export default function Ortografiesta() {
                 <button
                   key={emoji}
                   onClick={() => setSelectedAvatar(emoji)}
-                  className={`text-5xl p-4 rounded-2xl transition-all ${selectedAvatar === emoji
+                  className={`text-5xl p-4 rounded-2xl transition-all cursor-pointer ${selectedAvatar === emoji
                     ? 'bg-yellow-400 scale-110'
                     : 'bg-gray-100 hover:bg-yellow-200'
                     }`}
@@ -275,8 +310,9 @@ export default function Ortografiesta() {
                 setShowAvatarSelector(false);
                 enableAudio();
                 setShowMusicPrompt(false);
+                handleStart
               }}
-              className="bg-green-500 text-white px-6 py-3 rounded-full text-xl font-bold hover:bg-green-600 transition-colors"
+              className="bg-green-500 text-white px-6 py-3 rounded-full text-xl font-bold hover:bg-green-600 transition-colors cursor-pointer"
             >
               ¡Comenzar!
             </button>
@@ -286,3 +322,5 @@ export default function Ortografiesta() {
     </div>
   )
 }
+
+
