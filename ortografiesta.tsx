@@ -20,7 +20,6 @@ export default function Ortografiesta() {
   const [selectedAvatar, setSelectedAvatar] = useState<string>("🐱");
 
   useEffect(() => {
-    // Cargar avatar guardado
     const savedAvatar = localStorage.getItem('ortografia-avatar');
     if (savedAvatar) {
       setSelectedAvatar(savedAvatar);
@@ -30,7 +29,6 @@ export default function Ortografiesta() {
   }, []);
 
   useEffect(() => {
-    // Create style for wiggle animation
     const style = document.createElement("style");
     style.textContent = `
     @keyframes wiggle {
@@ -275,16 +273,8 @@ export default function Ortografiesta() {
               onClick={() => {
                 localStorage.setItem('ortografia-avatar', selectedAvatar);
                 setShowAvatarSelector(false);
-
-                // Iniciar la música
-                if (audioRef && audioRef.paused) {
-                  audioRef.play().then(() => {
-                    setIsMusicPlaying(true);
-                    setShowMusicPrompt(false);
-                  }).catch(error => {
-                    console.log("Error al iniciar música:", error);
-                  });
-                }
+                enableAudio();
+                setShowMusicPrompt(false);
               }}
               className="bg-green-500 text-white px-6 py-3 rounded-full text-xl font-bold hover:bg-green-600 transition-colors"
             >
