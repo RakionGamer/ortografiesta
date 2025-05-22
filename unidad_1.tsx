@@ -110,19 +110,26 @@ export default function Unidad1() {
   const { progress, updateActivity } = useProgress("unidad1");
   const [puntosUnidad, setPuntosUnidad] = useState(0);
   const [estrellasUnidad, setEstrellasUnidad] = useState(0);
+  const unitId = "unidad1";
+
+
 
   useEffect(() => {
-    if (progress && progress.activities) {
-      const totalPuntos = Object.values(progress.activities).reduce(
-        (sum, a) => sum + Math.round((a.lastScore / 100) * 50),
-        0
-      );
-      const estrellas = Object.values(progress.activities).filter(a => a.completed).length;
+  if (progress && unitId && progress.units[unitId]) {
+    const unitActivities = progress.units[unitId].activities;
+    
+    const totalPuntos = Object.values(unitActivities).reduce(
+      (sum, a) => sum + Math.round((a.lastScore / 100) * 50),
+      0
+    );
+    
+    const estrellas = Object.values(unitActivities)
+      .filter(activity => activity.completed).length;
 
-      setPuntosUnidad(totalPuntos);
-      setEstrellasUnidad(estrellas);
-    }
-  }, [progress]);
+    setPuntosUnidad(totalPuntos);
+    setEstrellasUnidad(estrellas);
+  }
+}, [progress, unitId]);
 
 
   useEffect(() => {
@@ -168,7 +175,7 @@ export default function Unidad1() {
       const porcentaje = (correctas / 10) * 100;
 
       updateActivity("completar", {
-        attempts: (progress?.activities?.completar?.attempts || 0) + 1,
+        attempts: (progress?.units[unitId]?.activities.completar.attempts || 0) + 1,
         lastScore: porcentaje,
         completed: true,
         stars: porcentaje >= 60 ? 1 : 0

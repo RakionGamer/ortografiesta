@@ -368,7 +368,6 @@ export default function Progreso() {
                             activityName = "Sopa de Letras"
                             break
                         }
-
                         return (
                           <div
                             key={activityType}
@@ -380,7 +379,7 @@ export default function Progreso() {
                             ) : (
                               <div className="w-5 h-5 border-2 border-gray-300 rounded-full"></div>
                             )}
-                            <span className="text-sm">{activityName}</span>
+                            <span className="text-sm font-bold text-teal-800">{activityName}</span>
                             {activity.attempts > 0 && (
                               <span className="ml-auto text-xs font-bold text-teal-700">{activity.lastScore}%</span>
                             )}
