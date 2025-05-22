@@ -7,6 +7,7 @@ import { Star, ArrowLeft, Volume2, Check, X, HelpCircle, Award, Mic, VolumeX, Mu
 import confetti from "canvas-confetti"
 import { useRouter } from "next/navigation"
 import { useAudio } from './app/contexts/AudioContext'
+import useProgress from "./app/hooks/useProgress"
 
 // Datos para las actividades
 const letrasConfusasData = [
@@ -106,7 +107,22 @@ export default function Unidad1() {
   const sopaRef = useRef<HTMLDivElement>(null);
   const { isMusicPlaying, isMuted, toggleMusic, toggleMute } = useAudio();
   const [selectedAvatar, setSelectedAvatar] = useState("🐱");
+  const { progress, updateActivity } = useProgress("unidad1");
+  const [puntosUnidad, setPuntosUnidad] = useState(0);
+  const [estrellasUnidad, setEstrellasUnidad] = useState(0);
 
+  useEffect(() => {
+    if (progress && progress.activities) {
+      const totalPuntos = Object.values(progress.activities).reduce(
+        (sum, a) => sum + Math.round((a.lastScore / 100) * 50),
+        0
+      );
+      const estrellas = Object.values(progress.activities).filter(a => a.completed).length;
+
+      setPuntosUnidad(totalPuntos);
+      setEstrellasUnidad(estrellas);
+    }
+  }, [progress]);
 
 
   useEffect(() => {
@@ -145,9 +161,20 @@ export default function Unidad1() {
     }
   }
 
-  // Función para verificar respuesta en completar palabras
   const verificarRespuesta = (respuesta: string, correcta: string) => {
-    const esCorrecta = respuesta.toLowerCase() === correcta.toLowerCase()
+    const esCorrecta = respuesta.toLowerCase() === correcta.toLowerCase();
+    if (esCorrecta && preguntaActual === 9) {
+      const correctas = respuestas.filter(r => r).length + 1;
+      const porcentaje = (correctas / 10) * 100;
+
+      updateActivity("completar", {
+        attempts: (progress?.activities?.completar?.attempts || 0) + 1,
+        lastScore: porcentaje,
+        completed: true,
+        stars: porcentaje >= 60 ? 1 : 0
+      });
+    }
+
     setMostrarResultado(esCorrecta)
 
     if (esCorrecta) {
@@ -431,52 +458,40 @@ export default function Unidad1() {
       <div className="container mx-auto px-4 py-8 relative z-10">
         {/* Encabezado */}
         <header className="p-4 flex justify-between items-center relative z-10 mb-8">
-        <button 
-          onClick={() => router.push('/')}
-          className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-full hover:bg-purple-700 transition-colors cursor-pointer"
-        >
-          <ArrowLeft className="w-5 h-5" />
-          <span>Volver</span>
-        </button>
-
-        <h1 className="text-3xl md:text-4xl font-bold text-center text-purple-800">Unidad 1: Sonidos y Letras</h1>
-
-        <div className="flex items-center gap-2">
-          <div className="bg-white/80 rounded-full px-3 py-1 flex items-center gap-1">
-            <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-            <span className="font-bold text-purple-800">{puntuacion || 0}</span>
-          </div>
-          
-          <div className="text-3xl bg-white p-2 rounded-full shadow-md">
-            {selectedAvatar}
-          </div>
-          
-          {/* Sound controls */}
           <button
-            onClick={toggleMusic}
-            className="p-3 bg-white/90 rounded-full hover:bg-white transition-colors shadow-md"
-            title={isMusicPlaying ? "Pausar música" : "Iniciar música"}
+            onClick={() => router.push('/')}
+            className="flex items-center gap-2 bg-purple-600 text-white px-4 py-2 rounded-full hover:bg-purple-700 transition-colors cursor-pointer"
           >
-            {isMusicPlaying ? (
-              <Music className="w-6 h-6 text-purple-600" />
-            ) : (
-              <Pause className="w-6 h-6 text-purple-600" />
-            )}
+            <ArrowLeft className="w-5 h-5" />
+            <span>Volver</span>
           </button>
-          <button
-            onClick={toggleMute}
-            className="p-3 bg-white/90 rounded-full hover:bg-white transition-colors shadow-md"
-            title={isMuted ? "Activar sonido" : "Silenciar"}
-          >
-            {isMuted ? (
-              <VolumeX className="w-6 h-6 text-purple-600" />
-            ) : (
-              <Volume2 className="w-6 h-6 text-purple-600" />
-            )}
-          </button>
-        </div>
-      </header>
 
+          <h1 className="text-3xl md:text-4xl font-bold text-center text-purple-800">Unidad 1: Sonidos y Letras</h1>
+
+          <div className="flex items-center gap-2">
+            <div className="bg-white/80 rounded-full px-3 py-1 flex items-center gap-1">
+              <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+              <span className="font-bold text-purple-800">{puntuacion || 0}</span>
+            </div>
+
+            <div className="text-3xl bg-white p-2 rounded-full shadow-md">
+              {selectedAvatar}
+            </div>
+
+            {/* Sound controls */}
+            <button
+              onClick={toggleMute}
+              className="p-3 bg-white/90 rounded-full hover:bg-white transition-colors shadow-md cursor-pointer"
+              title={isMuted ? "Activar sonido" : "Silenciar"}
+            >
+              {isMuted ? (
+                <VolumeX className="w-6 h-6 text-purple-600" />
+              ) : (
+                <Volume2 className="w-6 h-6 text-purple-600" />
+              )}
+            </button>
+          </div>
+        </header>
         {/* Selector de actividades */}
         <div className="flex flex-wrap justify-center gap-4 mb-8">
           <button
@@ -745,34 +760,55 @@ export default function Unidad1() {
             </div>
           )}
 
-          {/* Sopa de letras */}
+          {/* Sopa de letras para niños */}
           {actividad === "sopa" && (
             <div className="text-center">
               {!actividadCompletada ? (
                 <>
-                  <h2 className="text-2xl font-bold text-purple-800 mb-4">Sopa de Letras</h2>
-                  <p className="text-lg text-purple-600 mb-4">
-                    Encuentra las palabras relacionadas con las letras que estamos aprendiendo
-                  </p>
+                  <div className="bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-400 rounded-xl p-6 shadow-lg mb-6 relative overflow-hidden">
+                    {/* Imágenes decorativas en las esquinas */}
+                    <div className="absolute top-1 left-1 text-3xl">🚢</div>
+                    <div className="absolute top-1 right-1 text-3xl">🦒</div>
+                    <div className="absolute bottom-1 left-1 text-3xl">🐄</div>
+                    <div className="absolute bottom-1 right-1 text-3xl">👞</div>
 
+                    <h2 className="text-3xl font-bold text-white mb-2 flex items-center justify-center">
+                      <span className="mr-2">🔍</span>
+                      Sopa de Letras de Aventuras
+                      <span className="ml-2">✨</span>
+                    </h2>
+                    <p className="text-lg text-white mb-2">
+                      ¡Busca las 6 palabras escondidas y conviértete en un detective!
+                    </p>
+                    <div className="flex justify-center">
+                      <div className="flex items-center space-x-1">
+                        {[...Array(5)].map((_, i) => (
+                          <span key={i} className={`text-2xl ${i < Math.ceil(palabrasEncontradas.length / palabrasSopa.length * 5) ? "text-yellow-300" : "text-gray-300"}`}>
+                            ⭐
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
 
                   <div className="flex flex-col md:flex-row gap-6 items-start">
-                    <div
-                      className="bg-purple-100 p-4 rounded-xl w-full md:w-auto"
+                    <div className="bg-blue-100 p-5 rounded-xl w-full md:w-auto shadow-md border-4 border-blue-300 relative"
                       ref={sopaRef}
                       onMouseLeave={handleCeldaMouseUp}
                     >
-                      <div className="grid grid-cols-7 gap-0 mx-auto w-max">
+
+
+                      <div className="grid grid-cols-7 gap-1 mx-auto w-max">
                         {sopaLetras.flatMap((fila, rowIndex) =>
                           fila.map((letra, colIndex) => (
                             <div
                               key={`${rowIndex}-${colIndex}`}
-                              className={`w-8 h-8 flex items-center justify-center font-bold text-sm border border-purple-200 select-none cursor-pointer
-                      ${esCeldaPalabraEncontrada(rowIndex, colIndex)
-                                  ? "bg-green-300 text-green-800"
+                              className={`w-10 h-10 flex items-center justify-center font-bold text-lg rounded-md transition-all duration-200 select-none cursor-pointer transform hover:scale-110
+                    ${esCeldaPalabraEncontrada(rowIndex, colIndex)
+                                  ? "bg-green-400 text-white animate-pulse"
                                   : esCeldaSeleccionada(rowIndex, colIndex)
-                                    ? "bg-yellow-200 text-yellow-800"
-                                    : "bg-white text-purple-800"
+                                    ? "bg-yellow-300 text-purple-800"
+                                    : "bg-white text-purple-800 shadow-sm"
                                 }`}
                               onMouseDown={() => handleCeldaMouseDown(rowIndex, colIndex)}
                               onMouseEnter={() => handleCeldaMouseEnter(rowIndex, colIndex)}
@@ -785,48 +821,143 @@ export default function Unidad1() {
                       </div>
                     </div>
 
-                    <div className="bg-purple-100 p-4 rounded-xl flex-1">
-                      <h3 className="text-lg font-bold text-purple-800 mb-2">Palabras a encontrar:</h3>
-                      <div className="grid grid-cols-2 gap-2">
-                        {palabrasSopa.map((palabra, index) => (
-                          <div
-                            key={index}
-                            className={`px-3 py-1 rounded-full text-sm font-bold ${palabrasEncontradas.includes(palabra)
-                              ? "bg-green-300 text-green-800 line-through"
-                              : "bg-white text-purple-800"
-                              }`}
-                          >
-                            {palabra}
-                          </div>
-                        ))}
+                    <div className="bg-pink-100 p-5 rounded-xl flex-1 shadow-md border-4 border-pink-300">
+                      <h3 className="text-xl font-bold text-purple-800 mb-3 flex items-center justify-center">
+                        <span className="mr-2">🎯</span> ¡Encuentra estas palabras! <span className="ml-2">🎯</span>
+                      </h3>
+                      <div className="grid grid-cols-2 gap-3">
+                        {/* Personalizado con iconos para cada palabra */}
+                        <div
+                          className={`px-4 py-2 rounded-full text-md font-bold transition-all duration-300 flex items-center justify-between ${palabrasEncontradas.includes("BARCO")
+                            ? "bg-green-400 text-white line-through transform scale-95"
+                            : "bg-white text-purple-800 shadow-sm hover:shadow-md hover:scale-105"
+                            }`}
+                        >
+                          <span>{palabrasEncontradas.includes("BARCO") ? "✓ " : ""} BARCO</span>
+                          <span className="text-xl ml-2">🚢</span>
+                        </div>
+                        <div
+                          className={`px-4 py-2 rounded-full text-md font-bold transition-all duration-300 flex items-center justify-between ${palabrasEncontradas.includes("VACA")
+                            ? "bg-green-400 text-white line-through transform scale-95"
+                            : "bg-white text-purple-800 shadow-sm hover:shadow-md hover:scale-105"
+                            }`}
+                        >
+                          <span>{palabrasEncontradas.includes("VACA") ? "✓ " : ""} VACA</span>
+                          <span className="text-xl ml-2">🐄</span>
+                        </div>
+                        <div
+                          className={`px-4 py-2 rounded-full text-md font-bold transition-all duration-300 flex items-center justify-between ${palabrasEncontradas.includes("ZAPATO")
+                            ? "bg-green-400 text-white line-through transform scale-95"
+                            : "bg-white text-purple-800 shadow-sm hover:shadow-md hover:scale-105"
+                            }`}
+                        >
+                          <span>{palabrasEncontradas.includes("ZAPATO") ? "✓ " : ""} ZAPATO</span>
+                          <span className="text-xl ml-2">👞</span>
+                        </div>
+                        <div
+                          className={`px-4 py-2 rounded-full text-md font-bold transition-all duration-300 flex items-center justify-between ${palabrasEncontradas.includes("JIRAFA")
+                            ? "bg-green-400 text-white line-through transform scale-95"
+                            : "bg-white text-purple-800 shadow-sm hover:shadow-md hover:scale-105"
+                            }`}
+                        >
+                          <span>{palabrasEncontradas.includes("JIRAFA") ? "✓ " : ""} JIRAFA</span>
+                          <span className="text-xl ml-2">🦒</span>
+                        </div>
+                        <div
+                          className={`px-4 py-2 rounded-full text-md font-bold transition-all duration-300 flex items-center justify-between ${palabrasEncontradas.includes("GENTE")
+                            ? "bg-green-400 text-white line-through transform scale-95"
+                            : "bg-white text-purple-800 shadow-sm hover:shadow-md hover:scale-105"
+                            }`}
+                        >
+                          <span>{palabrasEncontradas.includes("GENTE") ? "✓ " : ""} GENTE</span>
+                          <span className="text-xl ml-2">👥</span>
+                        </div>
+                        <div
+                          className={`px-4 py-2 rounded-full text-md font-bold transition-all duration-300 flex items-center justify-between ${palabrasEncontradas.includes("CABEZA")
+                            ? "bg-green-400 text-white line-through transform scale-95"
+                            : "bg-white text-purple-800 shadow-sm hover:shadow-md hover:scale-105"
+                            }`}
+                        >
+                          <span>{palabrasEncontradas.includes("CABEZA") ? "✓ " : ""} CABEZA</span>
+                          <span className="text-xl ml-2">👤</span>
+                        </div>
                       </div>
-                      <div className="mt-4 text-purple-600">
-                        <p>
-                          Encontradas: {palabrasEncontradas.length} de {palabrasSopa.length}
+
+                      <div className="mt-6 bg-purple-200 p-3 rounded-lg text-purple-800 font-bold">
+                        <p className="flex items-center justify-center">
+                          <span className="text-xl mr-2">📊</span>
+                          ¡Has encontrado {palabrasEncontradas.length} de 6 palabras!
                         </p>
+                      </div>
+
+                      <div className="mt-4 text-purple-700 text-sm italic">
+                        Pista: Las palabras pueden estar en horizontal, vertical o diagonal.
                       </div>
                     </div>
                   </div>
-                </>
-              ) : (
-                <div className="text-center py-8">
-                  <div className="text-6xl mb-4">🎉</div>
-                  <h2 className="text-3xl font-bold text-purple-800 mb-4">¡Sopa de Letras Completada!</h2>
-                  <p className="text-xl text-purple-600 mb-8">Has encontrado todas las palabras. ¡Felicidades!</p>
 
-                  <div className="flex justify-center gap-4">
+                  <div className="mt-6">
                     <button
                       onClick={() => cambiarActividad(actividad)}
-                      className="bg-teal-400 text-white px-6 py-3 rounded-full font-bold hover:bg-teal-500 transition-colors flex items-center gap-2"
+                      className="bg-teal-400 text-white px-6 py-3 rounded-full font-bold hover:bg-teal-500 transition-colors flex items-center gap-2 mx-auto cursor-pointer"
                     >
-                      <HelpCircle size={20} />
-                      <span>Jugar de nuevo</span>
+                      <span>🔄</span>
+                      <span>Reiniciar juego</span>
+                    </button>
+                  </div>
+                </>
+              ) : (
+                <div className="text-center py-8 bg-gradient-to-r from-purple-200 via-pink-200 to-blue-200 rounded-xl p-8 shadow-lg">
+                  <div className="animate-bounce text-7xl mb-6">🎉</div>
+                  <h2 className="text-4xl font-bold text-purple-800 mb-4">¡WOW! ¡LO LOGRASTE!</h2>
+                  <p className="text-2xl text-purple-600 mb-8">Has encontrado todas las palabras. ¡Eres un detective increíble!</p>
+
+                  <div className="flex justify-center mb-6">
+                    {[...Array(5)].map((_, i) => (
+                      <span key={i} className="text-4xl text-yellow-400 animate-pulse">⭐</span>
+                    ))}
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-4 mb-8 max-w-md mx-auto">
+                    <div className="bg-white p-2 rounded-lg shadow-md transform rotate-3 animate-pulse delay-100">
+                      <span className="text-4xl">🚢</span>
+                      <div className="text-sm font-bold text-purple-800">BARCO</div>
+                    </div>
+                    <div className="bg-white p-2 rounded-lg shadow-md transform -rotate-2 animate-pulse delay-200">
+                      <span className="text-4xl">🐄</span>
+                      <div className="text-sm font-bold text-purple-800">VACA</div>
+                    </div>
+                    <div className="bg-white p-2 rounded-lg shadow-md transform rotate-2 animate-pulse delay-300">
+                      <span className="text-4xl">👞</span>
+                      <div className="text-sm font-bold text-purple-800">ZAPATO</div>
+                    </div>
+                    <div className="bg-white p-2 rounded-lg shadow-md transform -rotate-3 animate-pulse delay-400">
+                      <span className="text-4xl">🦒</span>
+                      <div className="text-sm font-bold text-purple-800">JIRAFA</div>
+                    </div>
+                    <div className="bg-white p-2 rounded-lg shadow-md transform rotate-1 animate-pulse delay-500">
+                      <span className="text-4xl">👥</span>
+                      <div className="text-sm font-bold text-purple-800">GENTE</div>
+                    </div>
+                    <div className="bg-white p-2 rounded-lg shadow-md transform -rotate-1 animate-pulse delay-600">
+                      <span className="text-4xl">👤</span>
+                      <div className="text-sm font-bold text-purple-800">CABEZA</div>
+                    </div>
+                  </div>
+
+                  <div className="flex flex-wrap justify-center gap-4">
+                    <button
+                      onClick={() => cambiarActividad(actividad)}
+                      className="bg-teal-500 text-white px-8 py-4 rounded-full font-bold hover:bg-teal-600 transition-transform hover:scale-105 shadow-md flex items-center gap-2"
+                    >
+                      <span>🎮</span>
+                      <span>¡Jugar de nuevo!</span>
                     </button>
                     <button
                       onClick={() => cambiarActividad("diferencias")}
-                      className="bg-purple-600 text-white px-6 py-3 rounded-full font-bold hover:bg-purple-700 transition-colors flex items-center gap-2"
+                      className="bg-purple-600 text-white px-8 py-4 rounded-full font-bold hover:bg-purple-700 transition-transform hover:scale-105 shadow-md flex items-center gap-2"
                     >
-                      <Award size={20} />
+                      <span>🏠</span>
                       <span>Volver a inicio</span>
                     </button>
                   </div>
