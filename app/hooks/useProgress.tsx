@@ -9,7 +9,7 @@ export interface ActivityProgress {
   attempts: number
   lastScore: number
   completed: boolean
-  stars: number // 0-3 estrellas
+  stars: number 
   lastCompletedAt?: string
 }
 
@@ -32,7 +32,6 @@ export interface Medal {
 }
 
 export interface UserProgress {
-  activities(activities: any): unknown
   totalPoints: number
   totalStars: number
   streak: number
@@ -130,9 +129,6 @@ const initialProgress: UserProgress = {
     unidad6: createInitialUnitProgress(6, "Prácticas Creativas"),
   },
   medals: availableMedals,
-  activities: function (activities: any): unknown {
-    throw new Error("Function not implemented.")
-  }
 }
 
 export default function useProgress(unitId?: string) {

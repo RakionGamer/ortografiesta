@@ -3,9 +3,11 @@ import { useEffect, useState } from "react"
 import { Star, Music, Volume2, VolumeX, Pause } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useAudio } from './app/contexts/AudioContext'
+import useProgress from "./app/hooks/useProgress"
 
 export default function Ortografiesta() {
   const router = useRouter();
+  const { progress } = useProgress();
   const {
     isMusicPlaying,
     isMuted,
@@ -112,6 +114,8 @@ export default function Ortografiesta() {
   }, []);
 
 
+
+
   const handleToggleMute = (e: React.MouseEvent) => {
     e.stopPropagation()
     toggleMute()
@@ -164,7 +168,7 @@ export default function Ortografiesta() {
         {/* Botones */}
         <div className="flex flex-col md:flex-row justify-center gap-4 md:gap-8 mb-12">
           <button
-          onClick={() => navegarAUnidad(1)}
+            onClick={() => navegarAUnidad(1)}
             className="btn bg-gradient-to-b from-orange-400 to-orange-500 text-white text-xl md:text-2xl font-bold py-4 px-8 rounded-full shadow-lg transition-all hover:shadow-xl active:scale-95 flex items-center justify-center gap-2 relative overflow-hidden group cursor-pointer"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-yellow-300/0 via-yellow-300/30 to-yellow-300/0 group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></div>
@@ -174,7 +178,7 @@ export default function Ortografiesta() {
             </span>
           </button >
           <button onClick={() => router.push("/progreso")}
-          className="btn bg-gradient-to-b from-teal-400 to-teal-500 text-white text-xl md:text-2xl font-bold py-4 px-8 rounded-full shadow-lg transition-all hover:shadow-xl active:scale-95 relative overflow-hidden group cursor-pointer">
+            className="btn bg-gradient-to-b from-teal-400 to-teal-500 text-white text-xl md:text-2xl font-bold py-4 px-8 rounded-full shadow-lg transition-all hover:shadow-xl active:scale-95 relative overflow-hidden group cursor-pointer">
             <div className="absolute inset-0 bg-gradient-to-r from-teal-200/0 via-teal-200/30 to-teal-200/0 group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></div>
             <span className="relative flex items-center">
               MI PROGRESO
@@ -202,48 +206,59 @@ export default function Ortografiesta() {
             { title: "Palabras Homófonas", color: "bg-green-400", icon: "🎭", emoji: "🎪", unidad: 4 },
             { title: "Reglas Ortográficas", color: "bg-blue-400", icon: "📝", emoji: "📚", unidad: 5 },
             { title: "Prácticas Creativas", color: "bg-purple-600", icon: "🎨", emoji: "👨‍🎨", unidad: 6 },
-          ].map((unit, index) => (
-            <div
-              key={index}
-              className={`
+          ].map((unit, index) => {
+            const unitKey = `unidad${unit.unidad}`;
+            const unitProgress = progress?.units[unitKey];
+            const stars = unitProgress?.stars || 0;
+            const completion = unitProgress?.completionPercentage || 0;
+
+            return (
+
+              <div
+                key={index}
+                className={`
                 ${unit.color} rounded-3xl p-4 shadow-lg transition-all duration-300 cursor-pointer relative overflow-hidden group`
-              }
-              onClick={() => navegarAUnidad(unit.unidad)}
-            >
+                }
+                onClick={() => navegarAUnidad(unit.unidad)}
+              >
 
-              {/* Efecto de brillo en el borde */}
-              <div className="absolute inset-0 rounded-3xl border-4 border-white/0 group-hover:border-white/30 transition-all duration-300"></div>
+                {/* Efecto de brillo en el borde */}
+                <div className="absolute inset-0 rounded-3xl border-4 border-white/0 group-hover:border-white/30 transition-all duration-300"></div>
 
-              <div className="flex flex-col items-center text-center relative z-10">
-                <div className="w-24 h-24 flex items-center justify-center mb-3 bg-white/30 rounded-full group-hover:bg-white/40 transition-all duration-300 relative">
-                  <span className="text-5xl">{unit.icon}</span>
-                  <span className="absolute -top-2 -right-2 text-2xl animate-bounce">{unit.emoji}</span>
-                </div>
-                <h3 className="text-white font-bold text-xl mb-1 group-hover:scale-105 transition-transform duration-300">
-                  Unidad {index + 1}
-                </h3>
-                <p className="text-white font-semibold">{unit.title}</p>
+                <div className="flex flex-col items-center text-center relative z-10">
+                  <div className="w-24 h-24 flex items-center justify-center mb-3 bg-white/30 rounded-full group-hover:bg-white/40 transition-all duration-300 relative">
+                    <span className="text-5xl">{unit.icon}</span>
+                    <span className="absolute -top-2 -right-2 text-2xl animate-bounce">{unit.emoji}</span>
+                  </div>
+                  <h3 className="text-white font-bold text-xl mb-1 group-hover:scale-105 transition-transform duration-300">
+                    Unidad {index + 1}
+                  </h3>
+                  <p className="text-white font-semibold">{unit.title}</p>
 
-                {/* Indicador de progreso */}
-                <div className="mt-3 w-full bg-white/30 rounded-full h-3 overflow-hidden">
-                  <div
-                    className="bg-yellow-300 h-3 rounded-full transition-all duration-1000 ease-in-out"
-                    style={{ width: "0%" }}
-                  ></div>
-                </div>
+                  {/* Indicador de progreso */}
+                  <div className="mt-3 w-full bg-white/30 rounded-full h-3 overflow-hidden">
+                    <div
+                      className="bg-yellow-300 h-3 rounded-full transition-all duration-1000 ease-in-out"
+                      style={{ width: `${completion}%` }}
+                    ></div>
+                  </div>
 
-                {/* Estrellas */}
-                <div className="flex mt-2 gap-1">
-                  {[...Array(3)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="w-5 h-5 text-white/50 group-hover:scale-110 transition-transform duration-300"
-                    />
-                  ))}
+                  {/* Estrellas */}
+                  <div className="flex mt-2 gap-1">
+                    {[...Array(4)].map((_, i) => (
+                      <Star
+                        key={i}
+                        className={`w-5 h-5 transition-transform duration-300 ${i < stars
+                            ? 'text-yellow-400 fill-yellow-400'
+                            : 'text-white/50'
+                          }`}
+                      />
+                    ))}
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            )
+          })}
         </div>
       </div>
 

@@ -171,7 +171,7 @@ export default function Progreso() {
             </div>
 
             {/* Estadísticas principales */}
-            <div className="flex-1 grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="flex-1 grid grid-cols-2 md:grid-cols-3 gap-3">
               <div className="bg-purple-100 rounded-xl p-3 text-center">
                 <div className="flex justify-center mb-1">
                   <Trophy className="w-6 h-6 text-purple-600" />
@@ -203,14 +203,6 @@ export default function Progreso() {
                   }
                   /24
                 </p>
-              </div>
-
-              <div className="bg-red-100 rounded-xl p-3 text-center">
-                <div className="flex justify-center mb-1">
-                  <Zap className="w-6 h-6 text-red-600" />
-                </div>
-                <p className="text-sm text-red-600">Racha</p>
-                <p className="text-xl font-bold text-red-800">{progress.streak} días</p>
               </div>
             </div>
           </div>
@@ -368,7 +360,6 @@ export default function Progreso() {
                             activityName = "Sopa de Letras"
                             break
                         }
-
                         return (
                           <div
                             key={activityType}
@@ -380,7 +371,7 @@ export default function Progreso() {
                             ) : (
                               <div className="w-5 h-5 border-2 border-gray-300 rounded-full"></div>
                             )}
-                            <span className="text-sm">{activityName}</span>
+                            <span className="text-sm font-bold text-teal-800">{activityName}</span>
                             {activity.attempts > 0 && (
                               <span className="ml-auto text-xs font-bold text-teal-700">{activity.lastScore}%</span>
                             )}

@@ -110,19 +110,31 @@ export default function Unidad1() {
   const { progress, updateActivity } = useProgress("unidad1");
   const [puntosUnidad, setPuntosUnidad] = useState(0);
   const [estrellasUnidad, setEstrellasUnidad] = useState(0);
+  const unitId = "unidad1";
+
+
+
+
 
   useEffect(() => {
-    if (progress && progress.activities) {
-      const totalPuntos = Object.values(progress.activities).reduce(
-        (sum, a) => sum + Math.round((a.lastScore / 100) * 50),
-        0
-      );
-      const estrellas = Object.values(progress.activities).filter(a => a.completed).length;
+  if (progress && unitId && progress.units[unitId]) {
+    const unitActivities = progress.units[unitId].activities;
 
-      setPuntosUnidad(totalPuntos);
-      setEstrellasUnidad(estrellas);
-    }
-  }, [progress]);
+    console.log()
+    
+    const totalPuntos = Object.values(unitActivities).reduce(
+      (sum, a) => 
+        sum + Math.round((a.lastScore / 100) * 50),
+      0
+    );
+    
+    const estrellas = Object.values(unitActivities)
+      .filter(activity => activity.completed).length;
+
+    setPuntosUnidad(totalPuntos);
+    setEstrellasUnidad(estrellas);
+  }
+}, [progress, unitId]);
 
 
   useEffect(() => {
@@ -168,7 +180,7 @@ export default function Unidad1() {
       const porcentaje = (correctas / 10) * 100;
 
       updateActivity("completar", {
-        attempts: (progress?.activities?.completar?.attempts || 0) + 1,
+        attempts: (progress?.units[unitId]?.activities.completar.attempts || 0) + 1,
         lastScore: porcentaje,
         completed: true,
         stars: porcentaje >= 60 ? 1 : 0
@@ -471,7 +483,7 @@ export default function Unidad1() {
           <div className="flex items-center gap-2">
             <div className="bg-white/80 rounded-full px-3 py-1 flex items-center gap-1">
               <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-              <span className="font-bold text-purple-800">{puntuacion || 0}</span>
+              <span className="font-bold text-purple-800">{progress?.totalPoints}</span>
             </div>
 
             <div className="text-3xl bg-white p-2 rounded-full shadow-md">
