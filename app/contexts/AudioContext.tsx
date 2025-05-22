@@ -46,25 +46,15 @@ export function AudioProvider({ children }: { children: ReactNode }) {
     };
   }, [isAudioInitialized]);
 
-  const toggleMusic = () => {
-    if (audio) {
-      if (isMusicPlaying) {
-        audio.pause();
-        setIsMusicPlaying(false);
-      } else {
-        const playPromise = audio.play();
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              setIsMusicPlaying(true);
-            })
-            .catch(error => {
-              console.log("Play failed:", error);
-            });
-        }
-      }
-    }
-  };
+ const toggleMusic = () => {
+  if (!audio) return;
+  if (isMusicPlaying) {
+    audio.pause();
+  } else {
+    audio.play();
+  }
+  setIsMusicPlaying(!isMusicPlaying);
+};
 
   const toggleMute = () => {
     if (audio) {
