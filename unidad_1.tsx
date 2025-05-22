@@ -117,9 +117,12 @@ export default function Unidad1() {
   useEffect(() => {
   if (progress && unitId && progress.units[unitId]) {
     const unitActivities = progress.units[unitId].activities;
+
+    console.log()
     
     const totalPuntos = Object.values(unitActivities).reduce(
-      (sum, a) => sum + Math.round((a.lastScore / 100) * 50),
+      (sum, a) => 
+        sum + Math.round((a.lastScore / 100) * 50),
       0
     );
     
