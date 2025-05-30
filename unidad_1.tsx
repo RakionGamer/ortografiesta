@@ -113,28 +113,33 @@ export default function Unidad1() {
   const unitId = "unidad1";
 
 
+  const MAX_ERRORS_BEFORE_PENALTY = 3
+  const ERROR_PENALTY_POINTS = 10
+  const [errors, setErrors] = useState(0)
+
+
 
 
 
   useEffect(() => {
-  if (progress && unitId && progress.units[unitId]) {
-    const unitActivities = progress.units[unitId].activities;
+    if (progress && unitId && progress.units[unitId]) {
+      const unitActivities = progress.units[unitId].activities;
 
-    console.log()
-    
-    const totalPuntos = Object.values(unitActivities).reduce(
-      (sum, a) => 
-        sum + Math.round((a.lastScore / 100) * 50),
-      0
-    );
-    
-    const estrellas = Object.values(unitActivities)
-      .filter(activity => activity.completed).length;
 
-    setPuntosUnidad(totalPuntos);
-    setEstrellasUnidad(estrellas);
-  }
-}, [progress, unitId]);
+
+      const totalPuntos = Object.values(unitActivities).reduce(
+        (sum, a) =>
+          sum + Math.round((a.lastScore / 100) * 50),
+        0
+      );
+
+      const estrellas = Object.values(unitActivities)
+        .filter(activity => activity.completed).length;
+
+      setPuntosUnidad(totalPuntos);
+      setEstrellasUnidad(estrellas);
+    }
+  }, [progress, unitId]);
 
 
   useEffect(() => {
@@ -173,8 +178,16 @@ export default function Unidad1() {
     }
   }
 
+
+
+  
+
+
+
   const verificarRespuesta = (respuesta: string, correcta: string) => {
     const esCorrecta = respuesta.toLowerCase() === correcta.toLowerCase();
+
+
     if (esCorrecta && preguntaActual === 9) {
       const correctas = respuestas.filter(r => r).length + 1;
       const porcentaje = (correctas / 10) * 100;
@@ -238,7 +251,14 @@ export default function Unidad1() {
         setPreguntaActual(nuevaPregunta)
         setPalabraDictado(palabrasDictado[nuevaPregunta])
       } else {
-        setActividadCompletada(true)
+        setActividadCompletada(true);
+        updateActivity("dictado", {
+          attempts: (progress?.units[unitId]?.activities.dictado.attempts || 0) + 1,
+          lastScore: 100,
+          completed: true,
+          stars: 1
+        });
+
       }
     }, 1500)
   }
@@ -421,8 +441,13 @@ export default function Unidad1() {
             })
           }, 300)
 
-          // Verificar si se han encontrado todas las palabras
           if (palabrasEncontradas.length + 1 === palabrasSopa.length) {
+            updateActivity("sopa", {
+              attempts: 1,
+              lastScore: 100,
+              completed: true,
+              stars: 1,
+            });
             setActividadCompletada(true)
           }
         }
@@ -481,10 +506,7 @@ export default function Unidad1() {
           <h1 className="text-3xl md:text-4xl font-bold text-center text-purple-800">Unidad 1: Sonidos y Letras</h1>
 
           <div className="flex items-center gap-2">
-            <div className="bg-white/80 rounded-full px-3 py-1 flex items-center gap-1">
-              <Star className="w-5 h-5 text-yellow-400 fill-yellow-400" />
-              <span className="font-bold text-purple-800">{progress?.totalPoints}</span>
-            </div>
+            
 
             <div className="text-3xl bg-white p-2 rounded-full shadow-md">
               {selectedAvatar}

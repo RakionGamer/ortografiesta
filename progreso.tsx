@@ -34,6 +34,29 @@ export default function Progreso() {
     })
   }
 
+  const getActivityName = (activityType: ActivityType, unitId: string) => {
+    if (unitId === "unidad2") {
+        switch (activityType) {
+            case "diferencias": return "Reglas de Mayúsculas";
+            case "completar": return "Completar Oraciones";
+            case "dictado": return "Corregir Textos";
+            case "sopa": return "Sopa de Nombres";
+            default: return activityType;
+        }
+    }
+
+  
+    switch (activityType) {
+        case "diferencias": return "Diferencias B/V, C/S/Z, G/J";
+        case "completar": return "Completar Palabras";
+        case "dictado": return "Dictado Interactivo";
+        case "sopa": return "Sopa de Letras";
+        default: return activityType;
+    }
+}
+
+
+
   // Calcular tiempo desde la última vez que se jugó
   const getLastPlayedText = () => {
     if (!progress?.lastPlayedAt) return "Nunca"
@@ -345,21 +368,8 @@ export default function Progreso() {
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3">
                       {Object.entries(unit.activities).map(([activityType, activity]) => {
-                        let activityName = ""
-                        switch (activityType as ActivityType) {
-                          case "diferencias":
-                            activityName = "Diferencias B/V, C/S/Z, G/J"
-                            break
-                          case "completar":
-                            activityName = "Completar Palabras"
-                            break
-                          case "dictado":
-                            activityName = "Dictado Interactivo"
-                            break
-                          case "sopa":
-                            activityName = "Sopa de Letras"
-                            break
-                        }
+                        const activityName = getActivityName(activityType as ActivityType, unitId)
+                      
                         return (
                           <div
                             key={activityType}

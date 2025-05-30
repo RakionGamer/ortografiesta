@@ -5,11 +5,17 @@ import { useState, useEffect } from "react"
 // Tipos para el sistema de progreso
 export type ActivityType = "diferencias" | "completar" | "dictado" | "sopa"
 
+
+
+type PenaltyReason = 'too_many_errors' | 'timeout' | 'hint_used'
+
+
 export interface ActivityProgress {
   attempts: number
   lastScore: number
   completed: boolean
-  stars: number 
+  stars: number,
+  errors: number
   lastCompletedAt?: string
 }
 
@@ -32,6 +38,7 @@ export interface Medal {
 }
 
 export interface UserProgress {
+  activities: UserProgress | null
   totalPoints: number
   totalStars: number
   streak: number
@@ -105,11 +112,28 @@ const createInitialUnitProgress = (id: number, name: string): UnitProgress => ({
   id,
   name,
   activities: {
-    diferencias: { attempts: 0, lastScore: 0, completed: false, stars: 0 },
-    completar: { attempts: 0, lastScore: 0, completed: false, stars: 0 },
-    dictado: { attempts: 0, lastScore: 0, completed: false, stars: 0 },
-    sopa: { attempts: 0, lastScore: 0, completed: false, stars: 0 },
+    diferencias: {
+      attempts: 0, lastScore: 0, completed: false, stars: 0,
+      errors: 0
+    },
+    completar: {
+      attempts: 0, lastScore: 0, completed: false, stars: 0,
+      errors: 0
+    },
+    dictado: {
+      attempts: 0, lastScore: 0, completed: false, stars: 0,
+      errors: 0
+    },
+    sopa: {
+      attempts: 0, lastScore: 0, completed: false, stars: 0,
+      errors: 0
+    },
   },
+
+
+
+
+
   completionPercentage: 0,
   stars: 0,
   unlockedAt: id === 1 ? new Date().toISOString() : undefined,
@@ -129,6 +153,7 @@ const initialProgress: UserProgress = {
     unidad6: createInitialUnitProgress(6, "Prácticas Creativas"),
   },
   medals: availableMedals,
+  activities: null
 }
 
 export default function useProgress(unitId?: string) {
@@ -163,7 +188,7 @@ export default function useProgress(unitId?: string) {
   }, [progress])
 
   // Actualizar el progreso de una actividad
-  const updateActivity = (activityType: ActivityType, activityProgress: Partial<ActivityProgress>) => {
+  const updateActivity = (activityType: ActivityType, activityProgress: Partial<ActivityProgress>, penalty?: { reason: PenaltyReason; amount: number }) => {
     if (!progress || !unitId) return
 
     setProgress((prevProgress) => {
@@ -176,13 +201,29 @@ export default function useProgress(unitId?: string) {
       const unit = newProgress.units[unitId]
       if (!unit) return prevProgress
 
-      const currentActivity = unit.activities[activityType]
+      // Asegurar que la actividad existe
+      if (!unit.activities[activityType]) {
+        // Si la actividad no existe, crearla con valores por defecto
+        unit.activities[activityType] = {
+          attempts: 0,
+          lastScore: 0,
+          completed: false,
+          stars: 0,
+          errors: 0
+        }
+      }
 
+      const currentActivity = unit.activities[activityType]
       // Calcular puntos a añadir (ahora cada actividad vale 50 puntos)
       let pointsToAdd = 0
-      if (activityProgress.lastScore !== undefined) {
+
+      // SOLUCIÓN: Verificar si currentActivity existe antes de acceder a sus propiedades
+      if (activityProgress.lastScore !== undefined && currentActivity) {
         // Si es la primera vez o si mejora la puntuación anterior
-        if (!currentActivity.completed || activityProgress.lastScore > currentActivity.lastScore) {
+        const isFirstAttempt = currentActivity.attempts === 0
+        const isImprovement = activityProgress.lastScore > currentActivity.lastScore
+
+        if (isFirstAttempt || isImprovement) {
           // Calcular puntos basados en el porcentaje de éxito (máximo 50 puntos por actividad)
           const maxPoints = 50
           const earnedPoints = Math.round((activityProgress.lastScore / 100) * maxPoints)
@@ -200,8 +241,6 @@ export default function useProgress(unitId?: string) {
           if (pointsToAdd <= 0 && activityProgress.completed) {
             pointsToAdd = earnedPoints
           }
-
-          console.log(`Añadiendo ${pointsToAdd} puntos por ${activityType}`)
         }
       }
 
@@ -217,6 +256,22 @@ export default function useProgress(unitId?: string) {
           stars = 0 // Quitar la estrella si hay muchos errores
         }
       }
+
+      if (penalty) {
+        switch (penalty.reason) {
+          case 'too_many_errors':
+            pointsToAdd = -penalty.amount
+            // Quitar estrella si corresponde
+            if (currentActivity.stars > 0) {
+              stars = Math.max(currentActivity.stars - 1, 0)
+            }
+            break
+          // Puedes añadir más casos de penalización
+        }
+      }
+
+      // Asegurar que los puntos no sean negativos
+      newProgress.totalPoints = Math.max(newProgress.totalPoints + pointsToAdd, 0)
 
       // Actualizar los campos de la actividad
       const updatedActivity = {
@@ -346,7 +401,7 @@ export default function useProgress(unitId?: string) {
     }
 
     // Maestro de palabras (dictado con 90% o más)
-    if (activityType === "dictado" && activity.lastScore >= 90) {
+    if (unitId === "unidad1" && activityType === "dictado" && activity.lastScore >= 90) {
       const wordMasterMedal = medals.find((m) => m.id === "word_master")
       if (wordMasterMedal && !wordMasterMedal.unlocked) {
         wordMasterMedal.unlocked = true
@@ -370,13 +425,11 @@ export default function useProgress(unitId?: string) {
     })
   }
 
-  // Resetear todo el progreso
   const resetProgress = () => {
     setProgress(initialProgress)
     if (typeof window !== "undefined") {
       localStorage.setItem("ortografiesta-progress", JSON.stringify(initialProgress))
-      alert("Progreso reiniciado correctamente. Los cambios se verán al recargar la página.")
-      window.location.reload()
+      window.location.href = '/'
     }
   }
 
