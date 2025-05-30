@@ -16,7 +16,6 @@ interface AudioContextType {
 // Create the context
 const AudioContext = createContext<AudioContextType | null>(null);
 
-// Custom hook to use the audio context
 export const useAudio = () => {
   const context = useContext(AudioContext);
   if (!context) {
@@ -25,7 +24,6 @@ export const useAudio = () => {
   return context;
 };
 
-// Provider component
 
 export function AudioProvider({ children }: { children: ReactNode }) {
   const [audio, setAudio] = useState<HTMLAudioElement | null>(null);

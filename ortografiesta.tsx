@@ -133,7 +133,10 @@ export default function Ortografiesta() {
 
   const navegarAUnidad = (unidad: number) => {
     if (unidad === 1) {
-      router.push("/unidad_1")
+      router.push("/unidad_1");
+    } else if (unidad === 2) {
+      router.push("/unidad_2");
+
     } else {
       alert("Esta unidad estará disponible próximamente")
     }
