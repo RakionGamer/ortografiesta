@@ -1037,7 +1037,7 @@ export default function Unidad3() {
                                             <span>¡Jugar de nuevo!</span>
                                         </button>
                                         <button
-                                            onClick={() => cambiarActividad("reglas")}
+                                            onClick={() => cambiarActividad("diferencias")}
                                             className="bg-yellow-600 text-white px-8 py-4 rounded-full font-bold hover:bg-yellow-700 transition-transform hover:scale-105 shadow-md flex items-center gap-2"
                                         >
                                             <span>🏠</span>

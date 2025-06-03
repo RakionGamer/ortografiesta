@@ -55,6 +55,27 @@ export default function Progreso() {
     }
 
 
+    if (unitId === "unidad4") {
+        switch (activityType) {
+            case "diferencias": return "Reglas de B y V";
+            case "completar": return "Completar con B o V";
+            case "dictado": return "Dictado de B y V";
+            case "sopa": return "Sopa de B y V";
+            default: return activityType;
+        }
+    }
+
+    if (unitId === "unidad5") {
+        switch (activityType) {
+            case "diferencias": return "Reglas de C, S y Z";
+            case "completar": return "Completar con C, S o Z";
+            case "dictado": return "Dictado de C, S y Z";
+            case "sopa": return "Sopa de C, S y Z";
+            default: return activityType;
+        }
+    }
+
+
     switch (activityType) {
         case "diferencias": return "Diferencias B/V, C/S/Z, G/J";
         case "completar": return "Completar Palabras";
@@ -64,9 +85,6 @@ export default function Progreso() {
     }
 }
 
-
-
-  // Calcular tiempo desde la última vez que se jugó
   const getLastPlayedText = () => {
     if (!progress?.lastPlayedAt) return "Nunca"
 
@@ -89,11 +107,9 @@ export default function Progreso() {
     }
   }
 
-  // Calcular el tiempo total de juego (simulado)
   const getTotalPlayTime = () => {
     if (!progress) return "0h 0m"
 
-    // Simulamos el tiempo basado en los intentos totales (5 minutos por intento)
     let totalAttempts = 0
     Object.values(progress.units).forEach((unit) => {
       Object.values(unit.activities).forEach((activity) => {
