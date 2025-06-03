@@ -38,6 +38,10 @@ export interface Medal {
 }
 
 export interface UserProgress {
+  sopa: any
+  diferencias: any
+  dictado: any
+  completar: any
   activities: UserProgress | null
   totalPoints: number
   totalStars: number
@@ -150,7 +154,6 @@ const initialProgress: UserProgress = {
     unidad3: createInitialUnitProgress(3, "Reglas de Acentuación"),
     unidad4: createInitialUnitProgress(4, "Palabras Homófonas"),
     unidad5: createInitialUnitProgress(5, "Reglas Ortográficas"),
-    unidad6: createInitialUnitProgress(6, "Prácticas Creativas"),
   },
   medals: availableMedals,
   activities: null

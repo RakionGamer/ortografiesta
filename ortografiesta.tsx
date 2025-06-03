@@ -136,7 +136,15 @@ export default function Ortografiesta() {
       router.push("/unidad_1");
     } else if (unidad === 2) {
       router.push("/unidad_2");
-
+    }
+    else if (unidad === 3) {
+      router.push("/unidad_3");
+    }
+    else if (unidad === 4) {
+      router.push("/unidad_4");
+    }
+    else if (unidad === 5) {
+      router.push("/unidad_5");
     } else {
       alert("Esta unidad estará disponible próximamente")
     }
@@ -208,7 +216,7 @@ export default function Ortografiesta() {
             { title: "Reglas de Acentuación", color: "bg-orange-400", icon: "✏️", emoji: "⭐", unidad: 3 },
             { title: "Palabras Homófonas", color: "bg-green-400", icon: "🎭", emoji: "🎪", unidad: 4 },
             { title: "Reglas Ortográficas", color: "bg-blue-400", icon: "📝", emoji: "📚", unidad: 5 },
-            { title: "Prácticas Creativas", color: "bg-purple-600", icon: "🎨", emoji: "👨‍🎨", unidad: 6 },
+
           ].map((unit, index) => {
             const unitKey = `unidad${unit.unidad}`;
             const unitProgress = progress?.units[unitKey];
@@ -252,8 +260,8 @@ export default function Ortografiesta() {
                       <Star
                         key={i}
                         className={`w-5 h-5 transition-transform duration-300 ${i < stars
-                            ? 'text-yellow-400 fill-yellow-400'
-                            : 'text-white/50'
+                          ? 'text-yellow-400 fill-yellow-400'
+                          : 'text-white/50'
                           }`}
                       />
                     ))}
