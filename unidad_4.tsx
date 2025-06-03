@@ -380,13 +380,13 @@ export default function Unidad4() {
           const totalPreguntas = historias.reduce((acc, h) => acc + h.opciones.length, 0)
           const porcentajeExito = (respuestasCorrectas / totalPreguntas) * 100
 
-            updateActivity("completar", {
-              attempts:  1,
-              lastScore: porcentajeExito,
-              completed: true,
-              stars: porcentajeExito >= 80 ? 1 : 0,
-            })
-          
+          updateActivity("completar", {
+            attempts: 1,
+            lastScore: porcentajeExito,
+            completed: true,
+            stars: porcentajeExito >= 80 ? 1 : 0,
+          })
+
         }
       }
     }, 2000)
@@ -417,18 +417,18 @@ export default function Unidad4() {
         const respuestasCorrectas = [...respuestas, esCorrecta].filter(Boolean).length
         const porcentajeExito = (respuestasCorrectas / 10) * 100
 
-          updateActivity("dictado", {
-            attempts: 1,
-            lastScore: porcentajeExito,
-            completed: true,
-            stars: porcentajeExito >= 80 ? 1 : 0,
-          })
+        updateActivity("dictado", {
+          attempts: 1,
+          lastScore: porcentajeExito,
+          completed: true,
+          stars: porcentajeExito >= 80 ? 1 : 0,
+        })
       }
     }, 2000)
   }
 
   const cambiarActividad = (nuevaActividad: Actividad) => {
-   if (actividad !== nuevaActividad && actividad === "diferencias") {
+    if (actividad !== nuevaActividad && actividad === "diferencias") {
       updateActivity("diferencias", {
         attempts: 1,
         lastScore: 100,
@@ -643,7 +643,7 @@ export default function Unidad4() {
           <h1 className="text-3xl md:text-4xl font-bold text-center text-teal-800">Unidad 4: Palabras Homófonas</h1>
 
           <div className="flex items-center gap-2">
-            
+
 
             <div className="text-3xl bg-white p-2 rounded-full shadow-md">{selectedAvatar}</div>
 
@@ -658,39 +658,35 @@ export default function Unidad4() {
         </header>
 
         {/* Barra de progreso y estrellas */}
-       
+
 
         {/* Selector de actividades */}
         <div className="flex flex-wrap justify-center gap-4 mb-8">
           <button
             onClick={() => cambiarActividad("diferencias")}
-            className={`px-4 py-2 rounded-full font-bold cursor-pointer ${
-              actividad === "diferencias" ? "bg-teal-600 text-white" : "bg-white/70 text-teal-600 hover:bg-white"
-            } transition-colors`}
+            className={`px-4 py-2 rounded-full font-bold cursor-pointer ${actividad === "diferencias" ? "bg-teal-600 text-white" : "bg-white/70 text-teal-600 hover:bg-white"
+              } transition-colors`}
           >
             Palabras Homófonas
           </button>
           <button
             onClick={() => cambiarActividad("completar")}
-            className={`px-4 py-2 rounded-full font-bold cursor-pointer ${
-              actividad === "completar" ? "bg-blue-500 text-white" : "bg-white/70 text-blue-600 hover:bg-white"
-            } transition-colors`}
+            className={`px-4 py-2 rounded-full font-bold cursor-pointer ${actividad === "completar" ? "bg-blue-500 text-white" : "bg-white/70 text-blue-600 hover:bg-white"
+              } transition-colors`}
           >
             Historias Interactivas
           </button>
           <button
             onClick={() => cambiarActividad("dictado")}
-            className={`px-4 py-2 rounded-full font-bold cursor-pointer ${
-              actividad === "dictado" ? "bg-purple-500 text-white" : "bg-white/70 text-purple-600 hover:bg-white"
-            } transition-colors`}
+            className={`px-4 py-2 rounded-full font-bold cursor-pointer ${actividad === "dictado" ? "bg-purple-500 text-white" : "bg-white/70 text-purple-600 hover:bg-white"
+              } transition-colors`}
           >
             Juego de Cartas
           </button>
           <button
             onClick={() => cambiarActividad("sopa")}
-            className={`px-4 py-2 rounded-full font-bold cursor-pointer ${
-              actividad === "sopa" ? "bg-green-500 text-white" : "bg-white/70 text-green-600 hover:bg-white"
-            } transition-colors`}
+            className={`px-4 py-2 rounded-full font-bold cursor-pointer ${actividad === "sopa" ? "bg-green-500 text-white" : "bg-white/70 text-green-600 hover:bg-white"
+              } transition-colors`}
           >
             Sopa de Palabras
           </button>
@@ -757,222 +753,487 @@ export default function Unidad4() {
 
           {/* Historias interactivas */}
           {actividad === "completar" && (
-            <div className="text-center">
-              {!actividadCompletada ? (
-                <>
-                  <h2 className="text-2xl font-bold text-teal-800 mb-4 flex items-center justify-center">
-                    <BookOpen className="w-6 h-6 mr-2" />
-                    {historias[historiaActual].titulo}
-                  </h2>
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
+              <div className="max-w-6xl mx-auto">
+                {!actividadCompletada ? (
+                  <div className="space-y-8">
+                    {/* Header con progreso mejorado */}
+                    <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/20">
+                      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            {historiaActual + 1}
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-blue-800">Historia {historiaActual + 1}</h3>
+                            <p className="text-blue-600 text-sm">de {historias.length} historias</p>
+                          </div>
+                        </div>
 
-                  <div className="text-8xl mb-6">{historias[historiaActual].imagen}</div>
+                        {/* Progreso de palabras */}
+                        <div className="flex flex-col items-end gap-2">
+                          <div className="flex gap-1.5">
+                            {historias[historiaActual].opciones.map((_, i) => (
+                              <div
+                                key={i}
+                                className={`w-3 h-3 rounded-full transition-all duration-300 ${i < opcionActual
+                                    ? (respuestasHistoria[i] === historias[historiaActual].opciones[i].correcta ? "bg-green-400 shadow-lg shadow-green-200" : "bg-red-400 shadow-lg shadow-red-200")
+                                    : i === opcionActual
+                                      ? "bg-blue-400 animate-pulse shadow-lg shadow-blue-200"
+                                      : "bg-gray-200"
+                                  }`}
+                              />
+                            ))}
+                          </div>
+                          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500 ease-out"
+                              style={{ width: `${((opcionActual + 1) / historias[historiaActual].opciones.length) * 100}%` }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
 
-                  <div className="bg-blue-100 p-6 rounded-xl mb-6">
-                    <p className="text-lg text-blue-800 leading-relaxed">
-                      {historias[historiaActual].historia.split("___").map((parte, index) => (
-                        <span key={index}>
-                          {parte}
-                          {index < historias[historiaActual].opciones.length && (
-                            <span
-                              className={`inline-block mx-1 px-3 py-1 rounded-full font-bold ${
-                                respuestasHistoria[index]
-                                  ? respuestasHistoria[index] === historias[historiaActual].opciones[index].correcta
-                                    ? "bg-green-400 text-white"
-                                    : "bg-red-400 text-white"
-                                  : index === opcionActual
-                                    ? "bg-yellow-300 text-yellow-800 animate-pulse"
-                                    : "bg-gray-200 text-gray-600"
-                              }`}
-                            >
-                              {respuestasHistoria[index] || "___"}
+                    {/* Título con animación */}
+                    <div className="text-center">
+                      <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4 flex items-center justify-center gap-3">
+                        <BookOpen className="w-10 h-10 text-blue-500 animate-pulse" />
+                        {historias[historiaActual].titulo}
+                      </h2>
+                      <div className="w-32 h-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full mx-auto"></div>
+                    </div>
+
+                    {/* Imagen principal con animación */}
+                    <div className="flex justify-center mb-6">
+                      <div className="relative">
+                        <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full blur-2xl animate-pulse"></div>
+                        <div className="relative text-8xl md:text-9xl animate-bounce">
+                          {historias[historiaActual].imagen}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Historia con espacios mejorada */}
+                    <div className="flex justify-center mb-8">
+                      <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-blue-200/30 shadow-xl max-w-4xl">
+                        <div className="flex items-center gap-3 mb-6">
+                          <div className="w-8 h-8 bg-gradient-to-r from-indigo-400 to-purple-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                            📖
+                          </div>
+                          <h3 className="text-lg font-semibold text-indigo-700">Historia</h3>
+                        </div>
+
+                        <div className="text-xl leading-relaxed text-gray-800">
+                          {historias[historiaActual].historia.split("___").map((parte, index) => (
+                            <span key={index}>
+                              {parte}
+                              {index < historias[historiaActual].opciones.length && (
+                                <span
+                                  className={`inline-block mx-2 px-4 py-2 rounded-2xl font-bold text-lg mb-2 transition-all duration-300 transform ${respuestasHistoria[index]
+                                      ? respuestasHistoria[index] === historias[historiaActual].opciones[index].correcta
+                                        ? "bg-gradient-to-r from-green-400 to-green-500 text-white shadow-lg shadow-green-300/50 scale-105"
+                                        : "bg-gradient-to-r from-red-400 to-red-500 text-white shadow-lg shadow-red-300/50 scale-105"
+                                      : index === opcionActual
+                                        ? "bg-gradient-to-r from-yellow-300 to-yellow-400 text-yellow-800 animate-pulse shadow-lg shadow-yellow-300/50 scale-110"
+                                        : "bg-gray-200 text-gray-600 border-2 border-dashed border-gray-400 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                                    }`}
+                                >
+                                  {respuestasHistoria[index] || "___"}
+                                </span>
+                              )}
                             </span>
-                          )}
-                        </span>
-                      ))}
-                    </p>
-                  </div>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
 
-                  {opcionActual < historias[historiaActual].opciones.length && !mostrarResultado && (
-                    <>
-                      <p className="text-lg text-teal-700 mb-4">
-                        Elige la palabra correcta para el espacio número {opcionActual + 1}:
+                    {opcionActual < historias[historiaActual].opciones.length && !mostrarResultado && (
+                      <>
+                        {/* Instrucción mejorada */}
+                        <div className="flex justify-center mb-6">
+                          <div className="bg-gradient-to-r from-indigo-100 to-purple-100 backdrop-blur-sm rounded-2xl p-6 border border-indigo-200/50 shadow-lg max-w-lg">
+                            <div className="flex items-center gap-3">
+                              <div className="text-3xl">🎯</div>
+                              <p className="text-indigo-800 font-medium text-lg">
+                                Elige la palabra correcta para el espacio <span className="font-bold text-indigo-600">#{opcionActual + 1}</span>
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Opciones de respuesta mejoradas */}
+                        <div className="flex flex-wrap justify-center gap-6 mb-8">
+                          {historias[historiaActual].opciones[opcionActual].opciones.map((opcion, index) => (
+                            <button
+                              key={index}
+                              onClick={() => handleRespuestaHistoria(opcion)}
+                              className="cursor-pointer group relative bg-white/80 rounded-2xl px-8 py-4 shadow-lg border-2 border-blue-200/50 hover:border-blue-400 hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95"
+                            >
+                              {/* Efecto de brillo en hover */}
+                              <div className="absolute inset-0 bg-gradient-to-r from-blue-400/10 to-indigo-400/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                              <span className="relative z-10 text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent group-hover:scale-110 transition-transform duration-200">
+                                {opcion}
+                              </span>
+
+                              {/* Indicador de hover */}
+                              <div className="absolute top-2 right-2 w-3 h-3 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full opacity-0 group-hover:opacity-100 animate-pulse transition-opacity duration-300"></div>
+                            </button>
+                          ))}
+                        </div>
+                      </>
+                    )}
+
+                    {/* Resultado mejorado */}
+                    {mostrarResultado !== null && (
+                      <div className="flex justify-center">
+                        <div className={`flex flex-col items-center gap-4 px-8 py-6 rounded-3xl text-xl font-bold shadow-xl transform animate-in slide-in-from-bottom-4 duration-500 max-w-lg ${mostrarResultado
+                            ? "bg-gradient-to-r from-green-400 to-green-500 text-white shadow-green-300/50"
+                            : "bg-gradient-to-r from-red-400 to-red-500 text-white shadow-red-300/50"
+                          }`}>
+                          <div className="flex items-center gap-3">
+                            {mostrarResultado ? (
+                              <>
+                                <Check size={32} className="animate-bounce" />
+                                <span className="text-2xl">¡Perfecto! 🎉</span>
+                              </>
+                            ) : (
+                              <>
+                                <X size={32} className="animate-pulse" />
+                                <span className="text-xl">¡Casi! 💪</span>
+                              </>
+                            )}
+                          </div>
+
+                          <div className="text-center">
+                            <p className="text-lg opacity-90 mb-2">
+                              {mostrarResultado ? "¡Correcto!" : "La palabra correcta es:"}
+                            </p>
+                            <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3">
+                              <span className="text-2xl font-bold">
+                                "{historias[historiaActual].opciones[opcionActual].correcta}"
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Información de progreso mejorada */}
+                    <div className="flex justify-center">
+                      <div className="bg-white/60 backdrop-blur-sm rounded-2xl px-6 py-3 border border-blue-200/30 shadow-lg">
+                        <p className="text-blue-700 font-medium">
+                          Historia <span className="font-bold">{historiaActual + 1}</span> de <span className="font-bold">{historias.length}</span> •
+                          Palabra <span className="font-bold">{opcionActual + 1}</span> de <span className="font-bold">{historias[historiaActual].opciones.length}</span>
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  /* Pantalla de completado mejorada */
+                  <div className="text-center py-12">
+                    <div className="relative mb-8">
+                      <div className="text-8xl mb-6 animate-bounce">🎉</div>
+                      <div className="absolute inset-0 flex justify-center items-center">
+                        <div className="w-32 h-32 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full animate-ping"></div>
+                      </div>
+                    </div>
+
+                    <h2 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-6">
+                      ¡Historias Completadas!
+                    </h2>
+
+                    <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 mb-8 border border-white/30 shadow-xl max-w-md mx-auto">
+                      <div className="text-6xl font-bold text-blue-800 mb-2">
+                        {historias.length}
+                      </div>
+                      <p className="text-xl text-blue-600 font-medium mb-4">
+                        historias completadas
                       </p>
 
-                      <div className="flex justify-center gap-4 mb-6">
-                        {historias[historiaActual].opciones[opcionActual].opciones.map((opcion, index) => (
-                          <button
-                            key={index}
-                            onClick={() => handleRespuestaHistoria(opcion)}
-                            className="bg-white text-teal-800 px-6 py-3 rounded-xl font-bold border-2 border-teal-300 hover:bg-teal-100 transition-colors cursor-pointer transform hover:scale-105"
-                          >
-                            {opcion}
-                          </button>
-                        ))}
+                      <div className="flex items-center justify-center gap-2 text-blue-700">
+                        <BookOpen size={20} />
+                        <span className="font-medium">¡Todas las palabras correctas!</span>
                       </div>
-                    </>
-                  )}
 
-                  {mostrarResultado !== null && (
-                    <div className={`text-xl font-bold ${mostrarResultado ? "text-green-500" : "text-red-500"}`}>
-                      {mostrarResultado ? (
-                        <div className="flex items-center justify-center gap-2">
-                          <Check size={24} />
-                          <span>
-                            ¡Correcto! La palabra es "{historias[historiaActual].opciones[opcionActual].correcta}"
-                          </span>
+                      {/* Efecto de logro */}
+                      <div className="mt-6">
+                        <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                          <div className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-1000 ease-out w-full" />
                         </div>
-                      ) : (
-                        <div className="flex items-center justify-center gap-2">
-                          <X size={24} />
-                          <span>
-                            La palabra correcta es "{historias[historiaActual].opciones[opcionActual].correcta}"
-                          </span>
-                        </div>
-                      )}
+                        <p className="text-sm text-blue-600 mt-2 font-medium">
+                          ¡Maestro de las historias! 🌟
+                        </p>
+                      </div>
                     </div>
-                  )}
 
-                  <div className="mt-6 text-sm text-teal-600">
-                    Historia {historiaActual + 1} de {historias.length} - Palabra {opcionActual + 1} de{" "}
-                    {historias[historiaActual].opciones.length}
+                    {/* Botones de acción mejorados */}
+                    <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
+                      <button
+                        onClick={() => cambiarActividad(actividad)}
+                        className="group bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                      >
+                        <HelpCircle size={24} className="group-hover:rotate-12 transition-transform duration-300" />
+                        <span>Leer de nuevo</span>
+                      </button>
+                      <button
+                        onClick={() => cambiarActividad("diferencias")}
+                        className="group bg-gradient-to-r from-indigo-600 to-indigo-700 text-white px-8 py-4 rounded-2xl font-bold hover:from-indigo-700 hover:to-indigo-800 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                      >
+                        <Award size={24} className="group-hover:rotate-12 transition-transform duration-300" />
+                        <span>Volver a reglas</span>
+                      </button>
+                    </div>
                   </div>
-                </>
-              ) : (
-                <div className="text-center py-8">
-                  <div className="text-6xl mb-4">🎉</div>
-                  <h2 className="text-3xl font-bold text-teal-800 mb-4">¡Historias Completadas!</h2>
-                  <p className="text-xl text-teal-600 mb-8">
-                    Has completado todas las historias y elegido las palabras correctas
-                  </p>
-
-                  <div className="flex justify-center gap-4">
-                    <button
-                      onClick={() => cambiarActividad(actividad)}
-                      className="bg-blue-500 text-white px-6 py-3 rounded-full font-bold hover:bg-blue-600 transition-colors flex items-center gap-2"
-                    >
-                      <HelpCircle size={20} />
-                      <span>Leer de nuevo</span>
-                    </button>
-                    <button
-                      onClick={() => cambiarActividad("diferencias")}
-                      className="bg-teal-600 text-white px-6 py-3 rounded-full font-bold hover:bg-teal-700 transition-colors flex items-center gap-2"
-                    >
-                      <Award size={20} />
-                      <span>Volver a reglas</span>
-                    </button>
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           )}
 
           {/* Juego de cartas */}
           {actividad === "dictado" && (
-            <div className="text-center">
-              {!actividadCompletada ? (
-                <>
-                  <div className="flex justify-between mb-4">
-                    <div className="text-teal-800 font-bold">Carta {cartaActual + 1}/10</div>
-                    <div className="flex gap-1">
-                      {[...Array(10)].map((_, i) => (
-                        <div
-                          key={i}
-                          className={`w-4 h-4 rounded-full ${
-                            i < cartaActual ? (respuestas[i] ? "bg-green-500" : "bg-red-500") : "bg-gray-300"
-                          }`}
-                        />
-                      ))}
-                    </div>
-                  </div>
+            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-teal-50 to-blue-50 p-4">
+              <div className="max-w-5xl mx-auto">
+                {!actividadCompletada ? (
+                  <div className="space-y-8">
+                    {/* Header con progreso mejorado */}
+                    <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/20">
+                      <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-12 h-12 bg-gradient-to-r from-teal-500 to-purple-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            {cartaActual + 1}
+                          </div>
+                          <div>
+                            <h3 className="text-xl font-bold text-teal-800">Carta {cartaActual + 1}</h3>
+                            <p className="text-teal-600 text-sm">de 10 cartas</p>
+                          </div>
+                        </div>
 
-                  <h2 className="text-2xl font-bold text-teal-800 mb-6 flex items-center justify-center">
-                    <Shuffle className="w-6 h-6 mr-2" />
-                    ¡Elige la carta correcta!
-                  </h2>
-
-                  {cartasBarajadas.length > 0 && (
-                    <>
-                      <div className="text-8xl mb-6">{cartasBarajadas[cartaActual].emoji}</div>
-
-                      <div className="bg-purple-100 p-6 rounded-xl mb-6">
-                        <p className="text-xl text-purple-800 font-medium">{cartasBarajadas[cartaActual].pregunta}</p>
-                      </div>
-
-                      {!mostrarResultado && (
-                        <>
-                          <div className="flex justify-center gap-6 mb-6">
-                            {cartasBarajadas[cartaActual].opciones.map((opcion, index) => (
+                        {/* Barra de progreso visual */}
+                        <div className="flex flex-col items-end gap-2">
+                          <div className="flex gap-1.5">
+                            {[...Array(10)].map((_, i) => (
                               <div
-                                key={index}
-                                onClick={() => handleRespuestaCarta(opcion)}
-                                className="bg-white rounded-xl p-6 shadow-lg border-4 border-purple-300 hover:border-purple-500 transition-all cursor-pointer transform hover:scale-105 hover:shadow-xl"
-                              >
-                                <div className="text-4xl font-bold text-purple-800">{opcion}</div>
-                              </div>
+                                key={i}
+                                className={`w-3 h-3 rounded-full transition-all duration-300 ${i < cartaActual
+                                    ? (respuestas[i] ? "bg-green-400 shadow-lg shadow-green-200" : "bg-red-400 shadow-lg shadow-red-200")
+                                    : i === cartaActual
+                                      ? "bg-teal-400 animate-pulse shadow-lg shadow-teal-200"
+                                      : "bg-gray-200"
+                                  }`}
+                              />
                             ))}
                           </div>
-
-                          <button
-                            onClick={() => setMostrarPista(true)}
-                            className="bg-yellow-500 text-white px-6 py-3 rounded-full font-bold hover:bg-yellow-600 transition-colors cursor-pointer"
-                          >
-                            💡 Ver pista
-                          </button>
-
-                          {mostrarPista && (
-                            <div className="mt-4 bg-yellow-100 p-4 rounded-xl">
-                              <p className="text-yellow-800 font-bold">
-                                💡 Pista: {cartasBarajadas[cartaActual].pista}
-                              </p>
-                            </div>
-                          )}
-                        </>
-                      )}
-
-                      {mostrarResultado !== null && (
-                        <div className={`text-xl font-bold ${mostrarResultado ? "text-green-500" : "text-red-500"}`}>
-                          {mostrarResultado ? (
-                            <div className="flex items-center justify-center gap-2">
-                              <Check size={24} />
-                              <span>¡Correcto! La respuesta es "{cartasBarajadas[cartaActual].respuesta}"</span>
-                            </div>
-                          ) : (
-                            <div className="flex items-center justify-center gap-2">
-                              <X size={24} />
-                              <span>La respuesta correcta es "{cartasBarajadas[cartaActual].respuesta}"</span>
-                            </div>
-                          )}
+                          <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                            <div
+                              className="h-full bg-gradient-to-r from-teal-500 to-purple-500 rounded-full transition-all duration-500 ease-out"
+                              style={{ width: `${((cartaActual + 1) / 10) * 100}%` }}
+                            />
+                          </div>
                         </div>
-                      )}
-                    </>
-                  )}
-                </>
-              ) : (
-                <div className="text-center py-8">
-                  <div className="text-6xl mb-4">🎉</div>
-                  <h2 className="text-3xl font-bold text-teal-800 mb-4">¡Juego de Cartas Completado!</h2>
-                  <p className="text-xl text-teal-600 mb-8">
-                    Has elegido correctamente {respuestas.filter((r) => r).length} de 10 cartas
-                  </p>
+                      </div>
+                    </div>
 
-                  <div className="flex justify-center gap-4">
-                    <button
-                      onClick={() => cambiarActividad(actividad)}
-                      className="bg-purple-500 text-white px-6 py-3 rounded-full font-bold hover:bg-purple-600 transition-colors flex items-center gap-2"
-                    >
-                      <Shuffle size={20} />
-                      <span>Barajar de nuevo</span>
-                    </button>
-                    <button
-                      onClick={() => cambiarActividad("diferencias")}
-                      className="bg-teal-600 text-white px-6 py-3 rounded-full font-bold hover:bg-teal-700 transition-colors flex items-center gap-2"
-                    >
-                      <Award size={20} />
-                      <span>Volver a reglas</span>
-                    </button>
+                    {/* Título principal con animación */}
+                    <div className="text-center">
+                      <h2 className="text-4xl font-bold bg-gradient-to-r from-teal-600 to-purple-600 bg-clip-text text-transparent mb-4 flex items-center justify-center gap-3">
+                        <Shuffle className="w-10 h-10 text-teal-500 animate-pulse" />
+                        ¡Elige la carta correcta!
+                      </h2>
+                      <div className="w-32 h-1 bg-gradient-to-r from-teal-400 to-purple-400 rounded-full mx-auto"></div>
+                    </div>
+
+                    {cartasBarajadas.length > 0 && (
+                      <>
+                        {/* Emoji principal con animación */}
+                        <div className="flex justify-center mb-6">
+                          <div className="relative">
+                            <div className="absolute inset-0 bg-gradient-to-r from-teal-400/20 to-purple-400/20 rounded-full blur-2xl"></div>
+                            <div className="relative text-8xl md:text-9xl animate-pulse">
+                              {cartasBarajadas[cartaActual].emoji}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Pregunta principal mejorada */}
+                        <div className="flex justify-center mb-8">
+                          <div className="bg-white/70 backdrop-blur-sm rounded-3xl p-8 border border-purple-200/30 shadow-xl max-w-3xl">
+                            <div className="flex items-center gap-3 mb-4">
+                              <div className="w-8 h-8 bg-gradient-to-r from-purple-400 to-teal-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                ?
+                              </div>
+                              <h3 className="text-lg font-semibold text-purple-700">Pregunta</h3>
+                            </div>
+                            <p className="text-2xl font-bold text-purple-800 leading-relaxed text-center">
+                              {cartasBarajadas[cartaActual].pregunta}
+                            </p>
+                          </div>
+                        </div>
+
+                        {!mostrarResultado && (
+                          <>
+                            {/* Opciones de respuesta mejoradas */}
+                            <div className="grid grid-cols-2 sm:grid-cols-2 gap-6 mb-8 max-w-4xl mx-auto">
+                              {cartasBarajadas[cartaActual].opciones.map((opcion, index) => (
+                                <button
+                                  key={index}
+                                  onClick={() => handleRespuestaCarta(opcion)}
+                                  className="cursor-pointer group relative bg-white/80 backdrop-blur-sm rounded-2xl p-6 shadow-lg border-2 border-purple-200/50 hover:border-purple-400 hover:shadow-xl transition-all duration-300 transform hover:scale-105 active:scale-95"
+                                >
+                                  {/* Efecto de brillo en hover */}
+                                  <div className="absolute inset-0 bg-gradient-to-r from-teal-400/10 to-purple-400/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                                  <div className="relative z-10 text-3xl font-bold bg-gradient-to-r from-teal-600 to-purple-600 bg-clip-text text-transparent group-hover:scale-110 transition-transform duration-200">
+                                    {opcion}
+                                  </div>
+
+                                  {/* Indicador de hover */}
+                                  <div className="absolute top-2 right-2 w-3 h-3 bg-gradient-to-r from-teal-400 to-purple-400 rounded-full opacity-0 group-hover:opacity-100 animate-pulse transition-opacity duration-300"></div>
+                                </button>
+                              ))}
+                            </div>
+
+                            {/* Botón de pista mejorado */}
+                            <div className="flex justify-center">
+                              <button
+                                onClick={() => setMostrarPista(true)}
+                                className="group bg-gradient-to-r from-yellow-400 to-orange-400 hover:from-yellow-500 hover:to-orange-500 text-white px-8 py-4 rounded-2xl font-bold transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 flex items-center gap-3"
+                              >
+                                <span className="text-2xl group-hover:animate-bounce">💡</span>
+                                <span className="text-lg">Ver pista</span>
+                              </button>
+                            </div>
+
+                            {/* Pista mejorada */}
+                            {mostrarPista && (
+                              <div className="flex justify-center mt-6">
+                                <div className="bg-gradient-to-r from-yellow-100 to-orange-100 backdrop-blur-sm rounded-3xl p-8 border border-yellow-200/50 shadow-xl max-w-2xl transform animate-in slide-in-from-bottom-4 duration-500">
+                                  <div className="flex items-start gap-4">
+                                    <div className="text-3xl animate-bounce">💡</div>
+                                    <div>
+                                      <h4 className="text-lg font-semibold text-orange-700 mb-2">Pista</h4>
+                                      <p className="text-orange-800 font-medium text-lg leading-relaxed">
+                                        {cartasBarajadas[cartaActual].pista}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+
+                        {/* Resultado mejorado */}
+                        {mostrarResultado !== null && (
+                          <div className="flex justify-center">
+                            <div className={`flex flex-col items-center gap-4 px-8 py-6 rounded-3xl text-xl font-bold shadow-xl transform animate-in slide-in-from-bottom-4 duration-500 max-w-lg ${mostrarResultado
+                                ? "bg-gradient-to-r from-green-400 to-green-500 text-white shadow-green-300/50"
+                                : "bg-gradient-to-r from-red-400 to-red-500 text-white shadow-red-300/50"
+                              }`}>
+                              <div className="flex items-center gap-3">
+                                {mostrarResultado ? (
+                                  <>
+                                    <Check size={32} className="animate-bounce" />
+                                    <span className="text-2xl">¡Perfecto! 🎉</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <X size={32} className="animate-pulse" />
+                                    <span className="text-xl">¡Casi! 💪</span>
+                                  </>
+                                )}
+                              </div>
+
+                              <div className="text-center">
+                                <p className="text-lg opacity-90 mb-2">
+                                  {mostrarResultado ? "¡Correcto!" : "La respuesta correcta es:"}
+                                </p>
+                                <div className="bg-white/20 backdrop-blur-sm rounded-xl px-6 py-3">
+                                  <span className="text-2xl font-bold">
+                                    "{cartasBarajadas[cartaActual].respuesta}"
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </>
+                    )}
                   </div>
-                </div>
-              )}
+                ) : (
+                  /* Pantalla de completado mejorada */
+                  <div className="text-center py-12">
+                    <div className="relative mb-8">
+                      <div className="text-8xl mb-6 animate-bounce">🎉</div>
+                      <div className="absolute inset-0 flex justify-center items-center">
+                        <div className="w-32 h-32 bg-gradient-to-r from-teal-400/20 to-purple-400/20 rounded-full animate-ping"></div>
+                      </div>
+                    </div>
+
+                    <h2 className="text-5xl font-bold bg-gradient-to-r from-teal-600 to-purple-600 bg-clip-text text-transparent mb-6">
+                      ¡Juego Completado!
+                    </h2>
+
+                    {/* Estadísticas visuales mejoradas */}
+                    <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 mb-8 border border-white/30 shadow-xl max-w-md mx-auto">
+                      <div className="grid grid-cols-3 gap-6 mb-6">
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-green-600 mb-1">
+                            {respuestas.filter((r) => r).length}
+                          </div>
+                          <div className="text-sm text-gray-600 font-medium">Correctas</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-red-500 mb-1">
+                            {respuestas.filter((r) => !r).length}
+                          </div>
+                          <div className="text-sm text-gray-600 font-medium">Incorrectas</div>
+                        </div>
+                        <div className="text-center">
+                          <div className="text-3xl font-bold text-teal-600 mb-1">
+                            {Math.round((respuestas.filter((r) => r).length / 10) * 100)}%
+                          </div>
+                          <div className="text-sm text-gray-600 font-medium">Precisión</div>
+                        </div>
+                      </div>
+
+                      {/* Barra de logros */}
+                      <div className="mt-6">
+                        <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                          <div
+                            className="h-full bg-gradient-to-r from-teal-500 to-purple-500 rounded-full transition-all duration-1000 ease-out"
+                            style={{ width: `${(respuestas.filter((r) => r).length / 10) * 100}%` }}
+                          />
+                        </div>
+                        <p className="text-sm text-teal-600 mt-2 font-medium">
+                          {respuestas.filter((r) => r).length >= 8 ? "¡Maestro del dictado! 🌟" :
+                            respuestas.filter((r) => r).length >= 6 ? "¡Buen dominio! 👏" :
+                              "¡Sigue practicando! 💪"}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Botones de acción mejorados */}
+                    <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
+                      <button
+                        onClick={() => cambiarActividad(actividad)}
+                        className="group bg-gradient-to-r from-purple-500 to-purple-600 text-white px-8 py-4 rounded-2xl font-bold hover:from-purple-600 hover:to-purple-700 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                      >
+                        <Shuffle size={24} className="group-hover:rotate-12 transition-transform duration-300" />
+                        <span>Jugar de nuevo</span>
+                      </button>
+                      <button
+                        onClick={() => cambiarActividad("diferencias")}
+                        className="group bg-gradient-to-r from-teal-600 to-teal-700 text-white px-8 py-4 rounded-2xl font-bold hover:from-teal-700 hover:to-teal-800 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                      >
+                        <Award size={24} className="group-hover:rotate-12 transition-transform duration-300" />
+                        <span>Volver al menú</span>
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
@@ -1009,13 +1270,12 @@ export default function Unidad4() {
                             <div
                               key={`${rowIndex}-${colIndex}`}
                               className={`w-10 h-10 flex items-center justify-center font-bold text-lg rounded-md transition-all duration-200 select-none cursor-pointer transform hover:scale-110
-                        ${
-                          esCeldaPalabraEncontrada(rowIndex, colIndex)
-                            ? "bg-teal-400 text-white animate-pulse"
-                            : esCeldaSeleccionada(rowIndex, colIndex)
-                              ? "bg-yellow-300 text-teal-800"
-                              : "bg-white text-teal-800 shadow-sm"
-                        }`}
+                        ${esCeldaPalabraEncontrada(rowIndex, colIndex)
+                                  ? "bg-teal-400 text-white animate-pulse"
+                                  : esCeldaSeleccionada(rowIndex, colIndex)
+                                    ? "bg-yellow-300 text-teal-800"
+                                    : "bg-white text-teal-800 shadow-sm"
+                                }`}
                               onMouseDown={() => handleCeldaMouseDown(rowIndex, colIndex)}
                               onMouseEnter={() => handleCeldaMouseEnter(rowIndex, colIndex)}
                               onMouseUp={handleCeldaMouseUp}
@@ -1037,11 +1297,10 @@ export default function Unidad4() {
                           return (
                             <div
                               key={palabra}
-                              className={`px-4 py-2 rounded-full text-md font-bold transition-all duration-300 flex items-center justify-between ${
-                                palabrasEncontradas.includes(palabra)
+                              className={`px-4 py-2 rounded-full text-md font-bold transition-all duration-300 flex items-center justify-between ${palabrasEncontradas.includes(palabra)
                                   ? "bg-teal-400 text-white line-through transform scale-95"
                                   : "bg-white text-teal-800 shadow-sm hover:shadow-md hover:scale-105"
-                              }`}
+                                }`}
                             >
                               <span>
                                 {palabrasEncontradas.includes(palabra) ? "✓ " : ""} {palabra}

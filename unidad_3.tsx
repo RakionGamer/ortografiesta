@@ -294,7 +294,7 @@ export default function Unidad3() {
                     });
                 }
             }
-        }, 2000)
+        }, 7000)
     }
 
     const verificarAdivinanza = () => {
@@ -488,13 +488,13 @@ export default function Unidad3() {
 
                     if (palabrasEncontradas.length + 1 === palabrasAcentuadas.length) {
                         setActividadCompletada(true)
-                            updateActivity("sopa", {
-                                attempts: 1,
-                                lastScore: 100,
-                                completed: true,
-                                stars: 1,
-                            });
-                        
+                        updateActivity("sopa", {
+                            attempts: 1,
+                            lastScore: 100,
+                            completed: true,
+                            stars: 1,
+                        });
+
                     }
                 }
             }
@@ -670,258 +670,487 @@ export default function Unidad3() {
 
                     {/* Arrastrar tildes */}
                     {actividad === "completar" && (
-                        <div className="text-center">
-                            {!actividadCompletada ? (
-                                <>
-                                    <div className="flex justify-between mb-4">
-                                        <div className="text-orange-800 font-bold">Palabra {preguntaActual + 1}/10</div>
-                                        <div className="flex gap-1">
-                                            {[...Array(10)].map((_, i) => (
-                                                <div
-                                                    key={i}
-                                                    className={`w-4 h-4 rounded-full ${i < preguntaActual ? (respuestas[i] ? "bg-green-500" : "bg-red-500") : "bg-gray-300"
+                        <div className="min-h-screen bg-gradient-to-br from-orange-50 via-red-50 to-yellow-50 p-4">
+                            <div className="max-w-5xl mx-auto">
+                                {!actividadCompletada ? (
+                                    <div className="space-y-8">
+                                        {/* Header con progreso mejorado */}
+                                        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/20">
+                                            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-12 h-12 bg-gradient-to-r from-orange-500 to-red-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                                        {preguntaActual + 1}
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-xl font-bold text-orange-800">Palabra {preguntaActual + 1}</h3>
+                                                        <p className="text-orange-600 text-sm">de 10 palabras</p>
+                                                    </div>
+                                                </div>
+
+                                                {/* Barra de progreso visual */}
+                                                <div className="flex flex-col items-end gap-2">
+                                                    <div className="flex gap-1.5">
+                                                        {[...Array(10)].map((_, i) => (
+                                                            <div
+                                                                key={i}
+                                                                className={`w-3 h-3 rounded-full transition-all duration-300 ${i < preguntaActual
+                                                                        ? (respuestas[i] ? "bg-green-400 shadow-lg shadow-green-200" : "bg-red-400 shadow-lg shadow-red-200")
+                                                                        : i === preguntaActual
+                                                                            ? "bg-orange-400 animate-pulse shadow-lg shadow-orange-200"
+                                                                            : "bg-gray-200"
+                                                                    }`}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                                        <div
+                                                            className="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full transition-all duration-500 ease-out"
+                                                            style={{ width: `${((preguntaActual + 1) / 10) * 100}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Título principal con animación */}
+                                        <div className="text-center">
+                                            <h2 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-4 flex items-center justify-center gap-3">
+                                                <Target className="w-10 h-10 text-orange-500 animate-pulse" />
+                                                ¡Coloca la tilde en la sílaba correcta!
+                                            </h2>
+                                            <div className="w-32 h-1 bg-gradient-to-r from-orange-400 to-red-400 rounded-full mx-auto"></div>
+                                        </div>
+
+                                        {/* Emoji principal con animación */}
+                                        <div className="flex justify-center mb-6">
+                                            <div className="relative">
+                                                <div className="absolute inset-0 bg-gradient-to-r from-orange-400/20 to-red-400/20 rounded-full blur-2xl animate-pulse"></div>
+                                                <div className="relative text-8xl md:text-9xl animate-bounce">
+                                                    {palabrasArrastrar[preguntaActual].emoji}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Información del tipo de palabra */}
+                                        <div className="flex justify-center">
+                                            <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-red-200/30 shadow-lg max-w-sm">
+                                                <div className="flex items-center gap-3 mb-2">
+                                                    <div className="w-8 h-8 bg-gradient-to-r from-red-400 to-orange-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                                                        T
+                                                    </div>
+                                                    <h3 className="text-lg font-semibold text-red-700">Tipo de palabra</h3>
+                                                </div>
+                                                <p className="text-2xl font-bold text-red-800 text-center">
+                                                    {palabrasArrastrar[preguntaActual].tipo}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Sílabas interactivas mejoradas */}
+                                        <div className="flex flex-wrap justify-center items-center gap-4 px-4">
+                                            {palabrasArrastrar[preguntaActual].silabas.map((silaba, index) => (
+                                                <button
+                                                    key={index}
+                                                    onClick={() => handleSilabaClick(index)}
+                                                    disabled={tildeColocada}
+                                                    className={`group relative px-8 py-6 text-4xl md:text-5xl font-bold rounded-2xl border-4 transition-all duration-300 transform hover:scale-105 ${silabaSeleccionada === index
+                                                            ? mostrarResultado
+                                                                ? "bg-gradient-to-br from-green-400 to-green-500 text-white border-green-600 scale-110 shadow-2xl shadow-green-300/50 animate-pulse"
+                                                                : "bg-gradient-to-br from-red-400 to-red-500 text-white border-red-600 scale-110 shadow-2xl shadow-red-300/50 animate-pulse"
+                                                            : tildeColocada
+                                                                ? "bg-gray-100 text-gray-400 border-gray-200 scale-95"
+                                                                : "bg-white hover:bg-gradient-to-br hover:from-orange-50 hover:to-red-50 text-orange-800 border-orange-300 hover:border-orange-400 shadow-lg hover:shadow-xl cursor-pointer active:scale-95"
                                                         }`}
-                                                />
+                                                >
+                                                    {/* Efecto de brillo en hover */}
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-orange-400/10 to-red-400/10 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+
+                                                    <span className="relative z-10">{silaba}</span>
+
+                                                    {/* Tilde animada */}
+                                                    {silabaSeleccionada === index && (
+                                                        <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
+                                                            <span className="text-5xl text-red-600 animate-bounce drop-shadow-lg">
+                                                                ´
+                                                            </span>
+                                                            <div className="absolute inset-0 text-5xl text-red-300 animate-ping opacity-75">
+                                                                ´
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </button>
                                             ))}
                                         </div>
+
+                                        {/* Instrucción de ayuda */}
+                                        {!tildeColocada && (
+                                            <div className="flex justify-center">
+                                                <div className="bg-gradient-to-r from-yellow-100 to-orange-100 backdrop-blur-sm rounded-2xl p-6 border border-yellow-200/50 shadow-lg max-w-lg">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="text-3xl animate-bounce">💡</div>
+                                                        <p className="text-orange-800 font-medium text-lg">
+                                                            Haz clic en la sílaba que suena más fuerte para colocar la tilde
+                                                        </p>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Resultado mejorado */}
+                                        {mostrarResultado !== null && (
+                                            <div className="flex justify-center">
+                                                <div className={`flex flex-col items-center gap-4 px-8 py-6 rounded-3xl text-xl font-bold shadow-xl transform animate-in slide-in-from-bottom-4 duration-500 max-w-md ${mostrarResultado
+                                                        ? "bg-gradient-to-r from-green-400 to-green-500 text-white shadow-green-300/50"
+                                                        : "bg-gradient-to-r from-red-400 to-red-500 text-white shadow-red-300/50"
+                                                    }`}>
+                                                    <div className="flex items-center gap-3">
+                                                        {mostrarResultado ? (
+                                                            <>
+                                                                <Check size={32} className="animate-bounce" />
+                                                                <span className="text-2xl">¡Perfecto! 🎉</span>
+                                                            </>
+                                                        ) : (
+                                                            <>
+                                                                <X size={32} className="animate-pulse" />
+                                                                <span className="text-xl">¡Casi! 💪</span>
+                                                            </>
+                                                        )}
+                                                    </div>
+
+                                                    <div className="text-center">
+                                                        <p className="text-lg opacity-90 mb-2">
+                                                            {mostrarResultado ? "La tilde va en:" : "La tilde correcta va en:"}
+                                                        </p>
+                                                        <div className="bg-white/20 backdrop-blur-sm rounded-xl px-4 py-2">
+                                                            <span className="text-2xl font-bold">
+                                                                "{palabrasArrastrar[preguntaActual].silabas[palabrasArrastrar[preguntaActual].correcta]}"
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
+                                ) : (
+                                    /* Pantalla de completado mejorada */
+                                    <div className="text-center py-12">
+                                        <div className="relative mb-8">
+                                            <div className="text-8xl mb-6 animate-bounce">🎉</div>
+                                            <div className="absolute inset-0 flex justify-center items-center">
+                                                <div className="w-32 h-32 bg-gradient-to-r from-orange-400/20 to-red-400/20 rounded-full animate-ping"></div>
+                                            </div>
+                                        </div>
 
-                                    <h2 className="text-2xl font-bold text-orange-800 mb-4 flex items-center justify-center">
-                                        <Target className="w-6 h-6 mr-2" />
-                                        ¡Coloca la tilde en la sílaba correcta!
-                                    </h2>
+                                        <h2 className="text-5xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent mb-6">
+                                            ¡Actividad Completada!
+                                        </h2>
 
-                                    <div className="text-6xl mb-4">{palabrasArrastrar[preguntaActual].emoji}</div>
-
-                                    <div className="bg-red-100 p-4 rounded-xl mb-6">
-                                        <p className="text-lg text-red-700 mb-2">
-                                            Tipo: <span className="font-bold">{palabrasArrastrar[preguntaActual].tipo}</span>
-                                        </p>
-                                    </div>
-
-                                    <div className="flex justify-center items-center gap-4 mb-8">
-                                        {palabrasArrastrar[preguntaActual].silabas.map((silaba, index) => (
-                                            <button
-                                                key={index}
-                                                onClick={() => handleSilabaClick(index)}
-                                                disabled={tildeColocada}
-                                                className={`relative px-6 py-4 text-3xl font-bold rounded-xl border-4 transition-all cursor-pointer ${silabaSeleccionada === index
-                                                    ? mostrarResultado
-                                                        ? "bg-green-400 text-white border-green-600 transform scale-110"
-                                                        : "bg-red-400 text-white border-red-600 transform scale-110"
-                                                    : tildeColocada
-                                                        ? "bg-gray-200 text-gray-500 border-gray-300"
-                                                        : "bg-white text-orange-800 border-orange-300 hover:bg-orange-100"
-                                                    }`}
-                                            >
-                                                {silaba}
-                                                {silabaSeleccionada === index && (
-                                                    <span className="absolute -top-2 left-1/2 transform -translate-x-1/2 text-4xl text-red-600">
-                                                        ´
-                                                    </span>
-                                                )}
-                                            </button>
-                                        ))}
-                                    </div>
-
-                                    {!tildeColocada && (
-                                        <div className="bg-yellow-100 p-4 rounded-xl mb-4">
-                                            <p className="text-orange-800">
-                                                💡 Haz clic en la sílaba que suena más fuerte para colocar la tilde
+                                        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 mb-8 border border-white/30 shadow-xl max-w-md mx-auto">
+                                            <div className="text-6xl font-bold text-orange-800 mb-2">
+                                                {respuestas.filter((r) => r).length}/10
+                                            </div>
+                                            <p className="text-xl text-orange-600 font-medium">
+                                                tildes correctas
                                             </p>
-                                        </div>
-                                    )}
 
-                                    {mostrarResultado !== null && (
-                                        <div className={`text-xl font-bold ${mostrarResultado ? "text-green-500" : "text-red-500"}`}>
-                                            {mostrarResultado ? (
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <Check size={24} />
-                                                    <span>
-                                                        ¡Perfecto! La tilde va en "
-                                                        {palabrasArrastrar[preguntaActual].silabas[palabrasArrastrar[preguntaActual].correcta]}"
-                                                    </span>
+                                            {/* Barra de logros */}
+                                            <div className="mt-6">
+                                                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                                                    <div
+                                                        className="h-full bg-gradient-to-r from-orange-500 to-red-500 rounded-full transition-all duration-1000 ease-out"
+                                                        style={{ width: `${(respuestas.filter((r) => r).length / 10) * 100}%` }}
+                                                    />
                                                 </div>
-                                            ) : (
-                                                <div className="flex items-center justify-center gap-2">
-                                                    <X size={24} />
-                                                    <span>
-                                                        La tilde va en "
-                                                        {palabrasArrastrar[preguntaActual].silabas[palabrasArrastrar[preguntaActual].correcta]}"
-                                                    </span>
-                                                </div>
-                                            )}
+                                                <p className="text-sm text-orange-600 mt-2 font-medium">
+                                                    {respuestas.filter((r) => r).length >= 8 ? "¡Maestro de las tildes! 🌟" :
+                                                        respuestas.filter((r) => r).length >= 6 ? "¡Buen dominio! 👏" :
+                                                            "¡Sigue practicando! 💪"}
+                                                </p>
+                                            </div>
                                         </div>
-                                    )}
-                                </>
-                            ) : (
-                                <div className="text-center py-8">
-                                    <div className="text-6xl mb-4">🎉</div>
-                                    <h2 className="text-3xl font-bold text-orange-800 mb-4">¡Actividad Completada!</h2>
-                                    <p className="text-xl text-orange-600 mb-8">
-                                        Has colocado correctamente {respuestas.filter((r) => r).length} de 10 tildes
-                                    </p>
 
-                                    <div className="flex justify-center gap-4">
-                                        <button
-                                            onClick={() => cambiarActividad(actividad)}
-                                            className="bg-red-500 text-white px-6 py-3 rounded-full font-bold hover:bg-red-600 transition-colors flex items-center gap-2"
-                                        >
-                                            <HelpCircle size={20} />
-                                            <span>Jugar de nuevo</span>
-                                        </button>
-                                        <button
-                                            onClick={() => cambiarActividad("diferencias")}
-                                            className="bg-orange-600 text-white px-6 py-3 rounded-full font-bold hover:bg-orange-700 transition-colors flex items-center gap-2"
-                                        >
-                                            <Award size={20} />
-                                            <span>Volver a reglas</span>
-                                        </button>
+                                        <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
+                                            <button
+                                                onClick={() => cambiarActividad(actividad)}
+                                                className="group bg-gradient-to-r from-red-500 to-red-600 text-white px-8 py-4 rounded-2xl font-bold hover:from-red-600 hover:to-red-700 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                                            >
+                                                <HelpCircle size={24} className="group-hover:rotate-12 transition-transform duration-300" />
+                                                <span>Jugar de nuevo</span>
+                                            </button>
+                                            <button
+                                                onClick={() => cambiarActividad("diferencias")}
+                                                className="group bg-gradient-to-r from-orange-600 to-orange-700 text-white px-8 py-4 rounded-2xl font-bold hover:from-orange-700 hover:to-orange-800 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                                            >
+                                                <Award size={24} className="group-hover:rotate-12 transition-transform duration-300" />
+                                                <span>Volver a reglas</span>
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     )}
 
                     {/* Adivinanzas */}
                     {actividad === "dictado" && (
-                        <div className="text-center">
-                            {!actividadCompletada ? (
-                                <>
-                                    <div className="flex justify-between mb-4">
-                                        <div className="text-orange-800 font-bold">Adivinanza {preguntaActual + 1}/6</div>
-                                        <div className="flex gap-1">
-                                            {[...Array(6)].map((_, i) => (
-                                                <div
-                                                    key={i}
-                                                    className={`w-4 h-4 rounded-full ${i < preguntaActual ? (respuestas[i] ? "bg-green-500" : "bg-red-500") : "bg-gray-300"
-                                                        }`}
-                                                />
-                                            ))}
+                        <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 p-4">
+                            <div className="max-w-4xl mx-auto">
+                                {!actividadCompletada ? (
+                                    <div className="space-y-8">
+                                        {/* Header con progreso mejorado */}
+                                        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/20">
+                                            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                                        {preguntaActual + 1}
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-xl font-bold text-blue-800">Adivinanza {preguntaActual + 1}</h3>
+                                                        <p className="text-blue-600 text-sm">de 6 adivinanzas</p>
+                                                    </div>
+                                                </div>
+
+                                                {/* Barra de progreso visual */}
+                                                <div className="flex flex-col items-end gap-2">
+                                                    <div className="flex gap-1.5">
+                                                        {[...Array(6)].map((_, i) => (
+                                                            <div
+                                                                key={i}
+                                                                className={`w-3 h-3 rounded-full transition-all duration-300 ${i < preguntaActual
+                                                                        ? (respuestas[i] ? "bg-green-400 shadow-lg shadow-green-200" : "bg-red-400 shadow-lg shadow-red-200")
+                                                                        : i === preguntaActual
+                                                                            ? "bg-blue-400 animate-pulse shadow-lg shadow-blue-200"
+                                                                            : "bg-gray-200"
+                                                                    }`}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                                        <div
+                                                            className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-500 ease-out"
+                                                            style={{ width: `${((preguntaActual + 1) / 6) * 100}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <h2 className="text-2xl font-bold text-orange-800 mb-6">🤔 ¡Adivina la palabra con tilde!</h2>
+                                        {/* Título principal con emoji animado */}
+                                        <div className="text-center">
+                                            <h2 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4 flex items-center justify-center gap-3">
+                                                ¡Adivina la palabra con tilde!
+                                            </h2>
+                                            <div className="w-32 h-1 bg-gradient-to-r from-blue-400 to-indigo-400 rounded-full mx-auto"></div>
+                                        </div>
 
-                                    <div className="text-8xl mb-6">{adivinanzas[preguntaActual].emoji}</div>
-
-                                    <div className="bg-blue-100 p-6 rounded-xl mb-6">
-                                        <p className="text-xl text-blue-800 font-medium">{adivinanzas[preguntaActual].pregunta}</p>
-                                    </div>
-
-                                    {!mostrarRespuesta && (
-                                        <>
-                                            <div className="mb-6">
-                                                <input
-                                                    type="text"
-                                                    value={respuestaUsuario}
-                                                    onChange={(e) => setRespuestaUsuario(e.target.value)}
-                                                    placeholder="Escribe tu respuesta aquí..."
-                                                    className="w-full max-w-md px-4 py-3 text-xl text-center rounded-xl border-2 border-orange-300 focus:border-orange-500 focus:outline-none"
-                                                    disabled={mostrarResultado !== null}
-                                                />
+                                        {/* Emoji principal con animación */}
+                                        <div className="flex justify-center mb-1">
+                                            <div className="relative">
+                                                <div className="absolute inset-0 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full blur-3xl animate-pulse"></div>
+                                                <div className="relative text-xl md:text-[10rem] w-content animate-bounce hover:scale-110 transition-transform duration-300 cursor-pointer">
+                                                    {adivinanzas[preguntaActual].emoji}
+                                                </div>
                                             </div>
+                                        </div>
 
-                                            <div className="flex justify-center gap-4 mb-6">
-                                                <button
-                                                    onClick={verificarAdivinanza}
-                                                    className="bg-blue-500 text-white px-6 py-3 rounded-full font-bold hover:bg-blue-600 transition-colors cursor-pointer"
-                                                    disabled={respuestaUsuario.trim() === "" || mostrarResultado !== null}
-                                                >
-                                                    Comprobar
-                                                </button>
-
-                                                {pistaActual < adivinanzas[preguntaActual].pistas.length && (
-                                                    <button
-                                                        onClick={() => setPistaActual((prev) => prev + 1)}
-                                                        className="bg-yellow-500 text-white px-6 py-3 rounded-full font-bold hover:bg-yellow-600 transition-colors cursor-pointer"
-                                                    >
-                                                        💡 Pista
-                                                    </button>
-                                                )}
-                                            </div>
-
-                                            {pistaActual > 0 && (
-                                                <div className="bg-yellow-100 p-4 rounded-xl mb-4">
-                                                    <p className="text-yellow-800 font-bold">
-                                                        💡 Pista: {adivinanzas[preguntaActual].pistas[pistaActual - 1]}
+                                        {/* Pregunta de la adivinanza mejorada */}
+                                        <div className="relative">
+                                            <div className="inset-0 bg-gradient-to-r from-blue-400/10 to-indigo-400/10 rounded-3xl blur-xl"></div>
+                                            <div className="flex justify-center relative bg-white/80 backdrop-blur-sm rounded-3xl p-8 border border-blue-200/30 shadow-xl">
+                                                <div className="flex items-start justify-center gap-4">
+                                                    <div className="text-3xl">❓</div>
+                                                    <p className="text-2xl text-blue-800 font-medium leading-relaxed flex-1">
+                                                        {adivinanzas[preguntaActual].pregunta}
                                                     </p>
                                                 </div>
-                                            )}
-                                        </>
-                                    )}
+                                            </div>
+                                        </div>
 
-                                    {mostrarRespuesta && (
-                                        <div className="bg-green-100 p-6 rounded-xl mb-6">
-                                            <div
-                                                className={`text-2xl font-bold mb-4 ${mostrarResultado ? "text-green-600" : "text-red-600"}`}
-                                            >
-                                                {mostrarResultado ? (
-                                                    <div className="flex items-center justify-center gap-2">
-                                                        <Check size={32} />
-                                                        <span>¡Correcto!</span>
+                                        {!mostrarRespuesta && (
+                                            <div className="space-y-6">
+                                                {/* Input mejorado */}
+                                                <div className="flex justify-center">
+                                                    <div className="relative w-full max-w-lg">
+                                                        <input
+                                                            type="text"
+                                                            value={respuestaUsuario}
+                                                            onChange={(e) => setRespuestaUsuario(e.target.value)}
+                                                            placeholder="Escribe tu respuesta aquí..."
+                                                            className="w-full px-6 py-4 text-2xl text-black text-center rounded-2xl border-3 border-blue-300 focus:border-blue-500 focus:outline-none bg-white/90 shadow-lg transition-all duration-300 focus:shadow-xl focus:scale-105"
+                                                            disabled={mostrarResultado !== null}
+                                                        />
+                                                        <div className="absolute inset-0 bg-gradient-to-r from-blue-400/5 to-indigo-400/5 rounded-2xl pointer-events-none"></div>
                                                     </div>
-                                                ) : (
-                                                    <div className="flex items-center justify-center gap-2">
-                                                        <X size={32} />
-                                                        <span>¡Casi!</span>
+                                                </div>
+
+                                                {/* Botones de acción mejorados */}
+                                                <div className="flex flex-col sm:flex-row justify-center gap-4">
+                                                    <button
+                                                        onClick={verificarAdivinanza}
+                                                        className="cursor-pointer group bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                                                        disabled={respuestaUsuario.trim() === "" || mostrarResultado !== null}
+                                                    >
+                                                        <Check size={24} className="group-hover:rotate-12 transition-transform duration-300" />
+                                                        <span>Comprobar</span>
+                                                    </button>
+
+                                                    {pistaActual < adivinanzas[preguntaActual].pistas.length && (
+                                                        <button
+                                                            onClick={() => setPistaActual((prev) => prev + 1)}
+                                                            className="cursor-pointer group bg-gradient-to-r from-yellow-500 to-amber-500 text-white px-8 py-4 rounded-2xl font-bold hover:from-yellow-600 hover:to-amber-600 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                                                        >
+                                                            <span className="text-2xl group-hover:animate-bounce">💡</span>
+                                                            <span>Pista</span>
+                                                        </button>
+                                                    )}
+                                                </div>
+
+                                                {/* Pista mostrada */}
+                                                {pistaActual > 0 && (
+                                                    <div className="flex justify-center animate-in slide-in-from-top-4  duration-500">
+                                                        <div className="bg-gradient-to-r from-yellow-100 to-amber-100 backdrop-blur-sm rounded-2xl p-6 border border-yellow-200/50 shadow-lg max-w-2xl">
+                                                            <div className="flex items-center gap-3">
+                                                                <div className="text-3xl animate-pulse">💡</div>
+                                                                <div>
+                                                                    <h4 className="text-lg font-bold text-yellow-800 mb-1">Pista:</h4>
+                                                                    <p className="text-yellow-800 font-medium text-lg">
+                                                                        {adivinanzas[preguntaActual].pistas[pistaActual - 1]}
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 )}
                                             </div>
+                                        )}
 
-                                            <p className="text-xl text-green-800 mb-4">
-                                                La respuesta es: <span className="font-bold">{adivinanzas[preguntaActual].respuesta}</span>
+                                        {/* Respuesta revelada mejorada */}
+                                        {mostrarRespuesta && (
+                                            <div className="space-y-6 animate-in slide-in-from-bottom-6 duration-700">
+                                                <div className="relative">
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-green-400/10 to-emerald-400/10 rounded-3xl blur-xl"></div>
+                                                    <div className="relative bg-white/90 backdrop-blur-sm rounded-3xl p-8 border border-green-200/30 shadow-xl">
+
+                                                        {/* Resultado del usuario */}
+                                                        <div className={`text-center mb-6 ${mostrarResultado ? "text-green-600" : "text-red-600"}`}>
+                                                            <div className="flex items-center justify-center gap-3 mb-4">
+                                                                {mostrarResultado ? (
+                                                                    <>
+                                                                        <Check size={40} className="animate-pulse" />
+                                                                        <span className="text-3xl font-bold">¡Correcto! 🎉</span>
+                                                                    </>
+                                                                ) : (
+                                                                    <>
+                                                                        <X size={40} className="animate-pulse" />
+                                                                        <span className="text-3xl font-bold">¡Casi! 💪</span>
+                                                                    </>
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Respuesta correcta */}
+                                                        <div className="text-center mb-6">
+                                                            <p className="text-xl text-green-800 mb-4">
+                                                                La respuesta es:
+                                                            </p>
+                                                            <div className="bg-gradient-to-r from-green-100 to-emerald-100 rounded-2xl p-4 inline-block">
+                                                                <span className="text-3xl font-bold text-green-800">
+                                                                    {adivinanzas[preguntaActual].respuesta}
+                                                                </span>
+                                                            </div>
+                                                        </div>
+
+                                                        {/* Sílabas con acentuación */}
+                                                        <div className="flex justify-center items-center gap-3 mb-6 flex-wrap">
+                                                            {adivinanzas[preguntaActual].silabas.map((silaba, index) => (
+                                                                <div
+                                                                    key={index}
+                                                                    className={`px-4 py-3 rounded-xl text-xl font-bold border-3 transition-all duration-300 ${index === adivinanzas[preguntaActual].acentuada
+                                                                            ? "bg-gradient-to-br from-green-400 to-green-500 text-white border-green-600 shadow-lg shadow-green-300/50 transform scale-110"
+                                                                            : "bg-white text-green-800 border-green-300 hover:border-green-400"
+                                                                        }`}
+                                                                >
+                                                                    {silaba}
+                                                                    {index === adivinanzas[preguntaActual].acentuada && (
+                                                                        <div className="text-xs text-green-100 mt-1 font-normal">
+                                                                            ← sílaba tónica
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+
+                                                        {/* Botón de sonido mejorado */}
+                                                        <div className="flex justify-center">
+                                                            <button
+                                                                onClick={() => reproducirSonido(adivinanzas[preguntaActual].respuesta)}
+                                                                className="group bg-gradient-to-r from-green-500 to-emerald-500 text-white p-4 rounded-full hover:from-green-600 hover:to-emerald-600 transition-all duration-300 shadow-lg hover:shadow-xl transform hover:scale-110 active:scale-95"
+                                                            >
+                                                                <Volume2 size={24} className="group-hover:animate-pulse" />
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    /* Pantalla de completado mejorada */
+                                    <div className="text-center py-12">
+                                        <div className="relative mb-8">
+                                            <div className="text-8xl mb-6 animate-bounce">🎉</div>
+                                            <div className="absolute inset-0 flex justify-center items-center">
+                                                <div className="w-32 h-32 bg-gradient-to-r from-blue-400/20 to-indigo-400/20 rounded-full animate-ping"></div>
+                                            </div>
+                                        </div>
+
+                                        <h2 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-6">
+                                            ¡Adivinanzas Completadas!
+                                        </h2>
+
+                                        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 mb-8 border border-white/30 shadow-xl max-w-md mx-auto">
+                                            <div className="text-6xl font-bold text-blue-800 mb-2">
+                                                {respuestas.filter((r) => r).length}/6
+                                            </div>
+                                            <p className="text-xl text-blue-600 font-medium">
+                                                adivinanzas correctas
                                             </p>
 
-                                            <div className="flex justify-center items-center gap-2 mb-4">
-                                                {adivinanzas[preguntaActual].silabas.map((silaba, index) => (
+                                            {/* Barra de logros */}
+                                            <div className="mt-6">
+                                                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
                                                     <div
-                                                        key={index}
-                                                        className={`px-3 py-2 rounded-lg text-lg font-bold border-2 ${index === adivinanzas[preguntaActual].acentuada
-                                                            ? "bg-green-400 text-white border-green-600"
-                                                            : "bg-white text-green-800 border-green-300"
-                                                            }`}
-                                                    >
-                                                        {silaba}
-                                                    </div>
-                                                ))}
+                                                        className="h-full bg-gradient-to-r from-blue-500 to-indigo-500 rounded-full transition-all duration-1000 ease-out"
+                                                        style={{ width: `${(respuestas.filter((r) => r).length / 6) * 100}%` }}
+                                                    />
+                                                </div>
+                                                <p className="text-sm text-blue-600 mt-2 font-medium">
+                                                    {respuestas.filter((r) => r).length >= 5 ? "¡Detective de palabras! 🕵️" :
+                                                        respuestas.filter((r) => r).length >= 3 ? "¡Buen trabajo! 👏" :
+                                                            "¡Sigue adivinando! 🧩"}
+                                                </p>
                                             </div>
+                                        </div>
 
+                                        <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
                                             <button
-                                                onClick={() => reproducirSonido(adivinanzas[preguntaActual].respuesta)}
-                                                className="bg-green-500 text-white p-2 rounded-full hover:bg-green-600 transition-colors cursor-pointer"
+                                                onClick={() => cambiarActividad(actividad)}
+                                                className="group bg-gradient-to-r from-blue-500 to-blue-600 text-white px-8 py-4 rounded-2xl font-bold hover:from-blue-600 hover:to-blue-700 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
                                             >
-                                                <Volume2 size={16} />
+                                                <HelpCircle size={24} className="group-hover:rotate-12 transition-transform duration-300" />
+                                                <span>Jugar de nuevo</span>
+                                            </button>
+                                            <button
+                                                onClick={() => cambiarActividad("diferencias")}
+                                                className="group bg-gradient-to-r from-indigo-600 to-indigo-700 text-white px-8 py-4 rounded-2xl font-bold hover:from-indigo-700 hover:to-indigo-800 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                                            >
+                                                <Award size={24} className="group-hover:rotate-12 transition-transform duration-300" />
+                                                <span>Volver a reglas</span>
                                             </button>
                                         </div>
-                                    )}
-                                </>
-                            ) : (
-                                <div className="text-center py-8">
-                                    <div className="text-6xl mb-4">🎉</div>
-                                    <h2 className="text-3xl font-bold text-orange-800 mb-4">¡Adivinanzas Completadas!</h2>
-                                    <p className="text-xl text-orange-600 mb-8">
-                                        Has adivinado {respuestas.filter((r) => r).length} de 6 palabras correctamente
-                                    </p>
-
-                                    <div className="flex justify-center gap-4">
-                                        <button
-                                            onClick={() => cambiarActividad(actividad)}
-                                            className="bg-blue-500 text-white px-6 py-3 rounded-full font-bold hover:bg-blue-600 transition-colors flex items-center gap-2"
-                                        >
-                                            <HelpCircle size={20} />
-                                            <span>Jugar de nuevo</span>
-                                        </button>
-                                        <button
-                                            onClick={() => cambiarActividad("diferencias")}
-                                            className="bg-orange-600 text-white px-6 py-3 rounded-full font-bold hover:bg-orange-700 transition-colors flex items-center gap-2"
-                                        >
-                                            <Award size={20} />
-                                            <span>Volver a reglas</span>
-                                        </button>
                                     </div>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     )}
 
