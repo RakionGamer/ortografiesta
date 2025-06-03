@@ -584,7 +584,7 @@ export default function Unidad4() {
 
             if (progress && progress.activities) {
               updateActivity("sopa", {
-                attempts: (progress.activities?.sopa?.attempts ?? 0) + 1,
+                attempts: 1,
                 lastScore: 100,
                 completed: true,
                 stars: 1,

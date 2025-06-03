@@ -38,10 +38,7 @@ export interface Medal {
 }
 
 export interface UserProgress {
-  sopa: any
-  diferencias: any
-  dictado: any
-  completar: any
+
   activities: UserProgress | null
   totalPoints: number
   totalStars: number
