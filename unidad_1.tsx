@@ -113,14 +113,6 @@ export default function Unidad1() {
   const unitId = "unidad1";
 
 
-  const MAX_ERRORS_BEFORE_PENALTY = 3
-  const ERROR_PENALTY_POINTS = 10
-  const [errors, setErrors] = useState(0)
-
-
-
-
-
   useEffect(() => {
     if (progress && unitId && progress.units[unitId]) {
       const unitActivities = progress.units[unitId].activities;
@@ -489,9 +481,6 @@ export default function Unidad1() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-300 to-yellow-200 overflow-hidden relative">
-
-
-
       <div className="container mx-auto px-4 py-8 relative z-10">
         {/* Encabezado */}
         <header className="p-4 flex justify-between items-center relative z-10 mb-8">
@@ -502,16 +491,11 @@ export default function Unidad1() {
             <ArrowLeft className="w-5 h-5" />
             <span>Volver</span>
           </button>
-
           <h1 className="text-3xl md:text-4xl font-bold text-center text-purple-800">Unidad 1: Sonidos y Letras</h1>
-
           <div className="flex items-center gap-2">
-            
-
             <div className="text-3xl bg-white p-2 rounded-full shadow-md">
               {selectedAvatar}
             </div>
-
             {/* Sound controls */}
             <button
               onClick={toggleMute}

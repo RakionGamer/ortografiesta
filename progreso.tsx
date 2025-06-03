@@ -44,8 +44,17 @@ export default function Progreso() {
             default: return activityType;
         }
     }
+    if (unitId === "unidad3") {
+        switch (activityType) {
+            case "diferencias": return "Reglas de Acentuación";
+            case "completar": return "Arrastrar Tildes";
+            case "dictado": return "Adivinanzas con Tildes";
+            case "sopa": return "Sopa de Palabras";
+            default: return activityType;
+        }
+    }
 
-  
+
     switch (activityType) {
         case "diferencias": return "Diferencias B/V, C/S/Z, G/J";
         case "completar": return "Completar Palabras";
