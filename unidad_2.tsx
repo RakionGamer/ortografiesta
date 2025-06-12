@@ -5,6 +5,7 @@ import { Star, ArrowLeft, Volume2, Check, X, HelpCircle, Award, Lightbulb, Volum
 import { useRouter } from "next/navigation"
 import { useAudio } from "./app/contexts/AudioContext"
 import useProgress from "./app/hooks/useProgress"
+import confetti from "canvas-confetti"
 
 // Datos para las reglas de mayúsculas
 const reglasData = [
@@ -190,7 +191,7 @@ const textosCorregir = [
 const nombresPropios = ["MARIA", "JUAN", "MADRID", "ESPAÑA", "LUNA", "TIERRA"]
 
 // Tipos de actividades
-type Actividad = "diferencias" | "completar" | "dictado" | "sopa" 
+type Actividad = "diferencias" | "completar" | "dictado" | "sopa"
 
 
 
@@ -219,6 +220,7 @@ export default function Unidad2() {
     const { progress, updateActivity } = useProgress("unidad2")
     const [puntosUnidad, setPuntosUnidad] = useState(0)
     const [estrellasUnidad, setEstrellasUnidad] = useState(0)
+    const [fallos, setFallos] = useState(0);
 
     useEffect(() => {
         const savedAvatar = localStorage.getItem("ortografia-avatar")
@@ -252,75 +254,75 @@ export default function Unidad2() {
         }
     }
 
-    // Función para verificar respuesta en completar oraciones
     const verificarRespuesta = (respuesta: string, correcta: string) => {
         const esCorrecta = respuesta === correcta;
         setMostrarResultado(esCorrecta);
 
-        if (esCorrecta) {
-            setPuntuacion((prev) => prev + 10);
+        const nuevosFallos = esCorrecta ? fallos : fallos + 1;
+        if (!esCorrecta) {
+            setFallos(n => n + 1);
         }
 
-        setRespuestas([...respuestas, esCorrecta]);
+        if (esCorrecta) setPuntuacion(p => p + 10);
+        setRespuestas(r => [...r, esCorrecta]);
 
         setTimeout(() => {
             setMostrarResultado(null);
             if (preguntaActual < 9) {
-                setPreguntaActual((prev) => prev + 1);
+                setPreguntaActual(p => p + 1);
             } else {
                 setActividadCompletada(true);
-
                 const respuestasCorrectas = [...respuestas, esCorrecta].filter(Boolean).length;
                 const porcentajeExito = (respuestasCorrectas / 10) * 100;
 
-                updateActivity("completar", {
-                    attempts: 1,
-                    lastScore: porcentajeExito,
-                    completed: true,
-                    stars: porcentajeExito >= 90 ? 1 : porcentajeExito >= 60 ? 1 : 0,
-                });
+                if (nuevosFallos < 3) {
+                    updateActivity("completar", {
+                        attempts: 1,
+                        lastScore: porcentajeExito,
+                        completed: true,
+                        stars: porcentajeExito >= 90 ? 1 : 0,
+                    });
+                }
             }
         }, 1500);
     };
 
-     const handleTextoClick = (posicion: number) => {
+
+    const handleTextoClick = (posicion: number) => {
         const textoData = textosCorregir[preguntaActual];
-        
-        // Verificar si esta posición es un error
+
         if (textoData.errores.includes(posicion)) {
-            // Verificar si ya fue encontrado
             if (!erroresEncontrados.includes(posicion)) {
                 const nuevosErrores = [...erroresEncontrados, posicion];
                 setErroresEncontrados(nuevosErrores);
                 setPuntuacion((prev) => prev + 20);
-                
-                // Verificar si se encontraron todos los errores de esta pregunta
                 if (nuevosErrores.length === textoData.errores.length) {
                     setTimeout(() => {
                         if (preguntaActual < textosCorregir.length - 1) {
-                            // Pasar a la siguiente pregunta
                             setPreguntaActual((prev) => prev + 1);
                             setErroresEncontrados([]);
                         } else {
-                            // Actividad completada
-                            setActividadCompletada(true);
-                            
-                            // Calcular porcentaje de éxito
                             const totalErrores = textosCorregir.reduce((acc, texto) => acc + texto.errores.length, 0);
-                            const erroresEncontradosTotal = nuevosErrores.length + 
+                            const erroresEncontradosTotal = nuevosErrores.length +
                                 textosCorregir.slice(0, preguntaActual).reduce((acc, texto) => acc + texto.errores.length, 0);
                             const porcentajeExito = (erroresEncontradosTotal / totalErrores) * 100;
 
-                            updateActivity("dictado", {
-                                attempts: 1,
-                                lastScore: porcentajeExito,
-                                completed: true,
-                                stars: porcentajeExito >= 80 ? 1 : 0,
-                            });
+                            if (fallos < 3) {
+                                updateActivity("dictado", {
+                                    attempts: 1,
+                                    lastScore: porcentajeExito,
+                                    completed: true,
+                                    stars: 1
+                                });
+                            }
+
+                            setActividadCompletada(true);
                         }
                     }, 1000);
                 }
             }
+        } else {
+            setFallos(prev => prev + 1);
         }
     };
 
@@ -537,7 +539,7 @@ export default function Unidad2() {
                     <h1 className="text-3xl md:text-4xl font-bold text-center text-purple-800">Unidad 2: Uso de Mayúsculas</h1>
 
                     <div className="flex items-center gap-2">
-                       
+
 
                         <div className="text-3xl bg-white p-2 rounded-full shadow-md">{selectedAvatar}</div>
 
@@ -652,185 +654,232 @@ export default function Unidad2() {
 
                     {/* Completar oraciones */}
                     {actividad === "completar" && (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 p-4">
-        <div className="max-w-4xl mx-auto">
-            {!actividadCompletada ? (
-                <div className="space-y-8">
-                    {/* Header con progreso mejorado */}
-                    <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/20">
-                        <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                            <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                                    {preguntaActual + 1}
-                                </div>
-                                <div>
-                                    <h3 className="text-xl font-bold text-purple-800">Pregunta {preguntaActual + 1}</h3>
-                                    <p className="text-purple-600 text-sm">de 10 preguntas</p>
-                                </div>
-                            </div>
-                            
-                            {/* Barra de progreso visual */}
-                            <div className="flex flex-col items-end gap-2">
-                                <div className="flex gap-1.5">
-                                    {[...Array(10)].map((_, i) => (
-                                        <div
-                                            key={i}
-                                            className={`w-3 h-3 rounded-full transition-all duration-300 ${
-                                                i < preguntaActual 
-                                                    ? (respuestas[i] ? "bg-green-400 shadow-lg shadow-green-200" : "bg-red-400 shadow-lg shadow-red-200") 
-                                                    : i === preguntaActual 
-                                                        ? "bg-purple-400 animate-pulse shadow-lg shadow-purple-200" 
-                                                        : "bg-gray-200"
-                                            }`}
-                                        />
-                                    ))}
-                                </div>
-                                <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
-                                    <div 
-                                        className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500 ease-out"
-                                        style={{ width: `${((preguntaActual + 1) / 10) * 100}%` }}
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-indigo-50 p-4">
+                            <div className="max-w-4xl mx-auto">
+                                {!actividadCompletada ? (
+                                    <div className="space-y-8">
+                                        {/* Header con progreso mejorado */}
+                                        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-6 shadow-lg border border-white/20">
+                                            <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
+                                                <div className="flex items-center gap-3">
+                                                    <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                                                        {preguntaActual + 1}
+                                                    </div>
+                                                    <div>
+                                                        <h3 className="text-xl font-bold text-purple-800">Pregunta {preguntaActual + 1}</h3>
+                                                        <p className="text-purple-600 text-sm">de 10 preguntas</p>
+                                                    </div>
+                                                </div>
 
-                    {/* Título principal con animación */}
-                    <div className="text-center">
-                        <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
-                            Elige la letra correcta
-                        </h2>
-                        <div className="w-24 h-1 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full mx-auto"></div>
-                    </div>
+                                                {/* Barra de progreso visual */}
+                                                <div className="flex flex-col items-end gap-2">
+                                                    <div className="flex gap-1.5">
+                                                        {[...Array(10)].map((_, i) => (
+                                                            <div
+                                                                key={i}
+                                                                className={`w-3 h-3 rounded-full transition-all duration-300 ${i < preguntaActual
+                                                                    ? (respuestas[i] ? "bg-green-400 shadow-lg shadow-green-200" : "bg-red-400 shadow-lg shadow-red-200")
+                                                                    : i === preguntaActual
+                                                                        ? "bg-purple-400 animate-pulse shadow-lg shadow-purple-200"
+                                                                        : "bg-gray-200"
+                                                                    }`}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                    <div className="w-full bg-gray-200 rounded-full h-2 overflow-hidden">
+                                                        <div
+                                                            className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-500 ease-out"
+                                                            style={{ width: `${((preguntaActual + 1) / 10) * 100}%` }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex items-center justify-center gap-6 mb-6">
+                                            {/* Indicador de estrella mejorado */}
+                                            <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border">
+                                                <div className="relative">
+                                                    <Star
+                                                        className={`w-6 h-6 transition-all duration-300 ${fallos < 3
+                                                            ? "text-yellow-400 drop-shadow-sm"
+                                                            : "text-gray-300"
+                                                            }`}
+                                                        fill={fallos < 3 ? "currentColor" : "none"}
+                                                    />
+                                                    {fallos < 3 && (
+                                                        <div className="absolute -inset-1 bg-yellow-400 rounded-full opacity-20 animate-ping" />
+                                                    )}
+                                                </div>
+                                                <span
+                                                    className={`font-semibold text-sm transition-all duration-300 ${fallos < 3
+                                                        ? "text-yellow-600"
+                                                        : "text-gray-400 line-through"
+                                                        }`}
+                                                >
+                                                    {fallos < 3 ? "¡Estrella disponible!" : "Estrella perdida"}
+                                                </span>
+                                            </div>
 
-                    {/* Pista mejorada */}
-                    <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-purple-200/30 shadow-lg">
-                        <div className="flex items-center gap-3 mb-3">
-                            <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
-                                💡
-                            </div>
-                            <h3 className="text-lg font-semibold text-purple-800">Pista</h3>
-                        </div>
-                        <p className="text-purple-700 text-lg font-medium leading-relaxed">
-                            {oracionesCompletar[preguntaActual].pista}
-                        </p>
-                    </div>
+                                            {/* Contador de fallos mejorado */}
+                                            <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border">
+                                                <div className="flex gap-1">
+                                                    {[1, 2, 3].map((fallo) => (
+                                                        <div
+                                                            key={fallo}
+                                                            className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${fallo <= fallos
+                                                                ? "bg-red-400 border-red-400 scale-110"
+                                                                : "border-gray-300"
+                                                                }`}
+                                                        />
+                                                    ))}
+                                                </div>
+                                                <span className={`font-semibold text-sm ${fallos === 0 ? "text-green-600" :
+                                                    fallos === 1 ? "text-yellow-600" :
+                                                        fallos === 2 ? "text-orange-600" : "text-red-600"
+                                                    }`}>
+                                                    {fallos === 0 ? "¡Perfecto!" :
+                                                        fallos === 1 ? "1 fallo" :
+                                                            fallos === 2 ? "2 fallos" : "3 fallos"}
+                                                </span>
+                                            </div>
+                                        </div>
 
-                    {/* Oración principal mejorada */}
-                    <div className="relative">
-                        <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-3xl blur-xl"></div>
-                        <div className="relative bg-white/90 backdrop-blur-sm rounded-3xl p-8 border border-white/30 shadow-xl">
-                            <div className="text-center">
-                                <div className="text-3xl md:text-4xl font-bold text-purple-800 leading-relaxed tracking-wide">
-                                    {oracionesCompletar[preguntaActual].oracion}
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                                        {/* Título principal con animación */}
+                                        <div className="text-center">
+                                            <h2 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+                                                Elige la letra correcta
+                                            </h2>
+                                            <div className="w-24 h-1 bg-gradient-to-r from-purple-400 to-pink-400 rounded-full mx-auto"></div>
+                                        </div>
 
-                    {/* Opciones mejoradas */}
-                    <div className="flex flex-wrap justify-center gap-6 px-4">
-                        {oracionesCompletar[preguntaActual].opciones.map((opcion, index) => (
-                            <button
-                                key={index}
-                                onClick={() => verificarRespuesta(opcion, oracionesCompletar[preguntaActual].correctas[0])}
-                                className={`group relative w-24 h-24 md:w-28 md:h-28 text-4xl md:text-5xl font-bold rounded-3xl flex items-center justify-center transition-all duration-300 transform hover:scale-105 ${
-                                    mostrarResultado !== null
-                                        ? opcion === oracionesCompletar[preguntaActual].correctas[0]
-                                            ? "bg-gradient-to-br from-green-400 to-green-500 text-white shadow-2xl shadow-green-300/50 scale-110 animate-bounce"
-                                            : "bg-gray-100 text-gray-400 scale-95"
-                                        : "bg-white hover:bg-gradient-to-br hover:from-purple-50 hover:to-pink-50 text-purple-800 shadow-lg hover:shadow-xl border-2 border-purple-200/30 hover:border-purple-300"
-                                } ${mostrarResultado !== null ? "pointer-events-none" : "cursor-pointer active:scale-95"}`}
-                            >
-                                {/* Efecto de brillo en hover */}
-                                <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                                <span className="relative z-10">{opcion}</span>
-                            </button>
-                        ))}
-                    </div>
+                                        {/* Pista mejorada */}
+                                        <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-6 border border-purple-200/30 shadow-lg">
+                                            <div className="flex items-center gap-3 mb-3">
+                                                <div className="w-8 h-8 bg-gradient-to-r from-yellow-400 to-orange-400 rounded-full flex items-center justify-center">
+                                                    💡
+                                                </div>
+                                                <h3 className="text-lg font-semibold text-purple-800">Pista</h3>
+                                            </div>
+                                            <p className="text-purple-700 text-lg font-medium leading-relaxed">
+                                                {oracionesCompletar[preguntaActual].pista}
+                                            </p>
+                                        </div>
 
-                    {/* Resultado mejorado */}
-                    {mostrarResultado !== null && (
-                        <div className="flex justify-center">
-                            <div className={`flex items-center gap-3 px-8 py-4 rounded-2xl text-xl font-bold shadow-lg transform animate-in slide-in-from-bottom-4 duration-500 ${
-                                mostrarResultado 
-                                    ? "bg-gradient-to-r from-green-400 to-green-500 text-white shadow-green-300/50" 
-                                    : "bg-gradient-to-r from-red-400 to-red-500 text-white shadow-red-300/50"
-                            }`}>
-                                {mostrarResultado ? (
-                                    <>
-                                        <Check size={28} className="animate-bounce" />
-                                        <span>¡Excelente! 🎉</span>
-                                    </>
+                                        {/* Oración principal mejorada */}
+                                        <div className="relative">
+                                            <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-3xl blur-xl"></div>
+                                            <div className="relative bg-white/90 backdrop-blur-sm rounded-3xl p-8 border border-white/30 shadow-xl">
+                                                <div className="text-center">
+                                                    <div className="text-3xl md:text-4xl font-bold text-purple-800 leading-relaxed tracking-wide">
+                                                        {oracionesCompletar[preguntaActual].oracion}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+
+                                        {/* Opciones mejoradas */}
+                                        <div className="flex flex-wrap justify-center gap-6 px-4">
+                                            {oracionesCompletar[preguntaActual].opciones.map((opcion, index) => (
+                                                <button
+                                                    key={index}
+                                                    onClick={() => verificarRespuesta(opcion, oracionesCompletar[preguntaActual].correctas[0])}
+                                                    className={`group relative w-24 h-24 md:w-28 md:h-28 text-4xl md:text-5xl font-bold rounded-3xl flex items-center justify-center transition-all duration-300 transform hover:scale-105 ${mostrarResultado !== null
+                                                        ? opcion === oracionesCompletar[preguntaActual].correctas[0]
+                                                            ? "bg-gradient-to-br from-green-400 to-green-500 text-white shadow-2xl shadow-green-300/50 scale-110 animate-bounce"
+                                                            : "bg-gray-100 text-gray-400 scale-95"
+                                                        : "bg-white hover:bg-gradient-to-br hover:from-purple-50 hover:to-pink-50 text-purple-800 shadow-lg hover:shadow-xl border-2 border-purple-200/30 hover:border-purple-300"
+                                                        } ${mostrarResultado !== null ? "pointer-events-none" : "cursor-pointer active:scale-95"}`}
+                                                >
+                                                    {/* Efecto de brillo en hover */}
+                                                    <div className="absolute inset-0 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                                                    <span className="relative z-10">{opcion}</span>
+                                                </button>
+                                            ))}
+                                        </div>
+
+                                        {/* Resultado mejorado */}
+                                        {mostrarResultado !== null && (
+                                            <div className="flex justify-center">
+                                                <div className={`flex items-center gap-3 px-8 py-4 rounded-2xl text-xl font-bold shadow-lg transform animate-in slide-in-from-bottom-4 duration-500 ${mostrarResultado
+                                                    ? "bg-gradient-to-r from-green-400 to-green-500 text-white shadow-green-300/50"
+                                                    : "bg-gradient-to-r from-red-400 to-red-500 text-white shadow-red-300/50"
+                                                    }`}>
+                                                    {mostrarResultado ? (
+                                                        <>
+                                                            <Check size={28} className="animate-bounce" />
+                                                            <span>¡Excelente! 🎉</span>
+                                                        </>
+                                                    ) : (
+                                                        <>
+                                                            <X size={28} className="animate-pulse" />
+                                                            <span>¡Inténtalo otra vez! 💪</span>
+                                                        </>
+                                                    )}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
                                 ) : (
-                                    <>
-                                        <X size={28} className="animate-pulse" />
-                                        <span>¡Inténtalo otra vez! 💪</span>
-                                    </>
+                                    /* Pantalla de completado mejorada */
+                                    <div className="text-center py-12">
+                                        <div className="relative mb-8">
+                                            <div className="text-8xl mb-6 animate-bounce">🎉</div>
+                                            <div className="absolute inset-0 flex justify-center items-center">
+                                                <div className="w-32 h-32 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full animate-ping"></div>
+                                            </div>
+                                        </div>
+
+                                        <h2 className="text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-6">
+                                            ¡Actividad Completada!
+                                        </h2>
+
+                                        <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 mb-8 border border-white/30 shadow-xl max-w-md mx-auto">
+                                            <div className="text-6xl font-bold text-purple-800 mb-2">
+                                                {respuestas.filter((r) => r).length}/10
+                                            </div>
+                                            <p className="text-xl text-purple-600 font-medium">
+                                                respuestas correctas
+                                            </p>
+
+                                            {/* Barra de logros */}
+                                            <div className="mt-6">
+                                                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                                                    <div
+                                                        className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-1000 ease-out"
+                                                        style={{ width: `${(respuestas.filter((r) => r).length / 10) * 100}%` }}
+                                                    />
+                                                </div>
+                                                <p className="text-sm text-purple-600 mt-2 font-medium">
+                                                    {respuestas.filter((r) => r).length >= 8 ? "¡Excelente trabajo! 🌟" :
+                                                        respuestas.filter((r) => r).length >= 6 ? "¡Buen trabajo! 👏" :
+                                                            "¡Sigue practicando! 💪"}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
+                                            <button
+                                                onClick={() => cambiarActividad(actividad)}
+                                                className="group bg-gradient-to-r from-pink-500 to-pink-600 text-white px-8 py-4 rounded-2xl font-bold hover:from-pink-600 hover:to-pink-700 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                                            >
+                                                <HelpCircle size={24} className="group-hover:rotate-12 transition-transform duration-300" />
+                                                <span>Jugar de nuevo</span>
+                                            </button>
+                                            <button
+                                                onClick={() => cambiarActividad("diferencias")}
+                                                className="group bg-gradient-to-r from-purple-600 to-purple-700 text-white px-8 py-4 rounded-2xl font-bold hover:from-purple-700 hover:to-purple-800 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
+                                            >
+                                                <Award size={24} className="group-hover:rotate-12 transition-transform duration-300" />
+                                                <span>Volver a reglas</span>
+                                            </button>
+                                        </div>
+                                    </div>
                                 )}
                             </div>
                         </div>
                     )}
-                </div>
-            ) : (
-                /* Pantalla de completado mejorada */
-                <div className="text-center py-12">
-                    <div className="relative mb-8">
-                        <div className="text-8xl mb-6 animate-bounce">🎉</div>
-                        <div className="absolute inset-0 flex justify-center items-center">
-                            <div className="w-32 h-32 bg-gradient-to-r from-purple-400/20 to-pink-400/20 rounded-full animate-ping"></div>
-                        </div>
-                    </div>
-                    
-                    <h2 className="text-5xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-6">
-                        ¡Actividad Completada!
-                    </h2>
-                    
-                    <div className="bg-white/80 backdrop-blur-sm rounded-3xl p-8 mb-8 border border-white/30 shadow-xl max-w-md mx-auto">
-                        <div className="text-6xl font-bold text-purple-800 mb-2">
-                            {respuestas.filter((r) => r).length}/10
-                        </div>
-                        <p className="text-xl text-purple-600 font-medium">
-                            respuestas correctas
-                        </p>
-                        
-                        {/* Barra de logros */}
-                        <div className="mt-6">
-                            <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                                <div 
-                                    className="h-full bg-gradient-to-r from-purple-500 to-pink-500 rounded-full transition-all duration-1000 ease-out"
-                                    style={{ width: `${(respuestas.filter((r) => r).length / 10) * 100}%` }}
-                                />
-                            </div>
-                            <p className="text-sm text-purple-600 mt-2 font-medium">
-                                {respuestas.filter((r) => r).length >= 8 ? "¡Excelente trabajo! 🌟" : 
-                                 respuestas.filter((r) => r).length >= 6 ? "¡Buen trabajo! 👏" : 
-                                 "¡Sigue practicando! 💪"}
-                            </p>
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row justify-center gap-4 max-w-md mx-auto">
-                        <button
-                            onClick={() => cambiarActividad(actividad)}
-                            className="group bg-gradient-to-r from-pink-500 to-pink-600 text-white px-8 py-4 rounded-2xl font-bold hover:from-pink-600 hover:to-pink-700 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
-                        >
-                            <HelpCircle size={24} className="group-hover:rotate-12 transition-transform duration-300" />
-                            <span>Jugar de nuevo</span>
-                        </button>
-                        <button
-                            onClick={() => cambiarActividad("diferencias")}
-                            className="group bg-gradient-to-r from-purple-600 to-purple-700 text-white px-8 py-4 rounded-2xl font-bold hover:from-purple-700 hover:to-purple-800 transition-all duration-300 flex items-center justify-center gap-3 shadow-lg hover:shadow-xl transform hover:scale-105 active:scale-95"
-                        >
-                            <Award size={24} className="group-hover:rotate-12 transition-transform duration-300" />
-                            <span>Volver a reglas</span>
-                        </button>
-                    </div>
-                </div>
-            )}
-        </div>
-    </div>
-)}
 
                     {/* Corregir textos */}
                     {/* Corregir textos - VERSIÓN MEJORADA */}
@@ -844,7 +893,7 @@ export default function Unidad2() {
                                         <div className="absolute top-2 right-2 text-3xl">✨</div>
                                         <div className="absolute bottom-2 left-2 text-3xl">📝</div>
                                         <div className="absolute bottom-2 right-2 text-3xl">🎯</div>
-                                        
+
                                         <h2 className="text-3xl font-bold text-white mb-2 flex items-center justify-center">
                                             <span className="mr-3">🕵️</span>
                                             Detective de Mayúsculas
@@ -853,10 +902,10 @@ export default function Unidad2() {
                                         <p className="text-lg text-white/90 mb-4">
                                             ¡Encuentra las palabras que necesitan mayúscula inicial!
                                         </p>
-                                        
+
                                         {/* Barra de progreso mejorada */}
                                         <div className="bg-white/20 rounded-full h-3 mb-2 overflow-hidden">
-                                            <div 
+                                            <div
                                                 className="bg-gradient-to-r from-yellow-300 to-orange-400 h-full rounded-full transition-all duration-500 ease-out"
                                                 style={{ width: `${((preguntaActual + 1) / textosCorregir.length) * 100}%` }}
                                             ></div>
@@ -864,6 +913,56 @@ export default function Unidad2() {
                                         <p className="text-white/80 text-sm font-medium">
                                             Texto {preguntaActual + 1} de {textosCorregir.length}
                                         </p>
+                                    </div>
+
+                                    {/* Sistema de estrellas y fallos rediseñado */}
+                                    <div className="flex items-center justify-center gap-6 mb-6">
+                                        {/* Indicador de estrella mejorado */}
+                                        <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border">
+                                            <div className="relative">
+                                                <Star
+                                                    className={`w-6 h-6 transition-all duration-300 ${fallos < 3
+                                                        ? "text-yellow-400 drop-shadow-sm"
+                                                        : "text-gray-300"
+                                                        }`}
+                                                    fill={fallos < 3 ? "currentColor" : "none"}
+                                                />
+                                                {fallos < 3 && (
+                                                    <div className="absolute -inset-1 bg-yellow-400 rounded-full opacity-20 animate-ping" />
+                                                )}
+                                            </div>
+                                            <span
+                                                className={`font-semibold text-sm transition-all duration-300 ${fallos < 3
+                                                    ? "text-yellow-600"
+                                                    : "text-gray-400 line-through"
+                                                    }`}
+                                            >
+                                                {fallos < 3 ? "¡Estrella disponible!" : "Estrella perdida"}
+                                            </span>
+                                        </div>
+
+                                        {/* Contador de fallos mejorado */}
+                                        <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border">
+                                            <div className="flex gap-1">
+                                                {[1, 2, 3].map((fallo) => (
+                                                    <div
+                                                        key={fallo}
+                                                        className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${fallo <= fallos
+                                                            ? "bg-red-400 border-red-400 scale-110"
+                                                            : "border-gray-300"
+                                                            }`}
+                                                    />
+                                                ))}
+                                            </div>
+                                            <span className={`font-semibold text-sm ${fallos === 0 ? "text-green-600" :
+                                                fallos === 1 ? "text-yellow-600" :
+                                                    fallos === 2 ? "text-orange-600" : "text-red-600"
+                                                }`}>
+                                                {fallos === 0 ? "¡Perfecto!" :
+                                                    fallos === 1 ? "1 fallo" :
+                                                        fallos === 2 ? "2 fallos" : "3 fallos"}
+                                            </span>
+                                        </div>
                                     </div>
 
                                     {/* Instrucciones visuales mejoradas */}
@@ -875,8 +974,8 @@ export default function Unidad2() {
                                             <h3 className="text-lg font-bold text-indigo-800">¿Cómo jugar?</h3>
                                         </div>
                                         <p className="text-indigo-700 text-left">
-                                            <span className="font-semibold">Paso 1:</span> Lee el texto cuidadosamente<br/>
-                                            <span className="font-semibold">Paso 2:</span> Haz clic en las letras que deberían ser mayúsculas<br/>
+                                            <span className="font-semibold">Paso 1:</span> Lee el texto cuidadosamente<br />
+                                            <span className="font-semibold">Paso 2:</span> Haz clic en las letras que deberían ser mayúsculas<br />
                                             <span className="font-semibold">Paso 3:</span> Las letras correctas se marcarán en verde ✅
                                         </p>
                                     </div>
@@ -887,7 +986,7 @@ export default function Unidad2() {
                                         <div className="absolute -top-3 left-4 bg-indigo-500 text-white px-4 py-1 rounded-full text-sm font-bold">
                                             Texto para corregir
                                         </div>
-                                        
+
                                         <div className="text-2xl text-gray-800 leading-relaxed font-medium tracking-wide">
                                             {textosCorregir[preguntaActual].texto.split("").map((char, index) => {
                                                 const esError = textosCorregir[preguntaActual].errores.includes(index)
@@ -956,7 +1055,7 @@ export default function Unidad2() {
                                             </p>
                                         </div>
 
- 
+
                                     </div>
 
                                     {/* Pista contextual mejorada */}
@@ -979,7 +1078,7 @@ export default function Unidad2() {
                                             <Volume2 size={20} />
                                             <span>Escuchar corrección</span>
                                         </button>
-                                        
+
                                         <button
                                             onClick={() => {
                                                 // Mostrar brevemente la respuesta correcta
@@ -1126,8 +1225,8 @@ export default function Unidad2() {
                                                         <div
                                                             key={nombre}
                                                             className={`px-4 py-2 rounded-full text-md font-bold transition-all duration-300 flex items-center justify-between ${palabrasEncontradas.includes(nombre)
-                                                                    ? "bg-green-400 text-white line-through transform scale-95"
-                                                                    : "bg-white text-purple-800 shadow-sm hover:shadow-md hover:scale-105"
+                                                                ? "bg-green-400 text-white line-through transform scale-95"
+                                                                : "bg-white text-purple-800 shadow-sm hover:shadow-md hover:scale-105"
                                                                 }`}
                                                         >
                                                             <span>
