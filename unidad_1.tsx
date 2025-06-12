@@ -255,14 +255,21 @@ export default function Unidad1() {
     }, 1500)
   }
 
-  // Función para cambiar de actividad sin recargar la página
   const cambiarActividad = (nuevaActividad: Actividad) => {
-    // Prevenir el comportamiento predeterminado para evitar recargas
     setActividad(nuevaActividad)
     setPreguntaActual(0)
     setRespuestas([])
     setMostrarResultado(null)
     setActividadCompletada(false)
+
+    if (actividad !== nuevaActividad && actividad === "diferencias") {
+            updateActivity("diferencias", {
+                attempts: 1,
+                lastScore: 100,
+                completed: true,
+                stars: 1,
+            });
+        }
 
     if (nuevaActividad === "dictado") {
       setPalabraDictado(palabrasDictado[0])
