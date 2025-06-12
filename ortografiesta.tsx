@@ -132,23 +132,15 @@ export default function Ortografiesta() {
   }, []);
 
   const navegarAUnidad = (unidad: number) => {
-    if (unidad === 1) {
-      router.push("/unidad_1");
-    } else if (unidad === 2) {
-      router.push("/unidad_2");
-    }
-    else if (unidad === 3) {
-      router.push("/unidad_3");
-    }
-    else if (unidad === 4) {
-      router.push("/unidad_4");
-    }
-    else if (unidad === 5) {
-      router.push("/unidad_5");
+    const unitKey = `unidad${unidad}`;
+    const unit = progress?.units[unitKey];
+
+    if (unit?.unlocked) {
+      router.push(`/unidad_${unidad}`);
     } else {
-      alert("Esta unidad estará disponible próximamente")
+      alert("¡Completa la unidad anterior con 4 estrellas para desbloquear esta!");
     }
-  }
+  };
   return (
     <div className="min-h-screen bg-gradient-to-b from-yellow-300 to-yellow-200 overflow-hidden relative">
       <div className="container mx-auto px-4 py-8 relative z-10">
@@ -208,7 +200,7 @@ export default function Ortografiesta() {
             {isMuted ? <VolumeX className="w-6 h-6 text-purple-600" /> : <Volume2 className="w-6 h-6 text-purple-600" />}
           </button>
         </div>
-        {/* Units */}
+
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 max-w-5xl mx-auto">
           {[
             { title: "Sonidos y Letras", color: "bg-teal-400", icon: "🔤", emoji: "🎵", unidad: 1 },
@@ -216,56 +208,103 @@ export default function Ortografiesta() {
             { title: "Reglas de Acentuación", color: "bg-orange-400", icon: "✏️", emoji: "⭐", unidad: 3 },
             { title: "Palabras Homófonas", color: "bg-green-400", icon: "🎭", emoji: "🎪", unidad: 4 },
             { title: "Reglas Ortográficas", color: "bg-blue-400", icon: "📝", emoji: "📚", unidad: 5 },
-
           ].map((unit, index) => {
             const unitKey = `unidad${unit.unidad}`;
             const unitProgress = progress?.units[unitKey];
             const stars = unitProgress?.stars || 0;
             const completion = unitProgress?.completionPercentage || 0;
+            const isUnlocked = unitProgress?.unlocked;
 
             return (
-
               <div
                 key={index}
                 className={`
-                ${unit.color} rounded-3xl p-4 shadow-lg transition-all duration-300 cursor-pointer relative overflow-hidden group`
-                }
+          ${unit.color} rounded-3xl p-4 shadow-lg transition-all duration-300 relative overflow-hidden group
+          ${isUnlocked
+                    ? 'cursor-pointer hover:scale-105'
+                    : 'opacity-60 cursor-not-allowed grayscale'
+                  }
+        `}
                 onClick={() => navegarAUnidad(unit.unidad)}
               >
+                {/* Candado para unidades bloqueadas */}
+                {!isUnlocked && (
+                  <div className="absolute inset-0 flex items-center justify-center z-20 bg-black/30 rounded-3xl">
+                    <div className="bg-white p-4 rounded-full shadow-lg animate-pulse">
+                      <svg
+                        className="w-8 h-8 text-gray-600"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                )}
 
-                {/* Efecto de brillo en el borde */}
-                <div className="absolute inset-0 rounded-3xl border-4 border-white/0 group-hover:border-white/30 transition-all duration-300"></div>
+                {/* Efecto de brillo en el borde solo si está desbloqueada */}
+                {isUnlocked && (
+                  <div className="absolute inset-0 rounded-3xl border-4 border-white/0 group-hover:border-white/30 transition-all duration-300"></div>
+                )}
 
                 <div className="flex flex-col items-center text-center relative z-10">
-                  <div className="w-24 h-24 flex items-center justify-center mb-3 bg-white/30 rounded-full group-hover:bg-white/40 transition-all duration-300 relative">
+                  <div className={`
+            w-24 h-24 flex items-center justify-center mb-3 rounded-full transition-all duration-300 relative
+            ${isUnlocked
+                      ? 'bg-white/30 group-hover:bg-white/40'
+                      : 'bg-white/20'
+                    }
+          `}>
                     <span className="text-5xl">{unit.icon}</span>
-                    <span className="absolute -top-2 -right-2 text-2xl animate-bounce">{unit.emoji}</span>
+                    {isUnlocked && (
+                      <span className="absolute -top-2 -right-2 text-2xl animate-bounce">{unit.emoji}</span>
+                    )}
                   </div>
-                  <h3 className="text-white font-bold text-xl mb-1 group-hover:scale-105 transition-transform duration-300">
+
+                  <h3 className={`
+            text-white font-bold text-xl mb-1 transition-transform duration-300
+            ${isUnlocked ? 'group-hover:scale-105' : ''}
+          `}>
                     Unidad {index + 1}
                   </h3>
+
                   <p className="text-white font-semibold">{unit.title}</p>
 
-                  {/* Indicador de progreso */}
-                  <div className="mt-3 w-full bg-white/30 rounded-full h-3 overflow-hidden">
-                    <div
-                      className="bg-yellow-300 h-3 rounded-full transition-all duration-1000 ease-in-out"
-                      style={{ width: `${completion}%` }}
-                    ></div>
-                  </div>
+                  {/* Mensaje de desbloqueo para unidades bloqueadas */}
+                  {!isUnlocked && (
+                    <p className="text-white/80 text-sm mt-2 font-medium">
+                      🔒 Completa la unidad anterior con 4 estrellas
+                    </p>
+                  )}
 
-                  {/* Estrellas */}
-                  <div className="flex mt-2 gap-1">
-                    {[...Array(4)].map((_, i) => (
-                      <Star
-                        key={i}
-                        className={`w-5 h-5 transition-transform duration-300 ${i < stars
-                          ? 'text-yellow-400 fill-yellow-400'
-                          : 'text-white/50'
-                          }`}
-                      />
-                    ))}
-                  </div>
+                  {/* Indicador de progreso solo si está desbloqueada */}
+                  {isUnlocked && (
+                    <>
+                      <div className="mt-3 w-full bg-white/30 rounded-full h-3 overflow-hidden">
+                        <div
+                          className="bg-yellow-300 h-3 rounded-full transition-all duration-1000 ease-in-out"
+                          style={{ width: `${completion}%` }}
+                        ></div>
+                      </div>
+
+                      {/* Estrellas */}
+                      <div className="flex mt-2 gap-1">
+                        {[...Array(4)].map((_, i) => (
+                          <Star
+                            key={i}
+                            className={`w-5 h-5 transition-transform duration-300 ${i < stars
+                                ? 'text-yellow-400 fill-yellow-400'
+                                : 'text-white/50'
+                              }`}
+                          />
+                        ))}
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             )

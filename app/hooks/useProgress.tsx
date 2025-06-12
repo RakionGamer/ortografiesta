@@ -25,7 +25,8 @@ export interface UnitProgress {
   activities: Record<ActivityType, ActivityProgress>
   completionPercentage: number
   stars: number
-  unlockedAt?: string
+  unlockedAt?: string,
+  unlocked: boolean // Nueva propiedad
 }
 
 export interface Medal {
@@ -131,13 +132,10 @@ const createInitialUnitProgress = (id: number, name: string): UnitProgress => ({
     },
   },
 
-
-
-
-
   completionPercentage: 0,
   stars: 0,
   unlockedAt: id === 1 ? new Date().toISOString() : undefined,
+  unlocked: id === 1,
 })
 
 // Progreso inicial del usuario
@@ -194,6 +192,9 @@ export default function useProgress(unitId?: string) {
     setProgress((prevProgress) => {
       if (!prevProgress) return null
 
+
+
+
       // Crear una copia profunda del progreso actual
       const newProgress = JSON.parse(JSON.stringify(prevProgress)) as UserProgress
 
@@ -203,7 +204,6 @@ export default function useProgress(unitId?: string) {
 
       // Asegurar que la actividad existe
       if (!unit.activities[activityType]) {
-        // Si la actividad no existe, crearla con valores por defecto
         unit.activities[activityType] = {
           attempts: 0,
           lastScore: 0,
@@ -312,7 +312,9 @@ export default function useProgress(unitId?: string) {
         }
       }
 
-      // Verificar y desbloquear medallas
+      
+
+
       checkAndUnlockMedals(newProgress, unitId, activityType, updatedActivity)
 
       return newProgress
@@ -432,6 +434,28 @@ export default function useProgress(unitId?: string) {
       window.location.href = '/'
     }
   }
+
+useEffect(() => {
+  if (!progress) return;
+
+  Object.values(progress.units).forEach((unit) => {
+    const completedActivities = Object.values(unit.activities).filter((a) => a.completed).length;
+
+    if (completedActivities === 4 && unit.id < 5) {
+      const nextUnitId = `unidad${unit.id + 1}`;
+      const nextUnit = progress.units[nextUnitId];
+      if (nextUnit && !nextUnit.unlocked) {
+        nextUnit.unlocked = true;
+        nextUnit.unlockedAt = new Date().toISOString();
+        console.log(`Unidad ${nextUnit.name} desbloqueada automáticamente (verificación en efecto).`);
+        setProgress({ ...progress }); // Fuerza actualización
+      }
+    }
+  });
+}, [progress]);
+
+
+
 
   return {
     progress,

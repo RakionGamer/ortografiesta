@@ -110,6 +110,8 @@ export default function Unidad1() {
   const { progress, updateActivity } = useProgress("unidad1");
   const [puntosUnidad, setPuntosUnidad] = useState(0);
   const [estrellasUnidad, setEstrellasUnidad] = useState(0);
+  const [fallos, setFallos] = useState(0);
+
   const unitId = "unidad1";
 
 
@@ -172,27 +174,31 @@ export default function Unidad1() {
 
 
 
-  
+
 
 
 
   const verificarRespuesta = (respuesta: string, correcta: string) => {
     const esCorrecta = respuesta.toLowerCase() === correcta.toLowerCase();
-
-
-    if (esCorrecta && preguntaActual === 9) {
-      const correctas = respuestas.filter(r => r).length + 1;
-      const porcentaje = (correctas / 10) * 100;
-
-      updateActivity("completar", {
-        attempts: (progress?.units[unitId]?.activities.completar.attempts || 0) + 1,
-        lastScore: porcentaje,
-        completed: true,
-        stars: porcentaje >= 60 ? 1 : 0
-      });
+    setMostrarResultado(esCorrecta);
+    if (!esCorrecta) {
+      setFallos(prev => prev + 1);
     }
 
-    setMostrarResultado(esCorrecta)
+    if (preguntaActual === 9) {
+      const correctas = respuestas.filter(r => r).length + (esCorrecta ? 1 : 0);
+      const porcentaje = (correctas / 10) * 100;
+
+      if (fallos < 3) {
+        updateActivity("completar", {
+          attempts: (progress?.units[unitId]?.activities.completar.attempts || 0) + 1,
+          lastScore: porcentaje,
+          completed: true,
+          stars: porcentaje >= 60 ? 1 : 0
+        });
+      }
+    }
+
 
     if (esCorrecta) {
       setPuntuacion((prev) => prev + 10)
@@ -218,51 +224,67 @@ export default function Unidad1() {
   }
 
   // Función para verificar respuesta en dictado
-  const verificarDictado = () => {
-    const esCorrecta = respuestaDictado.toLowerCase().trim() === palabraDictado.toLowerCase()
-    setMostrarResultado(esCorrecta)
+ const verificarDictado = () => {
+  const esCorrecta = respuestaDictado.toLowerCase().trim() === palabraDictado.toLowerCase()
+  setMostrarResultado(esCorrecta)
 
-    if (esCorrecta) {
-      setPuntuacion((prev) => prev + 10)
-      setTimeout(() => {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-        })
-      }, 300)
-    }
+  let fallosActuales = fallos;
+  if (!esCorrecta) {
+    fallosActuales = fallos + 1;
+    setFallos(fallosActuales);
+  }
 
-    setRespuestas([...respuestas, esCorrecta])
-
+  if (esCorrecta) {
+    setPuntuacion((prev) => prev + 10)
     setTimeout(() => {
-      setMostrarResultado(null)
-      setRespuestaDictado("")
-      if (preguntaActual < 9) {
-        const nuevaPregunta = preguntaActual + 1
-        setPreguntaActual(nuevaPregunta)
-        setPalabraDictado(palabrasDictado[nuevaPregunta])
-      } else {
-        setActividadCompletada(true);
+      confetti({
+        particleCount: 100,
+        spread: 70,
+        origin: { y: 0.6 },
+      })
+    }, 300)
+  }
+
+  setRespuestas([...respuestas, esCorrecta])
+
+  setTimeout(() => {
+    setMostrarResultado(null)
+    setRespuestaDictado("")
+    if (preguntaActual < 9) {
+      const nuevaPregunta = preguntaActual + 1
+      setPreguntaActual(nuevaPregunta)
+      setPalabraDictado(palabrasDictado[nuevaPregunta])
+    } else {
+      if (fallosActuales < 3) {
         updateActivity("dictado", {
           attempts: (progress?.units[unitId]?.activities.dictado.attempts || 0) + 1,
           lastScore: 100,
           completed: true,
           stars: 1
         });
-
       }
-    }, 1500)
-  }
 
-  // Función para cambiar de actividad sin recargar la página
+      setActividadCompletada(true);
+    }
+  }, 1500)
+}
+
   const cambiarActividad = (nuevaActividad: Actividad) => {
-    // Prevenir el comportamiento predeterminado para evitar recargas
     setActividad(nuevaActividad)
     setPreguntaActual(0)
     setRespuestas([])
     setMostrarResultado(null)
-    setActividadCompletada(false)
+    setActividadCompletada(false);
+    setFallos(0);
+
+    if (actividad !== nuevaActividad && actividad === "diferencias") {
+      updateActivity("diferencias", {
+        attempts: 1,
+        lastScore: 100,
+        completed: true,
+        stars: 1,
+      });
+    }
 
     if (nuevaActividad === "dictado") {
       setPalabraDictado(palabrasDictado[0])
@@ -271,7 +293,6 @@ export default function Unidad1() {
     }
   }
 
-  // Función para volver al inicio sin recargar la página
   const volverAlInicio = (e: React.MouseEvent) => {
     e.preventDefault() // Prevenir el comportamiento predeterminado
     router.push("/")
@@ -590,20 +611,99 @@ export default function Unidad1() {
           )}
 
           {/* Completar palabras */}
+          {/* Completar palabras */}
           {actividad === "completar" && (
             <div className="text-center">
               {!actividadCompletada ? (
                 <>
-                  <div className="flex justify-between mb-4">
-                    <div className="text-purple-800 font-bold">Pregunta {preguntaActual + 1}/10</div>
-                    <div className="flex gap-1">
+                  {/* Header mejorado con progreso e indicadores */}
+                  <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4 mb-6 border border-purple-100">
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                          {preguntaActual + 1}
+                        </div>
+                        <span className="text-purple-700 font-semibold">de 10 preguntas</span>
+                      </div>
+
+                      {/* Barra de progreso */}
+                      <div className="flex-1 mx-4">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-gradient-to-r from-purple-500 to-indigo-500 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${((preguntaActual + 1) / 10) * 100}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="text-purple-600 text-sm font-medium">
+                        {Math.round(((preguntaActual + 1) / 10) * 100)}%
+                      </div>
+                    </div>
+
+                    {/* Indicadores de respuestas anteriores */}
+                    <div className="flex justify-center gap-1 mb-4">
                       {[...Array(10)].map((_, i) => (
                         <div
                           key={i}
-                          className={`w-4 h-4 rounded-full ${i < preguntaActual ? (respuestas[i] ? "bg-green-500" : "bg-red-500") : "bg-gray-300"
+                          className={`w-3 h-3 rounded-full transition-all duration-300 ${i < preguntaActual
+                            ? (respuestas[i] ? "bg-green-400 shadow-md" : "bg-red-400 shadow-md")
+                            : i === preguntaActual
+                              ? "bg-purple-500 animate-pulse ring-2 ring-purple-300"
+                              : "bg-gray-200"
                             }`}
                         />
                       ))}
+                    </div>
+
+                    {/* Sistema de estrellas y fallos rediseñado */}
+                    <div className="flex items-center justify-center gap-6">
+                      {/* Indicador de estrella mejorado */}
+                      <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border">
+                        <div className="relative">
+                          <Star
+                            className={`w-6 h-6 transition-all duration-300 ${fallos < 3
+                              ? "text-yellow-400 drop-shadow-sm"
+                              : "text-gray-300"
+                              }`}
+                            fill={fallos < 3 ? "currentColor" : "none"}
+                          />
+                          {fallos < 3 && (
+                            <div className="absolute -inset-1 bg-yellow-400 rounded-full opacity-20 animate-ping" />
+                          )}
+                        </div>
+                        <span
+                          className={`font-semibold text-sm transition-all duration-300 ${fallos < 3
+                            ? "text-yellow-600"
+                            : "text-gray-400 line-through"
+                            }`}
+                        >
+                          {fallos < 3 ? "¡Estrella disponible!" : "Estrella perdida"}
+                        </span>
+                      </div>
+
+                      {/* Contador de fallos mejorado */}
+                      <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border">
+                        <div className="flex gap-1">
+                          {[1, 2, 3].map((fallo) => (
+                            <div
+                              key={fallo}
+                              className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${fallo <= fallos
+                                ? "bg-red-400 border-red-400 scale-110"
+                                : "border-gray-300"
+                                }`}
+                            />
+                          ))}
+                        </div>
+                        <span className={`font-semibold text-sm ${fallos === 0 ? "text-green-600" :
+                          fallos === 1 ? "text-yellow-600" :
+                            fallos === 2 ? "text-orange-600" : "text-red-600"
+                          }`}>
+                          {fallos === 0 ? "¡Perfecto!" :
+                            fallos === 1 ? "1 fallo" :
+                              fallos === 2 ? "2 fallos" : "3 fallos"}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -653,10 +753,80 @@ export default function Unidad1() {
               ) : (
                 <div className="text-center py-8">
                   <div className="text-6xl mb-4">🎉</div>
-                  <h2 className="text-3xl font-bold text-purple-800 mb-4">¡Actividad Completada!</h2>
-                  <p className="text-xl text-purple-600 mb-8">
-                    Has respondido {respuestas.filter((r) => r).length} de 10 preguntas correctamente
-                  </p>
+                  <h2 className="text-3xl font-bold text-purple-800 mb-6">¡Actividad Completada!</h2>
+
+                  {/* Estadísticas detalladas */}
+                  <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-6 mb-6 border border-purple-100 inline-block">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+
+                      {/* Respuestas correctas */}
+                      <div className="flex flex-col items-center">
+                        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-3">
+                          <Check className="w-8 h-8 text-green-600" />
+                        </div>
+                        <div className="text-2xl font-bold text-green-600 mb-1">
+                          {respuestas.filter((r) => r).length}
+                        </div>
+                        <div className="text-sm text-green-700 font-medium">
+                          Respuestas correctas
+                        </div>
+                      </div>
+
+                      {/* Respuestas incorrectas */}
+                      <div className="flex flex-col items-center">
+                        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-3">
+                          <X className="w-8 h-8 text-red-600" />
+                        </div>
+                        <div className="text-2xl font-bold text-red-600 mb-1">
+                          {fallos}
+                        </div>
+                        <div className="text-sm text-red-700 font-medium">
+                          Intentos fallidos
+                        </div>
+                      </div>
+
+                      {/* Estado de la estrella */}
+                      <div className="flex flex-col items-center">
+                        <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 ${fallos < 3 ? "bg-yellow-100" : "bg-gray-100"
+                          }`}>
+                          <Star
+                            className={`w-8 h-8 ${fallos < 3 ? "text-yellow-500" : "text-gray-400"
+                              }`}
+                            fill={fallos < 3 ? "currentColor" : "none"}
+                          />
+                        </div>
+                        <div className={`text-2xl font-bold mb-1 ${fallos < 3 ? "text-yellow-600" : "text-gray-500"
+                          }`}>
+                          {fallos < 3 ? "★ 1" : "★ 0"}
+                        </div>
+                        <div className={`text-sm font-medium ${fallos < 3 ? "text-yellow-700" : "text-gray-600"
+                          }`}>
+                          {fallos < 3 ? "¡Estrella ganada!" : "Estrella perdida"}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Mensaje de rendimiento */}
+                    <div className="mt-6 p-4 rounded-lg bg-white border-l-4 border-purple-400">
+                      <p className="text-purple-700 font-medium">
+                        {fallos === 0 && "¡Excelente! Respuesta perfecta sin errores."}
+                        {fallos === 1 && "¡Muy bien! Solo un pequeño error, sigue así."}
+                        {fallos === 2 && "¡Buen trabajo! Dos errores, pero ganaste la estrella."}
+                        {fallos >= 3 && "¡Sigue practicando! Puedes mejorar en el próximo intento."}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Progreso visual final */}
+                  <div className="flex justify-center gap-1 mb-6">
+                    {[...Array(10)].map((_, i) => (
+                      <div
+                        key={i}
+                        className={`w-4 h-4 rounded-full transition-all duration-300 ${respuestas[i] ? "bg-green-400 shadow-md" : "bg-red-400 shadow-md"
+                          }`}
+                      />
+                    ))}
+                  </div>
 
                   <div className="flex justify-center gap-4">
                     <button
@@ -684,16 +854,94 @@ export default function Unidad1() {
             <div className="text-center">
               {!actividadCompletada ? (
                 <>
-                  <div className="flex justify-between mb-4">
-                    <div className="text-purple-800 font-bold">Palabra {preguntaActual + 1}/10</div>
-                    <div className="flex gap-1">
+                  {/* Header mejorado con progreso e indicadores */}
+                  <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-xl p-4 mb-6 border border-purple-100">
+                    <div className="flex justify-between items-center mb-4">
+                      <div className="flex items-center gap-2">
+                        <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                          {preguntaActual + 1}
+                        </div>
+                        <span className="text-purple-700 font-semibold">de 10 palabras</span>
+                      </div>
+
+                      {/* Barra de progreso */}
+                      <div className="flex-1 mx-4">
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-gradient-to-r from-purple-500 to-indigo-500 h-2 rounded-full transition-all duration-300"
+                            style={{ width: `${((preguntaActual + 1) / 10) * 100}%` }}
+                          />
+                        </div>
+                      </div>
+
+                      <div className="text-purple-600 text-sm font-medium">
+                        {Math.round(((preguntaActual + 1) / 10) * 100)}%
+                      </div>
+                    </div>
+
+                    {/* Indicadores de respuestas anteriores */}
+                    <div className="flex justify-center gap-1 mb-4">
                       {[...Array(10)].map((_, i) => (
                         <div
                           key={i}
-                          className={`w-4 h-4 rounded-full ${i < preguntaActual ? (respuestas[i] ? "bg-green-500" : "bg-red-500") : "bg-gray-300"
+                          className={`w-3 h-3 rounded-full transition-all duration-300 ${i < preguntaActual
+                              ? (respuestas[i] ? "bg-green-400 shadow-md" : "bg-red-400 shadow-md")
+                              : i === preguntaActual
+                                ? "bg-purple-500 animate-pulse ring-2 ring-purple-300"
+                                : "bg-gray-200"
                             }`}
                         />
                       ))}
+                    </div>
+
+                    {/* Sistema de estrellas y fallos rediseñado */}
+                    <div className="flex items-center justify-center gap-6">
+                      {/* Indicador de estrella mejorado */}
+                      <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border">
+                        <div className="relative">
+                          <Star
+                            className={`w-6 h-6 transition-all duration-300 ${fallos < 3
+                                ? "text-yellow-400 drop-shadow-sm"
+                                : "text-gray-300"
+                              }`}
+                            fill={fallos < 3 ? "currentColor" : "none"}
+                          />
+                          {fallos < 3 && (
+                            <div className="absolute -inset-1 bg-yellow-400 rounded-full opacity-20 animate-ping" />
+                          )}
+                        </div>
+                        <span
+                          className={`font-semibold text-sm transition-all duration-300 ${fallos < 3
+                              ? "text-yellow-600"
+                              : "text-gray-400 line-through"
+                            }`}
+                        >
+                          {fallos < 3 ? "¡Estrella disponible!" : "Estrella perdida"}
+                        </span>
+                      </div>
+
+                      {/* Contador de fallos mejorado */}
+                      <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border">
+                        <div className="flex gap-1">
+                          {[1, 2, 3].map((fallo) => (
+                            <div
+                              key={fallo}
+                              className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${fallo <= fallos
+                                  ? "bg-red-400 border-red-400 scale-110"
+                                  : "border-gray-300"
+                                }`}
+                            />
+                          ))}
+                        </div>
+                        <span className={`font-semibold text-sm ${fallos === 0 ? "text-green-600" :
+                            fallos === 1 ? "text-yellow-600" :
+                              fallos === 2 ? "text-orange-600" : "text-red-600"
+                          }`}>
+                          {fallos === 0 ? "¡Perfecto!" :
+                            fallos === 1 ? "1 fallo" :
+                              fallos === 2 ? "2 fallos" : "3 fallos"}
+                        </span>
+                      </div>
                     </div>
                   </div>
 
@@ -752,10 +1000,80 @@ export default function Unidad1() {
               ) : (
                 <div className="text-center py-8">
                   <div className="text-6xl mb-4">🎉</div>
-                  <h2 className="text-3xl font-bold text-purple-800 mb-4">¡Dictado Completado!</h2>
-                  <p className="text-xl text-purple-600 mb-8">
-                    Has escrito correctamente {respuestas.filter((r) => r).length} de 10 palabras
-                  </p>
+                  <h2 className="text-3xl font-bold text-purple-800 mb-6">¡Dictado Completado!</h2>
+
+                  {/* Estadísticas detalladas */}
+                  <div className="bg-gradient-to-br from-purple-50 to-indigo-50 rounded-xl p-6 mb-6 border border-purple-100 inline-block">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+
+                      {/* Palabras correctas */}
+                      <div className="flex flex-col items-center">
+                        <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mb-3">
+                          <Check className="w-8 h-8 text-green-600" />
+                        </div>
+                        <div className="text-2xl font-bold text-green-600 mb-1">
+                          {respuestas.filter((r) => r).length}
+                        </div>
+                        <div className="text-sm text-green-700 font-medium">
+                          Palabras correctas
+                        </div>
+                      </div>
+
+                      {/* Palabras incorrectas */}
+                      <div className="flex flex-col items-center">
+                        <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mb-3">
+                          <X className="w-8 h-8 text-red-600" />
+                        </div>
+                        <div className="text-2xl font-bold text-red-600 mb-1">
+                          {fallos}
+                        </div>
+                        <div className="text-sm text-red-700 font-medium">
+                          Palabras incorrectas
+                        </div>
+                      </div>
+
+                      {/* Estado de la estrella */}
+                      <div className="flex flex-col items-center">
+                        <div className={`w-16 h-16 rounded-full flex items-center justify-center mb-3 ${fallos < 3 ? "bg-yellow-100" : "bg-gray-100"
+                          }`}>
+                          <Star
+                            className={`w-8 h-8 ${fallos < 3 ? "text-yellow-500" : "text-gray-400"
+                              }`}
+                            fill={fallos < 3 ? "currentColor" : "none"}
+                          />
+                        </div>
+                        <div className={`text-2xl font-bold mb-1 ${fallos < 3 ? "text-yellow-600" : "text-gray-500"
+                          }`}>
+                          {fallos < 3 ? "★ 1" : "★ 0"}
+                        </div>
+                        <div className={`text-sm font-medium ${fallos < 3 ? "text-yellow-700" : "text-gray-600"
+                          }`}>
+                          {fallos < 3 ? "¡Estrella ganada!" : "Estrella perdida"}
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Mensaje de rendimiento */}
+                    <div className="mt-6 p-4 rounded-lg bg-white border-l-4 border-purple-400">
+                      <p className="text-purple-700 font-medium">
+                        {fallos === 0 && "¡Excelente! Dictado perfecto sin errores de ortografía."}
+                        {fallos === 1 && "¡Muy bien! Solo una palabra incorrecta, sigue así."}
+                        {fallos === 2 && "¡Buen trabajo! Dos errores menores, pero ganaste la estrella."}
+                        {fallos >= 3 && "¡Sigue practicando! La ortografía mejora con la práctica."}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Progreso visual final */}
+                  <div className="flex justify-center gap-1 mb-6">
+                    {[...Array(10)].map((_, i) => (
+                      <div
+                        key={i}
+                        className={`w-4 h-4 rounded-full transition-all duration-300 ${respuestas[i] ? "bg-green-400 shadow-md" : "bg-red-400 shadow-md"
+                          }`}
+                      />
+                    ))}
+                  </div>
 
                   <div className="flex justify-center gap-4">
                     <button
