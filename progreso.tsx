@@ -40,7 +40,7 @@ export default function Progreso() {
             case "diferencias": return "Reglas de Mayúsculas";
             case "completar": return "Completar Oraciones";
             case "dictado": return "Corregir Textos";
-            case "sopa": return "Sopa de Nombres";
+            case "sopa": return "Actividad Clasificatoria";
             default: return activityType;
         }
     }
@@ -49,7 +49,7 @@ export default function Progreso() {
             case "diferencias": return "Reglas de Acentuación";
             case "completar": return "Arrastrar Tildes";
             case "dictado": return "Adivinanzas con Tildes";
-            case "sopa": return "Sopa de Palabras";
+            case "sopa": return "Actividad Clasificatoria";
             default: return activityType;
         }
     }
@@ -60,27 +60,19 @@ export default function Progreso() {
             case "diferencias": return "Reglas de B y V";
             case "completar": return "Completar con B o V";
             case "dictado": return "Dictado de B y V";
-            case "sopa": return "Sopa de B y V";
+            case "sopa": return "Actividad Clasificatoria";
             default: return activityType;
         }
     }
 
-    if (unitId === "unidad5") {
-        switch (activityType) {
-            case "diferencias": return "Reglas de C, S y Z";
-            case "completar": return "Completar con C, S o Z";
-            case "dictado": return "Dictado de C, S y Z";
-            case "sopa": return "Sopa de C, S y Z";
-            default: return activityType;
-        }
-    }
+   
 
 
     switch (activityType) {
         case "diferencias": return "Diferencias B/V, C/S/Z, G/J";
         case "completar": return "Completar Palabras";
         case "dictado": return "Dictado Interactivo";
-        case "sopa": return "Sopa de Letras";
+        case "sopa": return "Actividad Clasificatoria";
         default: return activityType;
     }
 }

@@ -75,7 +75,7 @@ const availableMedals: Medal[] = [
   {
     id: "three_stars",
     name: "Tres Estrellas",
-    description: "Conseguiste 3 estrellas en una actividad",
+    description: "Conseguiste 4 estrellas en una actividad",
     icon: "⭐",
     unlocked: false,
   },
@@ -148,7 +148,6 @@ const initialProgress: UserProgress = {
     unidad2: createInitialUnitProgress(2, "Uso de Mayúsculas"),
     unidad3: createInitialUnitProgress(3, "Reglas de Acentuación"),
     unidad4: createInitialUnitProgress(4, "Palabras Homófonas"),
-    unidad5: createInitialUnitProgress(5, "Reglas Ortográficas"),
   },
   medals: availableMedals,
   activities: null
@@ -364,7 +363,7 @@ export default function useProgress(unitId?: string) {
     }
 
     // Tres estrellas en una actividad
-    if (activity.stars === 3) {
+    if (activity.stars === 4) {
       const threeStarsMedal = medals.find((m) => m.id === "three_stars")
       if (threeStarsMedal && !threeStarsMedal.unlocked) {
         threeStarsMedal.unlocked = true

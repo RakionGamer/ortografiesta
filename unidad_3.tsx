@@ -115,6 +115,9 @@ const reglasData = [
     },
 ]
 
+
+
+
 // Palabras para arrastrar tildes
 const palabrasArrastrar = [
     { palabra: "ratón", silabas: ["ra", "ton"], correcta: 1, tipo: "aguda", emoji: "🐭" },
@@ -219,7 +222,13 @@ export default function Unidad3() {
     const [selectedAvatar, setSelectedAvatar] = useState("🐱")
     const { progress, updateActivity } = useProgress("unidad3")
     const [puntosUnidad, setPuntosUnidad] = useState(0)
-    const [estrellasUnidad, setEstrellasUnidad] = useState(0)
+    const [estrellasUnidad, setEstrellasUnidad] = useState(0);
+    const [fallos, setFallos] = useState(0);
+
+
+
+
+
 
     useEffect(() => {
         const savedAvatar = localStorage.getItem("ortografia-avatar")
@@ -257,74 +266,86 @@ export default function Unidad3() {
         }
     }
 
-    // Función para manejar clic en sílaba (arrastrar tildes)
+
     const handleSilabaClick = (index: number) => {
-        if (tildeColocada) return
+        if (tildeColocada) return;
+        setSilabaSeleccionada(index);
+        setTildeColocada(true);
+        const palabraActual = palabrasArrastrar[preguntaActual];
+        const esCorrecta = index === palabraActual.correcta;
 
-        setSilabaSeleccionada(index)
-        setTildeColocada(true)
-
-        const palabraActual = palabrasArrastrar[preguntaActual]
-        const esCorrecta = index === palabraActual.correcta
-
-        setMostrarResultado(esCorrecta)
-
+        setMostrarResultado(esCorrecta);
         if (esCorrecta) {
-            setPuntuacion((prev) => prev + 10)
+            setPuntuacion((prev) => prev + 10);
         }
+        setRespuestas((r) => [...r, esCorrecta]);
 
-        setRespuestas([...respuestas, esCorrecta])
-
+        const nuevosFallos = esCorrecta ? fallos : fallos + 1;
+         if (!esCorrecta) {
+            setFallos(n => n + 1);
+        }
         setTimeout(() => {
-            setMostrarResultado(null)
-            setSilabaSeleccionada(null)
-            setTildeColocada(false)
+            setMostrarResultado(null);
+            setSilabaSeleccionada(null);
+            setTildeColocada(false);
             if (preguntaActual < 9) {
-                setPreguntaActual((prev) => prev + 1)
+                setPreguntaActual((prev) => prev + 1);
             } else {
-                setActividadCompletada(true)
-                const respuestasCorrectas = [...respuestas, esCorrecta].filter(Boolean).length
-                const porcentajeExito = (respuestasCorrectas / 10) * 100
-                if (porcentajeExito === 100) {
+                setActividadCompletada(true);
+                const respuestasCorrectas = [...respuestas, esCorrecta].filter(Boolean).length;
+                const porcentajeExito = (respuestasCorrectas / 10) * 100;
+
+                if (nuevosFallos < 3) {
                     updateActivity("completar", {
                         attempts: 1,
                         lastScore: porcentajeExito,
                         completed: true,
-                        stars: 1,
+                        stars: porcentajeExito >= 90 ? 1 : 0,
                     });
                 }
             }
-        }, 7000)
-    }
+        }, 2200);
+    };
+
+
+
+
+
+
 
     const verificarAdivinanza = () => {
-        const adivinanzaActual = adivinanzas[preguntaActual]
-        const esCorrecta = respuestaUsuario.toLowerCase().trim() === adivinanzaActual.respuesta.toLowerCase()
+        const adivinanzaActual = adivinanzas[preguntaActual];
+        const esCorrecta =
+            respuestaUsuario.toLowerCase().trim() ===
+            adivinanzaActual.respuesta.toLowerCase();
 
-        setMostrarResultado(esCorrecta)
-        setMostrarRespuesta(true)
+        setMostrarResultado(esCorrecta);
+        setMostrarRespuesta(true);
         if (esCorrecta) {
-            setPuntuacion((prev) => prev + 15)
+            setPuntuacion((prev) => prev + 15);
         }
 
-        setRespuestas([...respuestas, esCorrecta])
+        setRespuestas((r) => [...r, esCorrecta]);
+
+        const nuevosFallos = esCorrecta ? fallos : fallos + 1;
+        if (!esCorrecta) {
+            setFallos(n => n + 1);
+        }
+
         setTimeout(() => {
-            setMostrarResultado(null)
-            setMostrarRespuesta(false)
-            setRespuestaUsuario("")
-            setPistaActual(0)
+            setMostrarResultado(null);
+            setMostrarRespuesta(false);
+            setRespuestaUsuario("");
+            setPistaActual(0);
 
             if (preguntaActual < 5) {
-                setPreguntaActual((prev) => prev + 1)
+                setPreguntaActual((prev) => prev + 1);
             } else {
-                setActividadCompletada(true)
-                const respuestasCorrectas = [...respuestas, esCorrecta].filter(Boolean).length
-                const porcentajeExito = (respuestasCorrectas / 6) * 100
+                setActividadCompletada(true);
+                const respuestasCorrectas = [...respuestas, esCorrecta].filter(Boolean).length;
+                const porcentajeExito = (respuestasCorrectas / 6) * 100;
 
-
-
-
-                if (progress && progress.activities) {
+                if (nuevosFallos < 3) {
                     updateActivity("dictado", {
                         attempts: 1,
                         lastScore: porcentajeExito,
@@ -333,8 +354,9 @@ export default function Unidad3() {
                     });
                 }
             }
-        }, 3000)
-    }
+        }, 3000);
+    };
+
 
     // Función para cambiar de actividad
     const cambiarActividad = (nuevaActividad: Actividad) => {
@@ -449,6 +471,10 @@ export default function Unidad3() {
         }
     }, [actividad])
 
+
+
+
+
     // Manejar selección en sopa de letras
     const handleCeldaMouseDown = (row: number, col: number) => {
         setSeleccionInicio({ row, col })
@@ -532,6 +558,96 @@ export default function Unidad3() {
         )
     }
 
+
+    const [palabrasSinClasificar, setPalabrasSinClasificar] = useState([
+        "canción", "árbol", "murciélago", "papel", "teléfono", "mesa",
+        "corazón", "fácil", "médico", "café", "lápiz", "computadora",
+        "música", "ratón", "pájaro", "universidad"
+    ]);
+
+    type CategoriaKey = "agudas" | "graves" | "esdrujulas";
+
+    const [categorias, setCategorias] = useState<Record<CategoriaKey, string[]>>({
+        agudas: [],
+        graves: [],
+        esdrujulas: []
+    });
+
+    const [palabraSeleccionada, setPalabraSeleccionada] = useState<string | null>(null);
+    const [feedback, setFeedback] = useState<Record<string, boolean>>({});
+
+    // Clasificación correcta de las palabras
+    const clasificacionCorrecta = {
+        agudas: ["canción", "papel", "café", "corazón", "ratón"],
+        graves: ["árbol", "mesa", "fácil", "lápiz", "computadora", "universidad"],
+        esdrujulas: ["murciélago", "teléfono", "médico", "música", "pájaro"]
+    };
+
+    // Función para asignar palabra a categoría
+    const asignarPalabra = (categoria: CategoriaKey) => {
+        if (palabraSeleccionada) {
+            const nuevasCategorias = { ...categorias };
+
+            setPalabrasSinClasificar(palabrasSinClasificar.filter(p => p !== palabraSeleccionada));
+
+            nuevasCategorias[categoria] = [
+                ...nuevasCategorias[categoria],
+                palabraSeleccionada
+            ];
+
+            setCategorias(nuevasCategorias);
+            setPalabraSeleccionada(null);
+        }
+    };
+
+    const comprobarClasificacion = () => {
+        const nuevoFeedback: Record<string, boolean> = {};
+        let errores = 0;
+
+        Object.keys(categorias).forEach(categoria => {
+            const cat = categoria as CategoriaKey;
+            categorias[cat].forEach(palabra => {
+                const esCorrecta = clasificacionCorrecta[cat].includes(palabra);
+                nuevoFeedback[palabra] = esCorrecta;
+                if (!esCorrecta) errores++;
+            });
+        });
+
+        setFeedback(nuevoFeedback);
+        setFallos(errores);
+        setActividadCompletada(true);
+
+        if (errores < 3) {
+            updateActivity("sopa", {
+                attempts: 1,
+                lastScore: 100,
+                completed: true,
+                stars: 1
+            });
+        }
+    };
+
+    // Función para reiniciar la actividad
+    const reiniciarActividad = () => {
+        setPalabrasSinClasificar([
+            "canción", "árbol", "murciélago", "papel", "teléfono", "mesa",
+            "corazón", "fácil", "médico", "café", "lápiz", "computadora",
+            "música", "ratón", "pájaro", "universidad"
+        ]);
+        setCategorias({
+            agudas: [],
+            graves: [],
+            esdrujulas: []
+        });
+        setPalabraSeleccionada(null);
+        setFeedback({});
+        setFallos(0);
+        setActividadCompletada(false);
+    };
+
+
+
+
     return (
         <div className="min-h-screen bg-gradient-to-b from-orange-300 to-orange-200 overflow-hidden relative">
             <div className="container mx-auto px-4 py-8 relative z-10">
@@ -596,7 +712,7 @@ export default function Unidad3() {
                         className={`px-4 py-2 rounded-full font-bold cursor-pointer ${actividad === "sopa" ? "bg-green-500 text-white" : "bg-white/70 text-green-600 hover:bg-white"
                             } transition-colors`}
                     >
-                        Sopa de Palabras
+                        Actividad Clasificatoria
                     </button>
                 </div>
 
@@ -694,10 +810,10 @@ export default function Unidad3() {
                                                             <div
                                                                 key={i}
                                                                 className={`w-3 h-3 rounded-full transition-all duration-300 ${i < preguntaActual
-                                                                        ? (respuestas[i] ? "bg-green-400 shadow-lg shadow-green-200" : "bg-red-400 shadow-lg shadow-red-200")
-                                                                        : i === preguntaActual
-                                                                            ? "bg-orange-400 animate-pulse shadow-lg shadow-orange-200"
-                                                                            : "bg-gray-200"
+                                                                    ? (respuestas[i] ? "bg-green-400 shadow-lg shadow-green-200" : "bg-red-400 shadow-lg shadow-red-200")
+                                                                    : i === preguntaActual
+                                                                        ? "bg-orange-400 animate-pulse shadow-lg shadow-orange-200"
+                                                                        : "bg-gray-200"
                                                                     }`}
                                                             />
                                                         ))}
@@ -709,6 +825,58 @@ export default function Unidad3() {
                                                         />
                                                     </div>
                                                 </div>
+                                            </div>
+                                        </div>
+
+
+
+                                        {/* Sistema de estrellas y fallos rediseñado */}
+                                        <div className="flex items-center justify-center gap-6 mb-6">
+                                            {/* Indicador de estrella mejorado */}
+                                            <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border">
+                                                <div className="relative">
+                                                    <Star
+                                                        className={`w-6 h-6 transition-all duration-300 ${fallos < 3
+                                                            ? "text-yellow-400 drop-shadow-sm"
+                                                            : "text-gray-300"
+                                                            }`}
+                                                        fill={fallos < 3 ? "currentColor" : "none"}
+                                                    />
+                                                    {fallos < 3 && (
+                                                        <div className="absolute -inset-1 bg-yellow-400 rounded-full opacity-20 animate-ping" />
+                                                    )}
+                                                </div>
+                                                <span
+                                                    className={`font-semibold text-sm transition-all duration-300 ${fallos < 3
+                                                        ? "text-yellow-600"
+                                                        : "text-gray-400 line-through"
+                                                        }`}
+                                                >
+                                                    {fallos < 3 ? "¡Estrella disponible!" : "Estrella perdida"}
+                                                </span>
+                                            </div>
+
+                                            {/* Contador de fallos mejorado */}
+                                            <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border">
+                                                <div className="flex gap-1">
+                                                    {[1, 2, 3].map((fallo) => (
+                                                        <div
+                                                            key={fallo}
+                                                            className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${fallo <= fallos
+                                                                ? "bg-red-400 border-red-400 scale-110"
+                                                                : "border-gray-300"
+                                                                }`}
+                                                        />
+                                                    ))}
+                                                </div>
+                                                <span className={`font-semibold text-sm ${fallos === 0 ? "text-green-600" :
+                                                    fallos === 1 ? "text-yellow-600" :
+                                                        fallos === 2 ? "text-orange-600" : "text-red-600"
+                                                    }`}>
+                                                    {fallos === 0 ? "¡Perfecto!" :
+                                                        fallos === 1 ? "1 fallo" :
+                                                            fallos === 2 ? "2 fallos" : "3 fallos"}
+                                                </span>
                                             </div>
                                         </div>
 
@@ -754,12 +922,12 @@ export default function Unidad3() {
                                                     onClick={() => handleSilabaClick(index)}
                                                     disabled={tildeColocada}
                                                     className={`group relative px-8 py-6 text-4xl md:text-5xl font-bold rounded-2xl border-4 transition-all duration-300 transform hover:scale-105 ${silabaSeleccionada === index
-                                                            ? mostrarResultado
-                                                                ? "bg-gradient-to-br from-green-400 to-green-500 text-white border-green-600 scale-110 shadow-2xl shadow-green-300/50 animate-pulse"
-                                                                : "bg-gradient-to-br from-red-400 to-red-500 text-white border-red-600 scale-110 shadow-2xl shadow-red-300/50 animate-pulse"
-                                                            : tildeColocada
-                                                                ? "bg-gray-100 text-gray-400 border-gray-200 scale-95"
-                                                                : "bg-white hover:bg-gradient-to-br hover:from-orange-50 hover:to-red-50 text-orange-800 border-orange-300 hover:border-orange-400 shadow-lg hover:shadow-xl cursor-pointer active:scale-95"
+                                                        ? mostrarResultado
+                                                            ? "bg-gradient-to-br from-green-400 to-green-500 text-white border-green-600 scale-110 shadow-2xl shadow-green-300/50 animate-pulse"
+                                                            : "bg-gradient-to-br from-red-400 to-red-500 text-white border-red-600 scale-110 shadow-2xl shadow-red-300/50 animate-pulse"
+                                                        : tildeColocada
+                                                            ? "bg-gray-100 text-gray-400 border-gray-200 scale-95"
+                                                            : "bg-white hover:bg-gradient-to-br hover:from-orange-50 hover:to-red-50 text-orange-800 border-orange-300 hover:border-orange-400 shadow-lg hover:shadow-xl cursor-pointer active:scale-95"
                                                         }`}
                                                 >
                                                     {/* Efecto de brillo en hover */}
@@ -800,8 +968,8 @@ export default function Unidad3() {
                                         {mostrarResultado !== null && (
                                             <div className="flex justify-center">
                                                 <div className={`flex flex-col items-center gap-4 px-8 py-6 rounded-3xl text-xl font-bold shadow-xl transform animate-in slide-in-from-bottom-4 duration-500 max-w-md ${mostrarResultado
-                                                        ? "bg-gradient-to-r from-green-400 to-green-500 text-white shadow-green-300/50"
-                                                        : "bg-gradient-to-r from-red-400 to-red-500 text-white shadow-red-300/50"
+                                                    ? "bg-gradient-to-r from-green-400 to-green-500 text-white shadow-green-300/50"
+                                                    : "bg-gradient-to-r from-red-400 to-red-500 text-white shadow-red-300/50"
                                                     }`}>
                                                     <div className="flex items-center gap-3">
                                                         {mostrarResultado ? (
@@ -917,10 +1085,10 @@ export default function Unidad3() {
                                                             <div
                                                                 key={i}
                                                                 className={`w-3 h-3 rounded-full transition-all duration-300 ${i < preguntaActual
-                                                                        ? (respuestas[i] ? "bg-green-400 shadow-lg shadow-green-200" : "bg-red-400 shadow-lg shadow-red-200")
-                                                                        : i === preguntaActual
-                                                                            ? "bg-blue-400 animate-pulse shadow-lg shadow-blue-200"
-                                                                            : "bg-gray-200"
+                                                                    ? (respuestas[i] ? "bg-green-400 shadow-lg shadow-green-200" : "bg-red-400 shadow-lg shadow-red-200")
+                                                                    : i === preguntaActual
+                                                                        ? "bg-blue-400 animate-pulse shadow-lg shadow-blue-200"
+                                                                        : "bg-gray-200"
                                                                     }`}
                                                             />
                                                         ))}
@@ -932,6 +1100,55 @@ export default function Unidad3() {
                                                         />
                                                     </div>
                                                 </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex items-center justify-center gap-6 mb-6">
+                                            {/* Indicador de estrella mejorado */}
+                                            <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border">
+                                                <div className="relative">
+                                                    <Star
+                                                        className={`w-6 h-6 transition-all duration-300 ${fallos < 3
+                                                            ? "text-yellow-400 drop-shadow-sm"
+                                                            : "text-gray-300"
+                                                            }`}
+                                                        fill={fallos < 3 ? "currentColor" : "none"}
+                                                    />
+                                                    {fallos < 3 && (
+                                                        <div className="absolute -inset-1 bg-yellow-400 rounded-full opacity-20 animate-ping" />
+                                                    )}
+                                                </div>
+                                                <span
+                                                    className={`font-semibold text-sm transition-all duration-300 ${fallos < 3
+                                                        ? "text-yellow-600"
+                                                        : "text-gray-400 line-through"
+                                                        }`}
+                                                >
+                                                    {fallos < 3 ? "¡Estrella disponible!" : "Estrella perdida"}
+                                                </span>
+                                            </div>
+
+                                            {/* Contador de fallos mejorado */}
+                                            <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border">
+                                                <div className="flex gap-1">
+                                                    {[1, 2, 3].map((fallo) => (
+                                                        <div
+                                                            key={fallo}
+                                                            className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${fallo <= fallos
+                                                                ? "bg-red-400 border-red-400 scale-110"
+                                                                : "border-gray-300"
+                                                                }`}
+                                                        />
+                                                    ))}
+                                                </div>
+                                                <span className={`font-semibold text-sm ${fallos === 0 ? "text-green-600" :
+                                                    fallos === 1 ? "text-yellow-600" :
+                                                        fallos === 2 ? "text-orange-600" : "text-red-600"
+                                                    }`}>
+                                                    {fallos === 0 ? "¡Perfecto!" :
+                                                        fallos === 1 ? "1 fallo" :
+                                                            fallos === 2 ? "2 fallos" : "3 fallos"}
+                                                </span>
                                             </div>
                                         </div>
 
@@ -1066,8 +1283,8 @@ export default function Unidad3() {
                                                                 <div
                                                                     key={index}
                                                                     className={`px-4 py-3 rounded-xl text-xl font-bold border-3 transition-all duration-300 ${index === adivinanzas[preguntaActual].acentuada
-                                                                            ? "bg-gradient-to-br from-green-400 to-green-500 text-white border-green-600 shadow-lg shadow-green-300/50 transform scale-110"
-                                                                            : "bg-white text-green-800 border-green-300 hover:border-green-400"
+                                                                        ? "bg-gradient-to-br from-green-400 to-green-500 text-white border-green-600 shadow-lg shadow-green-300/50 transform scale-110"
+                                                                        : "bg-white text-green-800 border-green-300 hover:border-green-400"
                                                                         }`}
                                                                 >
                                                                     {silaba}
@@ -1157,124 +1374,358 @@ export default function Unidad3() {
                     {/* Sopa de palabras acentuadas */}
                     {actividad === "sopa" && (
                         <div className="text-center">
-                            {!actividadCompletada ? (
-                                <>
-                                    <div className="bg-gradient-to-r from-green-400 via-blue-500 to-purple-500 rounded-xl p-6 shadow-lg mb-6 relative overflow-hidden">
-                                        <div className="absolute top-1 left-1 text-3xl">✏️</div>
-                                        <div className="absolute top-1 right-1 text-3xl">🎵</div>
-                                        <div className="absolute bottom-1 left-1 text-3xl">☕</div>
-                                        <div className="absolute bottom-1 right-1 text-3xl">🌳</div>
+                            <div className="text-center">
+                                {!actividadCompletada ? (
+                                    <>
+                                        <div className="bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-400 rounded-xl p-6 shadow-lg mb-6 relative overflow-hidden">
+                                            {/* Imágenes decorativas en las esquinas */}
+                                            <div className="absolute top-1 left-1 text-3xl">📝</div>
+                                            <div className="absolute top-1 right-1 text-3xl">🔤</div>
+                                            <div className="absolute bottom-1 left-1 text-3xl">📚</div>
+                                            <div className="absolute bottom-1 right-1 text-3xl">✏️</div>
 
-                                        <h2 className="text-3xl font-bold text-white mb-2 flex items-center justify-center">
-                                            <span className="mr-2">🔍</span>
-                                            Sopa de Palabras con Tilde
-                                            <span className="ml-2">✨</span>
-                                        </h2>
-                                        <p className="text-lg text-white mb-2">¡Encuentra las palabras que llevan tilde!</p>
-                                    </div>
-
-                                    <div className="flex flex-col md:flex-row gap-6 items-start">
-                                        <div
-                                            className="bg-orange-100 p-5 rounded-xl w-full md:w-auto shadow-md border-4 border-orange-300 relative"
-                                            ref={sopaRef}
-                                            onMouseLeave={handleCeldaMouseUp}
-                                        >
-                                            <div className="grid grid-cols-9 gap-1 mx-auto w-max">
-                                                {sopaLetras.flatMap((fila, rowIndex) =>
-                                                    fila.map((letra, colIndex) => (
-                                                        <div
-                                                            key={`${rowIndex}-${colIndex}`}
-                                                            className={`w-10 h-10 flex items-center justify-center font-bold text-lg rounded-md transition-all duration-200 select-none cursor-pointer transform hover:scale-110
-                        ${esCeldaPalabraEncontrada(rowIndex, colIndex)
-                                                                    ? "bg-orange-400 text-white animate-pulse"
-                                                                    : esCeldaSeleccionada(rowIndex, colIndex)
-                                                                        ? "bg-yellow-300 text-orange-800"
-                                                                        : "bg-white text-orange-800 shadow-sm"
-                                                                }`}
-                                                            onMouseDown={() => handleCeldaMouseDown(rowIndex, colIndex)}
-                                                            onMouseEnter={() => handleCeldaMouseEnter(rowIndex, colIndex)}
-                                                            onMouseUp={handleCeldaMouseUp}
-                                                        >
-                                                            {letra}
-                                                        </div>
-                                                    )),
-                                                )}
+                                            <h2 className="text-3xl font-bold text-white mb-2 flex items-center justify-center">
+                                                <span className="mr-2">🎯</span>
+                                                Clasificación por Acentuación
+                                                <span className="ml-2">🔍</span>
+                                            </h2>
+                                            <p className="text-lg text-white mb-2">
+                                                ¡Clasifica las palabras según su acentuación!
+                                            </p>
+                                            <div className="flex justify-center">
+                                                <div className="flex items-center space-x-1">
+                                                    {[...Array(5)].map((_, i) => (
+                                                        <span key={i} className={`text-2xl ${i < Math.ceil((Object.values(categorias).flat().length) / 16 * 5) ? "text-yellow-300" : "text-gray-300"}`}>
+                                                            ⭐
+                                                        </span>
+                                                    ))}
+                                                </div>
                                             </div>
                                         </div>
+                                        
 
-                                        <div className="bg-yellow-100 p-5 rounded-xl flex-1 shadow-md border-4 border-yellow-300">
-                                            <h3 className="text-xl font-bold text-orange-800 mb-3 flex items-center justify-center">
-                                                <span className="mr-2">🎯</span> ¡Encuentra estas palabras! <span className="ml-2">🎯</span>
+                                        {/* Palabras sin clasificar */}
+                                        <div className="bg-blue-100 p-5 rounded-xl mb-6 shadow-md border-4 border-blue-300">
+                                            <h3 className="text-xl font-bold text-purple-800 mb-4 flex items-center justify-center">
+                                                <span className="mr-2">📦</span> Palabras para clasificar <span className="ml-2">📦</span>
                                             </h3>
-                                            <div className="grid grid-cols-2 gap-3">
-                                                {palabrasAcentuadas.map((palabra, index) => {
-                                                    const iconos = ["🎵", "🌳", "☕", "👨‍⚕️", "✏️", "🐭"]
-                                                    return (
-                                                        <div
-                                                            key={palabra}
-                                                            className={`px-4 py-2 rounded-full text-md font-bold transition-all duration-300 flex items-center justify-between ${palabrasEncontradas.includes(palabra)
-                                                                ? "bg-orange-400 text-white line-through transform scale-95"
-                                                                : "bg-white text-orange-800 shadow-sm hover:shadow-md hover:scale-105"
-                                                                }`}
-                                                        >
-                                                            <span>
-                                                                {palabrasEncontradas.includes(palabra) ? "✓ " : ""} {palabra}
-                                                            </span>
-                                                            <span className="text-xl ml-2">{iconos[index]}</span>
+                                            <div className="flex flex-wrap justify-center gap-3">
+                                                {palabrasSinClasificar.map((palabra, index) => (
+                                                    <button
+                                                        key={index}
+                                                        onClick={() => setPalabraSeleccionada(palabra)}
+                                                        className={`px-4 py-2 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105 cursor-pointer
+                      ${palabraSeleccionada === palabra
+                                                                ? "bg-purple-500 text-white shadow-lg scale-105"
+                                                                : "bg-white text-purple-800 shadow-md hover:shadow-lg"
+                                                            }`}
+                                                    >
+                                                        {palabra}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            {palabrasSinClasificar.length === 0 && (
+                                                <p className="text-purple-600 font-bold text-lg">¡Todas las palabras han sido clasificadas!</p>
+                                            )}
+                                        </div>
+
+                                        {/* Categorías */}
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+                                            {/* Categoría AGUDAS */}
+                                            <div className="bg-red-100 p-5 rounded-xl shadow-md border-4 border-red-300">
+                                                <h3 className="text-xl font-bold text-red-800 mb-3 flex items-center justify-center">
+                                                    <span className="mr-2">🔥</span> AGUDAS <span className="ml-2">🔥</span>
+                                                </h3>
+                                                <div
+                                                    className="min-h-[150px] bg-white rounded-lg p-3 border-2 border-dashed border-red-400 cursor-pointer hover:bg-red-50 transition-colors"
+                                                    onClick={() => palabraSeleccionada && asignarPalabra('agudas')}
+                                                >
+                                                    {categorias.agudas.length === 0 ? (
+                                                        <div className="text-center py-8">
+                                                            <p className="text-red-600 italic text-lg">Pulsa aquí las palabras</p>
+                                                            <p className="text-red-600 italic text-lg">agudas</p>
+                                                            <div className="text-2xl mt-2">🔥</div>
                                                         </div>
-                                                    )
-                                                })}
+                                                    ) : (
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {categorias.agudas.map((palabra, index) => (
+                                                                <span
+                                                                    key={index}
+                                                                    className={`px-3 py-1 rounded-full text-sm font-bold transition-all duration-300
+                            ${feedback[palabra] === true ? "bg-green-400 text-white animate-pulse" :
+                                                                            feedback[palabra] === false ? "bg-red-400 text-white animate-shake" :
+                                                                                "bg-red-200 text-red-800"}`}
+                                                                >
+                                                                    {palabra}
+                                                                    {feedback[palabra] === true && " ✓"}
+                                                                    {feedback[palabra] === false && " ✗"}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="mt-3 text-xs text-red-700 italic text-center">
+                                                    💡 Acento en la última sílaba
+                                                </div>
                                             </div>
 
-                                            <div className="mt-6 bg-orange-200 p-3 rounded-lg text-orange-800 font-bold">
-                                                <p className="flex items-center justify-center">
-                                                    <span className="text-xl mr-2">📊</span>
-                                                    ¡Has encontrado {palabrasEncontradas.length} de {palabrasAcentuadas.length} palabras!
-                                                </p>
+                                            {/* Categoría GRAVES */}
+                                            <div className="bg-blue-100 p-5 rounded-xl shadow-md border-4 border-blue-300">
+                                                <h3 className="text-xl font-bold text-blue-800 mb-3 flex items-center justify-center">
+                                                    <span className="mr-2">⚖️</span> GRAVES <span className="ml-2">⚖️</span>
+                                                </h3>
+                                                <div
+                                                    className="min-h-[150px] bg-white rounded-lg p-3 border-2 border-dashed border-blue-400 cursor-pointer hover:bg-blue-50 transition-colors"
+                                                    onClick={() => palabraSeleccionada && asignarPalabra('graves')}
+                                                >
+                                                    {categorias.graves.length === 0 ? (
+                                                        <div className="text-center py-8">
+                                                            <p className="text-blue-600 italic text-lg">Pulsa aquí las palabras</p>
+                                                            <p className="text-blue-600 italic text-lg">graves</p>
+                                                            <div className="text-2xl mt-2">⚖️</div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {categorias.graves.map((palabra, index) => (
+                                                                <span
+                                                                    key={index}
+                                                                    className={`px-3 py-1 rounded-full text-sm font-bold transition-all duration-300
+                            ${feedback[palabra] === true ? "bg-green-400 text-white animate-pulse" :
+                                                                            feedback[palabra] === false ? "bg-red-400 text-white animate-shake" :
+                                                                                "bg-blue-200 text-blue-800"}`}
+                                                                >
+                                                                    {palabra}
+                                                                    {feedback[palabra] === true && " ✓"}
+                                                                    {feedback[palabra] === false && " ✗"}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="mt-3 text-xs text-blue-700 italic text-center">
+                                                    💡 Acento en la penúltima sílaba
+                                                </div>
                                             </div>
 
-                                            <div className="mt-4 text-orange-700 text-sm italic">
-                                                Recuerda: Todas estas palabras llevan tilde (´) en alguna sílaba.
+                                            {/* Categoría ESDRÚJULAS */}
+                                            <div className="bg-green-100 p-5 rounded-xl shadow-md border-4 border-green-300">
+                                                <h3 className="text-xl font-bold text-green-800 mb-3 flex items-center justify-center">
+                                                    <span className="mr-2">⭐</span> ESDRÚJULAS <span className="ml-2">⭐</span>
+                                                </h3>
+                                                <div
+                                                    className="min-h-[150px] bg-white rounded-lg p-3 border-2 border-dashed border-green-400 cursor-pointer hover:bg-green-50 transition-colors"
+                                                    onClick={() => palabraSeleccionada && asignarPalabra('esdrujulas')}
+                                                >
+                                                    {categorias.esdrujulas.length === 0 ? (
+                                                        <div className="text-center py-8">
+                                                            <p className="text-green-600 italic text-lg">Pulsa aquí las palabras</p>
+                                                            <p className="text-green-600 italic text-lg">esdrújulas</p>
+                                                            <div className="text-2xl mt-2">⭐</div>
+                                                        </div>
+                                                    ) : (
+                                                        <div className="flex flex-wrap gap-2">
+                                                            {categorias.esdrujulas.map((palabra, index) => (
+                                                                <span
+                                                                    key={index}
+                                                                    className={`px-3 py-1 rounded-full text-sm font-bold transition-all duration-300
+                            ${feedback[palabra] === true ? "bg-green-400 text-white animate-pulse" :
+                                                                            feedback[palabra] === false ? "bg-red-400 text-white animate-shake" :
+                                                                                "bg-green-200 text-green-800"}`}
+                                                                >
+                                                                    {palabra}
+                                                                    {feedback[palabra] === true && " ✓"}
+                                                                    {feedback[palabra] === false && " ✗"}
+                                                                </span>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <div className="mt-3 text-xs text-green-700 italic text-center">
+                                                    💡 Acento en la antepenúltima sílaba
+                                                </div>
                                             </div>
                                         </div>
-                                    </div>
 
-                                    <div className="mt-6">
-                                        <button
-                                            onClick={() => cambiarActividad(actividad)}
-                                            className="bg-orange-500 text-white px-6 py-3 rounded-full font-bold hover:bg-orange-600 transition-colors flex items-center gap-2 mx-auto cursor-pointer"
-                                        >
-                                            <span>🔄</span>
-                                            <span>Reiniciar juego</span>
-                                        </button>
-                                    </div>
-                                </>
-                            ) : (
-                                <div className="text-center py-8 bg-gradient-to-r from-orange-200 via-yellow-200 to-red-200 rounded-xl p-8 shadow-lg">
-                                    <div className="animate-bounce text-7xl mb-6">🎉</div>
-                                    <h2 className="text-4xl font-bold text-orange-800 mb-4">¡Fantástico trabajo!</h2>
-                                    <p className="text-2xl text-orange-600 mb-8">
-                                        Has encontrado todas las palabras con tilde. ¡Eres un experto en acentuación!
-                                    </p>
+                                        {/* Instrucciones y progreso */}
+                                        <div className="bg-purple-100 p-5 rounded-xl shadow-md border-4 border-purple-300 mb-6">
+                                            <div className="flex items-center justify-center mb-3">
+                                                <span className="text-2xl mr-2">📊</span>
+                                                <span className="text-lg font-bold text-purple-800">
+                                                    Progreso: {Object.values(categorias).flat().length} de 16 palabras clasificadas
+                                                </span>
+                                            </div>
+                                            {palabraSeleccionada && (
+                                                <div className="bg-purple-200 p-3 rounded-lg mb-3">
+                                                    <p className="text-purple-800 font-bold">
+                                                        Palabra seleccionada: <span className="text-purple-600">"{palabraSeleccionada}"</span>
+                                                    </p>
+                                                    <p className="text-sm text-purple-600">
+                                                        Haz clic en la categoría donde quieres colocarla
+                                                    </p>
+                                                </div>
+                                            )}
+                                            <div className="text-purple-700 text-sm italic text-center">
+                                                💡 Pista: Pronuncia la palabra y escucha dónde suena más fuerte
+                                            </div>
+                                        </div>
 
-                                    <div className="flex justify-center gap-4">
-                                        <button
-                                            onClick={() => cambiarActividad(actividad)}
-                                            className="bg-orange-500 text-white px-8 py-4 rounded-full font-bold hover:bg-orange-600 transition-transform hover:scale-105 shadow-md flex items-center gap-2"
-                                        >
-                                            <span>🎮</span>
-                                            <span>¡Jugar de nuevo!</span>
-                                        </button>
-                                        <button
-                                            onClick={() => cambiarActividad("diferencias")}
-                                            className="bg-yellow-600 text-white px-8 py-4 rounded-full font-bold hover:bg-yellow-700 transition-transform hover:scale-105 shadow-md flex items-center gap-2"
-                                        >
-                                            <span>🏠</span>
-                                            <span>Volver a reglas</span>
-                                        </button>
+                                        {/* Botones de acción */}
+                                        <div className="flex flex-wrap justify-center gap-4">
+                                            {Object.values(categorias).flat().length === 16 && (
+                                                <button
+                                                    onClick={comprobarClasificacion}
+                                                    className="bg-green-500 text-white px-8 py-4 rounded-full font-bold hover:bg-green-600 transition-transform hover:scale-105 shadow-md flex items-center gap-2"
+                                                >
+                                                    <span>✅</span>
+                                                    <span>Comprobar clasificación</span>
+                                                </button>
+                                            )}
+                                            <button
+                                                onClick={reiniciarActividad}
+                                                className="bg-teal-400 text-white px-6 py-3 rounded-full font-bold hover:bg-teal-500 transition-colors flex items-center gap-2 cursor-pointer"
+                                            >
+                                                <span>🔄</span>
+                                                <span>Reiniciar juego</span>
+                                            </button>
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="text-center py-8 bg-gradient-to-r from-purple-200 via-pink-200 to-blue-200 rounded-xl p-8 shadow-lg">
+                                        <div className="animate-bounce text-7xl mb-6">
+                                            {fallos === 0 ? "🎉" : fallos <= 3 ? "😊" : "😅"}
+                                        </div>
+                                        <h2 className="text-4xl font-bold text-purple-800 mb-4">
+                                            {fallos === 0 ? "¡PERFECTO!" : fallos <= 3 ? "¡BUEN TRABAJO!" : "¡SIGUE PRACTICANDO!"}
+                                        </h2>
+                                        <p className="text-2xl text-purple-600 mb-8">
+                                            {fallos === 0
+                                                ? "¡Has clasificado todas las palabras correctamente! ¡Eres un experto en acentuación!"
+                                                : fallos <= 3
+                                                    ? `Has tenido ${fallos} error${fallos > 1 ? 'es' : ''}. ¡Muy bien, casi perfecto!`
+                                                    : `Has tenido ${fallos} errores. ¡No te preocupes, practica más y lo lograrás!`
+                                            }
+                                        </p>
+
+                                        <div className="flex justify-center mb-6">
+                                            {[...Array(5)].map((_, i) => (
+                                                <span key={i} className={`text-4xl animate-pulse ${fallos === 0 && i < 5 ? "text-yellow-400" :
+                                                    fallos <= 3 && i < 3 ? "text-yellow-400" :
+                                                        fallos > 3 && i < 1 ? "text-yellow-400" :
+                                                            "text-gray-300"
+                                                    }`}>
+                                                    ⭐
+                                                </span>
+                                            ))}
+                                        </div>
+
+                                        {/* Resumen de resultados */}
+                                        <div className="bg-white p-4 rounded-lg shadow-md mb-6 max-w-md mx-auto">
+                                            <h4 className="font-bold text-purple-800 mb-2">📊 Resumen:</h4>
+                                            <div className="flex justify-between text-sm">
+                                                <span className="text-green-600">✅ Correctas: {16 - fallos}</span>
+                                                <span className="text-red-600">❌ Incorrectas: {fallos}</span>
+                                                <span className="text-purple-600">📈 Precisión: {Math.round((16 - fallos) / 16 * 100)}%</span>
+                                            </div>
+                                        </div>
+
+                                        {/* Mostrar resultados por categoría */}
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 max-w-4xl mx-auto">
+                                            <div className="bg-red-200 p-4 rounded-lg shadow-md">
+                                                <h4 className="font-bold text-red-800 mb-2">🔥 AGUDAS</h4>
+                                                <div className="flex flex-wrap gap-1 justify-center">
+                                                    {categorias.agudas.map((palabra, index) => (
+                                                        <span key={index} className={`text-sm px-2 py-1 rounded ${feedback[palabra] === true ? "bg-green-400 text-white" :
+                                                            feedback[palabra] === false ? "bg-red-300 text-red-800" :
+                                                                "bg-white text-red-800"
+                                                            }`}>
+                                                            {palabra}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div className="bg-blue-200 p-4 rounded-lg shadow-md">
+                                                <h4 className="font-bold text-blue-800 mb-2">⚖️ GRAVES</h4>
+                                                <div className="flex flex-wrap gap-1 justify-center">
+                                                    {categorias.graves.map((palabra, index) => (
+                                                        <span key={index} className={`text-sm px-2 py-1 rounded ${feedback[palabra] === true ? "bg-green-400 text-white" :
+                                                            feedback[palabra] === false ? "bg-red-300 text-red-800" :
+                                                                "bg-white text-blue-800"
+                                                            }`}>
+                                                            {palabra}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                            <div className="bg-green-200 p-4 rounded-lg shadow-md">
+                                                <h4 className="font-bold text-green-800 mb-2">⭐ ESDRÚJULAS</h4>
+                                                <div className="flex flex-wrap gap-1 justify-center">
+                                                    {categorias.esdrujulas.map((palabra, index) => (
+                                                        <span key={index} className={`text-sm px-2 py-1 rounded ${feedback[palabra] === true ? "bg-green-400 text-white" :
+                                                            feedback[palabra] === false ? "bg-red-300 text-red-800" :
+                                                                "bg-white text-green-800"
+                                                            }`}>
+                                                            {palabra}
+                                                        </span>
+                                                    ))}
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Explicación educativa */}
+                                        <div className="bg-yellow-100 p-6 rounded-lg shadow-md mb-6 max-w-4xl mx-auto">
+                                            <h4 className="font-bold text-yellow-800 mb-4 text-xl">📚 Reglas de Acentuación</h4>
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-left">
+                                                <div className="bg-red-50 p-3 rounded-lg">
+                                                    <h5 className="font-bold text-red-800 mb-2">🔥 AGUDAS</h5>
+                                                    <p className="text-sm text-red-700 mb-2">
+                                                        Acento en la <strong>última sílaba</strong>
+                                                    </p>
+                                                    <p className="text-xs text-red-600">
+                                                        Llevan tilde cuando terminan en vocal, 'n' o 's'
+                                                    </p>
+                                                    <p className="text-xs text-red-600 mt-1">
+                                                        Ej: ca-<strong>CIÓN</strong>, ca-<strong>FÉ</strong>
+                                                    </p>
+                                                </div>
+                                                <div className="bg-blue-50 p-3 rounded-lg">
+                                                    <h5 className="font-bold text-blue-800 mb-2">⚖️ GRAVES</h5>
+                                                    <p className="text-sm text-blue-700 mb-2">
+                                                        Acento en la <strong>penúltima sílaba</strong>
+                                                    </p>
+                                                    <p className="text-xs text-blue-600">
+                                                        Llevan tilde cuando NO terminan en vocal, 'n' o 's'
+                                                    </p>
+                                                    <p className="text-xs text-blue-600 mt-1">
+                                                        Ej: <strong>ÁR</strong>-bol, <strong>LÁ</strong>-piz
+                                                    </p>
+                                                </div>
+                                                <div className="bg-green-50 p-3 rounded-lg">
+                                                    <h5 className="font-bold text-green-800 mb-2">⭐ ESDRÚJULAS</h5>
+                                                    <p className="text-sm text-green-700 mb-2">
+                                                        Acento en la <strong>antepenúltima sílaba</strong>
+                                                    </p>
+                                                    <p className="text-xs text-green-600">
+                                                        Siempre llevan tilde
+                                                    </p>
+                                                    <p className="text-xs text-green-600 mt-1">
+                                                        Ej: <strong>MÚ</strong>-si-ca, <strong>MÉ</strong>-di-co
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex flex-wrap justify-center gap-4">
+                                            <button
+                                                onClick={reiniciarActividad}
+                                                className="bg-teal-500 text-white px-8 py-4 rounded-full font-bold hover:bg-teal-600 transition-transform hover:scale-105 shadow-md flex items-center gap-2"
+                                            >
+                                                <span>🎮</span>
+                                                <span>¡Jugar de nuevo!</span>
+                                            </button>
+                                        </div>
                                     </div>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                     )}
                 </div>
