@@ -4,6 +4,7 @@ import { Star, Music, Volume2, VolumeX, Pause } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useAudio } from './app/contexts/AudioContext'
 import useProgress from "./app/hooks/useProgress"
+import OrtografiestaImg from './public/ortografiesta.png'
 
 export default function Ortografiesta() {
   const router = useRouter();
@@ -142,11 +143,11 @@ export default function Ortografiesta() {
     }
   };
   return (
-    <div className="min-h-screen bg-gradient-to-b from-yellow-300 to-yellow-200 overflow-hidden relative">
-      <div className="container mx-auto px-4 py-8 relative z-10">
+    <div className="min-h-screen bg-gradient-to-b from-yellow-300 to-yellow-200 pb-4 overflow-hidden relative">
+      <div className="container mx-auto px-4 relative z-10">
         {/* Header */}
-        <header className="mb-12 text-center relative">
-          <div className="absolute top-4 left-4 flex items-center gap-2">
+        <header className="text-center relative">
+          <div className="absolute top-4 left-4 py-4 flex items-center gap-2">
             <button
               onClick={() => setShowAvatarSelector(true)}
               className="cursor-pointer text-4xl bg-white p-2 rounded-full shadow-md hover:scale-110 transition-transform"
@@ -156,22 +157,14 @@ export default function Ortografiesta() {
             </button>
           </div>
           <div className="inline-block relative">
-            <div className="absolute -inset-4 bg-gradient-to-r from-red-400 via-yellow-400 to-green-400 rounded-3xl opacity-75 blur-xl animate-pulse"></div>
-            <h1 className="text-5xl md:text-6xl font-bold text-white bg-red-500 px-8 py-4 rounded-3xl shadow-lg inline-block relative">
-              <span className="text-yellow-400 inline-block">Ortogra</span>
-              <span className="text-green-300 inline-block">fiesta</span>
-              <Star
-                className="absolute -top-4 -right-4 w-10 h-10 text-yellow-300 animate-spin"
-                style={{ animationDuration: "10s" }}
-              />
-            </h1>
+            <img src={OrtografiestaImg.src} alt="Ortografiesta" className="w-72 mx-auto" />
           </div>
         </header>
 
         {/* Botones */}
-        <div className="flex flex-col md:flex-row justify-center gap-4 md:gap-8 mb-12">
+        <div className="flex flex-col md:flex-row justify-center gap-4 md:gap-8 mb-8">
           <button
-            onClick={() => navegarAUnidad(1)}
+            onClick={() => router.push('/unidad_6')}
             className="btn bg-gradient-to-b from-orange-400 to-orange-500 text-white text-xl md:text-2xl font-bold py-4 px-8 rounded-full shadow-lg transition-all hover:shadow-xl active:scale-95 flex items-center justify-center gap-2 relative overflow-hidden group cursor-pointer"
           >
             <div className="absolute inset-0 bg-gradient-to-r from-yellow-300/0 via-yellow-300/30 to-yellow-300/0 group-hover:translate-x-full transition-transform duration-1000 ease-in-out"></div>
@@ -191,7 +184,7 @@ export default function Ortografiesta() {
         </div>
 
         {/* Sound controls - more visible now */}
-        <div className="audio-controls absolute top-4 right-4 flex gap-2">
+        <div className="audio-controls absolute top-4 py-4 right-4 flex gap-2">
           <button
             onClick={handleToggleMute}
             className="p-3 bg-white/90 rounded-full hover:bg-white transition shadow-md cursor-pointer"
