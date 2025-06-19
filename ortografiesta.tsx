@@ -207,7 +207,6 @@ export default function Ortografiesta() {
             { title: "Uso de Mayúsculas", color: "bg-red-600", icon: "🔠", emoji: "👑", unidad: 2 },
             { title: "Reglas de Acentuación", color: "bg-orange-400", icon: "✏️", emoji: "⭐", unidad: 3 },
             { title: "Palabras Homófonas", color: "bg-green-400", icon: "🎭", emoji: "🎪", unidad: 4 },
-            { title: "Reglas Ortográficas", color: "bg-blue-400", icon: "📝", emoji: "📚", unidad: 5 },
           ].map((unit, index) => {
             const unitKey = `unidad${unit.unidad}`;
             const unitProgress = progress?.units[unitKey];

@@ -311,137 +311,10 @@ export default function Unidad4() {
   const [puntosUnidad, setPuntosUnidad] = useState(0);
   const [estrellasUnidad, setEstrellasUnidad] = useState(0);
   const [fallos, setFallos] = useState(0);
-  const [palabraSeleccionada, setPalabraSeleccionada] = useState<string | null>(null);
-  const [feedback, setFeedback] = useState<Feedback>({});
 
 
 
-  const palabrasHomofonas: string[] = [
-    "baca", "vaca", "casa", "caza", "haya", "halla",
-    "sierra", "cierra", "tubo", "tuvo", "hola", "ola"
-  ];
 
-  // Imágenes para cada palabra
-  const imagenesEjemplos: ImagenesEjemplos = {
-    "baca": "🚗", "vaca": "🐄", "casa": "🏠", "caza": "🏹",
-    "haya": "🌳", "halla": "🔍", "sierra": "🔧", "cierra": "🚪",
-    "tubo": "⚙️", "tuvo": "✋", "hola": "👋", "ola": "🌊"
-  };
-
-  // Estado inicial de palabras sin clasificar (solo cuando la actividad es "sopa")
-  const [palabrasSinClasificar, setPalabrasSinClasificar] = useState<string[]>(() => {
-    return actividad === "sopa" ? [...palabrasHomofonas] : [];
-  });
-
-  // Estado de las categorías con las palabras ya clasificadas
-  const [categorias, setCategorias] = useState<Categorias>(() => {
-    return {
-      significado: [],
-      ortografia: []
-    };
-  });
-
-  // Clasificación correcta de las palabras (para verificación)
-  const clasificacionCorrecta: Categorias = {
-    significado: ["baca", "vaca", "casa", "caza", "haya", "halla"],
-    ortografia: ["sierra", "cierra", "tubo", "tuvo", "hola", "ola"]
-  };
-
-  // Función para asignar una palabra a una categoría
-  const asignarPalabra = (categoria: keyof Categorias): void => {
-    if (palabraSeleccionada && palabrasSinClasificar.includes(palabraSeleccionada)) {
-      // Crear nueva copia de categorías
-      const nuevasCategorias: Categorias = {
-        significado: [...categorias.significado],
-        ortografia: [...categorias.ortografia]
-      };
-
-      // Agregar la palabra a la categoría seleccionada
-      nuevasCategorias[categoria] = [...nuevasCategorias[categoria], palabraSeleccionada];
-
-      // Actualizar estados
-      setCategorias(nuevasCategorias);
-      setPalabrasSinClasificar(prev => prev.filter(p => p !== palabraSeleccionada));
-      setPalabraSeleccionada(null);
-
-      console.log(`Palabra "${palabraSeleccionada}" asignada a "${categoria}"`);
-      console.log('Nuevas categorías:', nuevasCategorias);
-    }
-  };
-
-  // Función para comprobar la clasificación
-const comprobarClasificacion = (): void => {
-  const nuevoFeedback: Feedback = {};
-  let nuevosFallos = 0;
-
-  Object.entries(categorias).forEach(([categoria, palabras]) => {
-    palabras.forEach((palabra: string) => {
-      const esCorrecta = clasificacionCorrecta[categoria as keyof Categorias].includes(palabra);
-      nuevoFeedback[palabra] = esCorrecta;
-      if (!esCorrecta) nuevosFallos++;
-    });
-  });
-
-  setFeedback(nuevoFeedback);
-  setFallos(nuevosFallos);
-  setActividadCompletada(true);
-
-  const puntuacion = nuevosFallos === 0 ? 100
-                   : nuevosFallos <= 2 ? 80
-                   : 60;
-
-  if (nuevosFallos < 3) {
-    updateActivity("sopa", {
-      attempts: 1,
-      lastScore: puntuacion,
-      completed: true,
-      stars: 1,
-    });
-  }
-};
-
-
-  // Función para reiniciar la actividad
-  const reiniciarClasificacion = (): void => {
-    setPalabrasSinClasificar([...palabrasHomofonas]);
-    setCategorias({ significado: [], ortografia: [] });
-    setPalabraSeleccionada(null);
-    setFeedback({});
-    setFallos(0);
-    setActividadCompletada(false);
-  };
-
-  // Función para remover una palabra de una categoría
-  const removerPalabraDCategoria = (palabra: string, categoria: keyof Categorias): void => {
-    const nuevasCategorias: Categorias = {
-      significado: [...categorias.significado],
-      ortografia: [...categorias.ortografia]
-    };
-
-    nuevasCategorias[categoria] = nuevasCategorias[categoria].filter(p => p !== palabra);
-    setCategorias(nuevasCategorias);
-    setPalabrasSinClasificar(prev => [...prev, palabra]);
-
-    // Limpiar feedback si existe
-    if (feedback[palabra] !== undefined) {
-      const nuevoFeedback = { ...feedback };
-      delete nuevoFeedback[palabra];
-      setFeedback(nuevoFeedback);
-    }
-  };
-
-  // Función mejorada para cambiar actividad
-  const cambiarActividadClasificacion = (nuevaActividad: string): void => {
-    if (nuevaActividad === "sopa") {
-      reiniciarClasificacion();
-    }
-  };
-
-  useEffect(() => {
-    if (actividad === "sopa") {
-      reiniciarClasificacion();
-    }
-  }, [actividad]);
 
 
 
@@ -591,7 +464,7 @@ const comprobarClasificacion = (): void => {
             attempts: 1,
             lastScore: porcentajeExito,
             completed: true,
-            stars: porcentajeExito >= 80 ? 1 : 0,
+            stars: porcentajeExito >= 90 ? 1 : 0,
           });
         }
       }
@@ -798,15 +671,116 @@ const comprobarClasificacion = (): void => {
       (p) => palabrasEncontradas.includes(p.palabra) && p.celdas.some((c) => c.row === row && c.col === col),
     )
   }
+  // Lista de palabras homófonas organizadas por categorías
+  const palabrasDiferenteSignificado = ['baca', 'vaca', 'casa', 'caza', 'haya', 'halla'];
+  const palabrasDiferenteOrtografia = ['sierra', 'cierra', 'tubo', 'tuvo', 'hola', 'ola'];
+  const palabrasHomofonas = [...palabrasDiferenteSignificado, ...palabrasDiferenteOrtografia];
+
+  // Emojis/imágenes para cada palabra
+  const imagenesEjemplos: Record<string, string> = {
+    'baca': '🚗',     // estructura techo vehículo
+    'vaca': '🐄',     // animal
+    'casa': '🏠',     // hogar
+    'caza': '🎯',     // acción de cazar
+    'haya': '🌳',     // árbol
+    'halla': '🔍',    // forma del verbo hallar
+    'sierra': '🔧',   // herramienta
+    'cierra': '🚪',   // forma del verbo cerrar
+    'tubo': '🧪',     // cilindro
+    'tuvo': '🕒',     // forma del verbo tener
+    'hola': '👋',     // saludo
+    'ola': '🌊'       // onda en el mar
+  };
+
+  // Estados iniciales
+  const [categorias, setCategorias] = useState({
+    significado: [] as string[],
+    ortografia: [] as string[]
+  });
+  const [palabrasSinClasificar, setPalabrasSinClasificar] = useState<string[]>(palabrasHomofonas);
+  const [palabraSeleccionada, setPalabraSeleccionada] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<Record<string, boolean>>({});
 
 
 
+  const asignarPalabra = (categoria: string) => {
+    if (palabraSeleccionada) {
+      const nuevasCategorias = { ...categorias };
+      setPalabrasSinClasificar(palabrasSinClasificar.filter(p => p !== palabraSeleccionada));
+      nuevasCategorias[categoria as keyof typeof categorias] = [
+        ...nuevasCategorias[categoria as keyof typeof categorias],
+        palabraSeleccionada
+      ];
+      setCategorias(nuevasCategorias);
+      setPalabraSeleccionada(null);
+    }
+  };
+
+  // Función para verificar respuestas
+  const comprobarClasificacion = () => {
+    const nuevoFeedback: { [palabra: string]: boolean } = {};
+    let errores = 0;
+
+    // Verificar categoría "significado"
+    categorias.significado.forEach(palabra => {
+      const esCorrecta = palabrasDiferenteSignificado.includes(palabra);
+      nuevoFeedback[palabra] = esCorrecta;
+      if (!esCorrecta) errores++;
+    });
+
+    categorias.ortografia.forEach(palabra => {
+      const esCorrecta = palabrasDiferenteOrtografia.includes(palabra);
+      nuevoFeedback[palabra] = esCorrecta;
+      if (!esCorrecta) errores++;
+    });
+
+    setFeedback(nuevoFeedback);
+    setFallos(errores);
+    setActividadCompletada(true);
+
+    if (errores < 3) {
+      updateActivity("sopa", {
+        attempts: 1,
+        lastScore: 100,
+        completed: true,
+        stars: 1
+      });
+    }
 
 
+  };
 
+  const removerPalabraDCategoria = (palabra: string, categoria: keyof typeof categorias) => {
+    if (actividadCompletada) return; // No permitir cambios después de completar
 
+    const nuevasCategorias = { ...categorias };
+    nuevasCategorias[categoria] = nuevasCategorias[categoria].filter(p => p !== palabra);
+    setCategorias(nuevasCategorias);
+    setPalabrasSinClasificar([...palabrasSinClasificar, palabra]);
 
+    // Actualizar feedback si existe
+    const nuevoFeedback = { ...feedback };
+    delete nuevoFeedback[palabra];
+    setFeedback(nuevoFeedback);
+  };
 
+  const cambiarActividadClasificacion = (tipo: string) => {
+    if (tipo === "sopa") {
+      // Reiniciar solo la actividad actual
+      setCategorias({
+        significado: [],
+        ortografia: []
+      });
+      setPalabrasSinClasificar(palabrasHomofonas);
+      setPalabraSeleccionada(null);
+      setFeedback({});
+      setFallos(0);
+      setActividadCompletada(false);
+    } else {
+      // Cambiar a otra actividad
+      setActividad(tipo as Actividad);
+    }
+  };
 
 
 
@@ -872,7 +846,7 @@ const comprobarClasificacion = (): void => {
             className={`px-4 py-2 rounded-full font-bold cursor-pointer ${actividad === "sopa" ? "bg-green-500 text-white" : "bg-white/70 text-green-600 hover:bg-white"
               } transition-colors`}
           >
-            Sopa de Palabras
+            Actividad Clasificativa
           </button>
         </div>
 
@@ -1187,10 +1161,7 @@ const comprobarClasificacion = (): void => {
                         historias completadas
                       </p>
 
-                      <div className="flex items-center justify-center gap-2 text-blue-700">
-                        <BookOpen size={20} />
-                        <span className="font-medium">¡Todas las palabras correctas!</span>
-                      </div>
+          
 
                       {/* Efecto de logro */}
                       <div className="mt-6">
@@ -1736,15 +1707,15 @@ const comprobarClasificacion = (): void => {
                       <div className="grid grid-cols-3 gap-4 text-sm">
                         <div>
                           <span className="text-green-600 font-bold text-lg">{Object.values(feedback).filter(v => v === true).length}</span>
-                          <br />Correctas
+                          <br /><span className="text-green-600 font-bold">Incorrectas</span>
                         </div>
                         <div>
                           <span className="text-red-600 font-bold text-lg">{fallos}</span>
-                          <br />Incorrectas
+                          <br /> <span className="text-red-600 font-bold">Incorrectas</span>
                         </div>
                         <div>
                           <span className="text-blue-600 font-bold text-lg">{Math.round(((Object.values(feedback).filter(v => v === true).length) / palabrasHomofonas.length) * 100)}%</span>
-                          <br />Precisión
+                          <br /> <span className="text-blue-600 font-bold"> Precisión</span>
                         </div>
                       </div>
                     </div>

@@ -148,7 +148,6 @@ const initialProgress: UserProgress = {
     unidad2: createInitialUnitProgress(2, "Uso de Mayúsculas"),
     unidad3: createInitialUnitProgress(3, "Reglas de Acentuación"),
     unidad4: createInitialUnitProgress(4, "Palabras Homófonas"),
-    unidad5: createInitialUnitProgress(5, "Reglas Ortográficas"),
   },
   medals: availableMedals,
   activities: null

@@ -40,7 +40,7 @@ export default function Progreso() {
             case "diferencias": return "Reglas de Mayúsculas";
             case "completar": return "Completar Oraciones";
             case "dictado": return "Corregir Textos";
-            case "sopa": return "Sopa de Nombres";
+            case "sopa": return "Actividad Clasificatoria";
             default: return activityType;
         }
     }
@@ -65,15 +65,7 @@ export default function Progreso() {
         }
     }
 
-    if (unitId === "unidad5") {
-        switch (activityType) {
-            case "diferencias": return "Reglas de C, S y Z";
-            case "completar": return "Completar con C, S o Z";
-            case "dictado": return "Dictado de C, S y Z";
-            case "sopa": return "Actividad Clasificatoria";
-            default: return activityType;
-        }
-    }
+   
 
 
     switch (activityType) {

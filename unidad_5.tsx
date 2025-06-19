@@ -105,9 +105,9 @@ const reglasData = [
 
 // Palabras para completar
 const palabrasCompletar = [
-  { palabra: "_uevo", opciones: ["h", ""], correcta: "h", pista: "Se come en el desayuno", emoji: "🥚" },
-  { palabra: "_ierba", opciones: ["h", ""], correcta: "h", pista: "Crece en el jardín", emoji: "🌿" },
-  { palabra: "_umano", opciones: ["h", ""], correcta: "h", pista: "Persona", emoji: "👤" },
+  { palabra: "_uevo", opciones: ["h", "o"], correcta: "h", pista: "Se come en el desayuno", emoji: "🥚" },
+  { palabra: "_ierba", opciones: ["h", "a"], correcta: "h", pista: "Crece en el jardín", emoji: "🌿" },
+  { palabra: "_umano", opciones: ["h", "u"], correcta: "h", pista: "Persona", emoji: "👤" },
   { palabra: "ca_a", opciones: ["r", "rr"], correcta: "r", pista: "Parte del cuerpo", emoji: "😊" },
   { palabra: "pe_o", opciones: ["r", "rr"], correcta: "rr", pista: "Animal doméstico", emoji: "🐕" },
   { palabra: "_osa", opciones: ["r", "rr"], correcta: "r", pista: "Flor bonita", emoji: "🌹" },

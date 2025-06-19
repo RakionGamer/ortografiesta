@@ -579,8 +579,8 @@ export default function Unidad3() {
     // Clasificación correcta de las palabras
     const clasificacionCorrecta = {
         agudas: ["canción", "papel", "café", "corazón", "ratón"],
-        graves: ["árbol", "teléfono", "mesa", "fácil", "lápiz", "computadora"],
-        esdrujulas: ["murciélago", "médico", "música", "pájaro"]
+        graves: ["árbol", "mesa", "fácil", "lápiz", "computadora", "universidad"],
+        esdrujulas: ["murciélago", "teléfono", "médico", "música", "pájaro"]
     };
 
     // Función para asignar palabra a categoría
@@ -600,7 +600,6 @@ export default function Unidad3() {
         }
     };
 
-    // Función para comprobar clasificación
     const comprobarClasificacion = () => {
         const nuevoFeedback: Record<string, boolean> = {};
         let errores = 0;
@@ -618,16 +617,14 @@ export default function Unidad3() {
         setFallos(errores);
         setActividadCompletada(true);
 
-        if (errores <= 3) {
+        if (errores < 3) {
             updateActivity("sopa", {
                 attempts: 1,
                 lastScore: 100,
                 completed: true,
-                stars: errores === 0 ? 3 : errores <= 2 ? 2 : 1
+                stars: 1
             });
         }
-
-
     };
 
     // Función para reiniciar la actividad

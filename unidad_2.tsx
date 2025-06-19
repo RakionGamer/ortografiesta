@@ -92,63 +92,63 @@ const reglasData = [
 // Oraciones para completar
 const oracionesCompletar = [
     {
-        oracion: "_aria y _edro van a _adrid.",
+        oracion: "_aria y pedro van a madrid.",
         opciones: ["M", "m"],
-        correctas: ["M", "P", "M"],
+        correctas: ["M"],
         pista: "Nombres de personas y lugares",
     },
     {
-        oracion: "el _ío _bro pasa por _eville.",
+        oracion: "el _ío ebro pasa por seville.",
         opciones: ["R", "r"],
-        correctas: ["r", "E", "S"],
+        correctas: ["r"],
         pista: "Río es común, pero Ebro y Sevilla son propios",
     },
     {
-        oracion: "_oy es _unes. _iene a visitarme.",
+        oracion: "_oy es lunes. viene a visitarme.",
         opciones: ["H", "h"],
-        correctas: ["H", "l", "V"],
+        correctas: ["H"],
         pista: "Inicio de oración y después de punto",
     },
     {
-        oracion: "mi _erro se llama _oby.",
+        oracion: "mi _erro se llama toby.",
         opciones: ["P", "p"],
-        correctas: ["p", "T"],
+        correctas: ["p"],
         pista: "Perro es común, Toby es nombre propio",
     },
     {
-        oracion: "_stamos en _iciembre. _ace mucho frío.",
+        oracion: "_stamos en diciembre. Hace mucho frío.",
         opciones: ["E", "e"],
-        correctas: ["E", "d", "H"],
+        correctas: ["E"],
         pista: "Inicio de oración y después de punto",
     },
     {
-        oracion: "el _lanet _ierra es _zul.",
+        oracion: "el _lanet tierra es azul.",
         opciones: ["P", "p"],
-        correctas: ["p", "T", "a"],
+        correctas: ["p"],
         pista: "Planeta es común, Tierra es nombre propio",
     },
     {
-        oracion: "_éxico está en _mérica. _s un _aís hermoso.",
+        oracion: "_éxico está en América. Es un país hermoso.",
         opciones: ["M", "m"],
-        correctas: ["M", "A", "E", "p"],
+        correctas: ["M"],
         pista: "Países y continentes son nombres propios",
     },
     {
-        oracion: "la _aestra _aría enseña _atemáticas.",
+        oracion: "la _aestra María enseña matemáticas.",
         opciones: ["M", "m"],
-        correctas: ["m", "M", "m"],
+        correctas: ["m"],
         pista: "Maestra es común, María es nombre propio",
     },
     {
-        oracion: "_l _ol sale por el _ste.",
+        oracion: "_l sol sale por el Este.",
         opciones: ["E", "e"],
-        correctas: ["E", "s", "e"],
+        correctas: ["E"],
         pista: "Inicio de oración, sol es común, este es dirección",
     },
     {
-        oracion: "¿_ónde vives? _ivo en _arcelona.",
+        oracion: "¿_ónde vives? vivo en Barcelona.",
         opciones: ["D", "d"],
-        correctas: ["D", "V", "B"],
+        correctas: ["D"],
         pista: "Inicio de pregunta, respuesta y nombre de ciudad",
     },
 ]
@@ -284,7 +284,7 @@ export default function Unidad2() {
                     });
                 }
             }
-        }, 1500);
+        }, 3000);
     };
 
 
@@ -346,100 +346,100 @@ export default function Unidad2() {
 
         if (nuevaActividad === "dictado") {
             setTextoActual(textosCorregir[0].texto);
-        } 
+        }
     };
     // Generar sopa de letras
-    
+
     // Inicializar actividades
     useEffect(() => {
         if (actividad === "dictado" && textoActual === "") {
             setTextoActual(textosCorregir[0].texto)
-        } 
+        }
     }, [actividad, textoActual])
 
     const [palabrasSinClasificar, setPalabrasSinClasificar] = useState([
-  "mayo", "Carlos", "jueves", "parque", "María", "diciembre", 
-  "Barcelona", "lunes", "hospital", "Ana", "febrero", "escuela"
-]);
+        "mayo", "Carlos", "jueves", "parque", "María", "diciembre",
+        "Barcelona", "lunes", "hospital", "Ana", "febrero", "escuela"
+    ]);
 
-type CategoriaKey = "mayuscula" | "minuscula";
+    type CategoriaKey = "mayuscula" | "minuscula";
 
-const [categorias, setCategorias] = useState<Record<CategoriaKey, string[]>>({
-  mayuscula: [],
-  minuscula: []
-});
-
-const [palabraSeleccionada, setPalabraSeleccionada] = useState<string | null>(null);
-const [feedback, setFeedback] = useState<Record<string, boolean>>({});
-
-// Palabras que deben ir con mayúscula (nombres propios, ciudades, personas)
-const palabrasConMayuscula = ["Carlos", "María", "Barcelona", "Ana"];
-
-// Función para asignar palabra a categoría
-const asignarPalabra = (categoria: CategoriaKey) => {
-  if (palabraSeleccionada) {
-    const nuevasCategorias = { ...categorias };
-    
-    setPalabrasSinClasificar(palabrasSinClasificar.filter(p => p !== palabraSeleccionada));
-    
-    nuevasCategorias[categoria] = [
-      ...nuevasCategorias[categoria],
-      palabraSeleccionada
-    ];
-    
-    setCategorias(nuevasCategorias);
-    setPalabraSeleccionada(null);
-  }
-};
-
-// Función para comprobar clasificación
-const comprobarClasificacion = () => {
-  const nuevoFeedback: Record<string, boolean> = {};
-  let errores = 0;
-  
-  // Verificar categoría de mayúsculas
-  categorias.mayuscula.forEach(palabra => {
-    const esCorrecta = palabrasConMayuscula.includes(palabra);
-    nuevoFeedback[palabra] = esCorrecta;
-    if (!esCorrecta) errores++;
-  });
-  
-  // Verificar categoría de minúsculas
-  categorias.minuscula.forEach(palabra => {
-    const esCorrecta = !palabrasConMayuscula.includes(palabra);
-    nuevoFeedback[palabra] = esCorrecta;
-    if (!esCorrecta) errores++;
-  });
-  
-  setFeedback(nuevoFeedback);
-  setFallos(errores);
-  setActividadCompletada(true);
-  
-  if (errores <= 3) {
-    updateActivity("sopa", {
-      attempts: 1,
-      lastScore: 100,
-      completed: true,
-      stars: errores === 0 ? 3 : errores <= 2 ? 2 : 1
+    const [categorias, setCategorias] = useState<Record<CategoriaKey, string[]>>({
+        mayuscula: [],
+        minuscula: []
     });
-  }
-};
 
-// Función para reiniciar la actividad clasificatoria
-const reiniciarClasificacion = () => {
-  setPalabrasSinClasificar([
-    "mayo", "Carlos", "jueves", "parque", "María", "diciembre", 
-    "Barcelona", "lunes", "hospital", "Ana", "febrero", "escuela"
-  ]);
-  setCategorias({
-    mayuscula: [],
-    minuscula: []
-  });
-  setPalabraSeleccionada(null);
-  setFeedback({});
-  setFallos(0);
-  setActividadCompletada(false);
-};
+    const [palabraSeleccionada, setPalabraSeleccionada] = useState<string | null>(null);
+    const [feedback, setFeedback] = useState<Record<string, boolean>>({});
+
+    // Palabras que deben ir con mayúscula (nombres propios, ciudades, personas)
+    const palabrasConMayuscula = ["Carlos", "María", "Barcelona", "Ana"];
+
+    // Función para asignar palabra a categoría
+    const asignarPalabra = (categoria: CategoriaKey) => {
+        if (palabraSeleccionada) {
+            const nuevasCategorias = { ...categorias };
+
+            setPalabrasSinClasificar(palabrasSinClasificar.filter(p => p !== palabraSeleccionada));
+
+            nuevasCategorias[categoria] = [
+                ...nuevasCategorias[categoria],
+                palabraSeleccionada
+            ];
+
+            setCategorias(nuevasCategorias);
+            setPalabraSeleccionada(null);
+        }
+    };
+
+    // Función para comprobar clasificación
+    const comprobarClasificacion = () => {
+        const nuevoFeedback: Record<string, boolean> = {};
+        let errores = 0;
+
+        // Verificar categoría de mayúsculas
+        categorias.mayuscula.forEach(palabra => {
+            const esCorrecta = palabrasConMayuscula.includes(palabra);
+            nuevoFeedback[palabra] = esCorrecta;
+            if (!esCorrecta) errores++;
+        });
+
+        // Verificar categoría de minúsculas
+        categorias.minuscula.forEach(palabra => {
+            const esCorrecta = !palabrasConMayuscula.includes(palabra);
+            nuevoFeedback[palabra] = esCorrecta;
+            if (!esCorrecta) errores++;
+        });
+
+        setFeedback(nuevoFeedback);
+        setFallos(errores);
+        setActividadCompletada(true);
+
+        if (errores < 3) {
+            updateActivity("sopa", {
+                attempts: 1,
+                lastScore: 100,
+                completed: true,
+                stars: 1
+            });
+        }
+    };
+
+    // Función para reiniciar la actividad clasificatoria
+    const reiniciarClasificacion = () => {
+        setPalabrasSinClasificar([
+            "mayo", "Carlos", "jueves", "parque", "María", "diciembre",
+            "Barcelona", "lunes", "hospital", "Ana", "febrero", "escuela"
+        ]);
+        setCategorias({
+            mayuscula: [],
+            minuscula: []
+        });
+        setPalabraSeleccionada(null);
+        setFeedback({});
+        setFallos(0);
+        setActividadCompletada(false);
+    };
 
     return (
         <div className="min-h-screen bg-gradient-to-b from-purple-300 to-purple-200 overflow-hidden relative">
@@ -504,7 +504,7 @@ const reiniciarClasificacion = () => {
                         className={`px-4 py-2 rounded-full font-bold cursor-pointer ${actividad === "sopa" ? "bg-green-500 text-white" : "bg-white/70 text-green-600 hover:bg-white"
                             } transition-colors`}
                     >
-                        Sopa de Nombres
+                        Actividad Clasificativa
                     </button>
                 </div>
 
@@ -689,13 +689,34 @@ const reiniciarClasificacion = () => {
                                             <div className="relative bg-white/90 backdrop-blur-sm rounded-3xl p-8 border border-white/30 shadow-xl">
                                                 <div className="text-center">
                                                     <div className="text-3xl md:text-4xl font-bold text-purple-800 leading-relaxed tracking-wide">
-                                                        {oracionesCompletar[preguntaActual].oracion}
+                                                        {mostrarResultado === true ? 
+                                                            // Show complete sentence when correct
+                                                            oracionesCompletar[preguntaActual].oracion.replace('_', oracionesCompletar[preguntaActual].correctas[0])
+                                                            :
+                                                            // Show original sentence with blank
+                                                            oracionesCompletar[preguntaActual].oracion
+                                                        }
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
 
-
+                                        {/* Complete sentence display when correct - NEW SECTION */}
+                                        {mostrarResultado === true && (
+                                            <div className="flex justify-center">
+                                                <div className="bg-gradient-to-r from-green-100 to-emerald-100 border-2 border-green-300 rounded-2xl p-6 max-w-2xl mx-auto shadow-lg transform animate-in slide-in-from-bottom-4 duration-700">
+                                                    <div className="flex items-center gap-3 mb-3">
+                                                        <div className="w-8 h-8 bg-gradient-to-r from-green-400 to-emerald-400 rounded-full flex items-center justify-center">
+                                                            ✓
+                                                        </div>
+                                                        <h3 className="text-lg font-semibold text-green-800">Oración completa:</h3>
+                                                    </div>
+                                                    <p className="text-2xl font-bold text-green-700 leading-relaxed text-center">
+                                                        {oracionesCompletar[preguntaActual].oracion.replace('_', oracionesCompletar[preguntaActual].correctas[0])}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        )}
 
                                         {/* Opciones mejoradas */}
                                         <div className="flex flex-wrap justify-center gap-6 px-4">
@@ -1084,274 +1105,271 @@ const reiniciarClasificacion = () => {
 
                     {/* Sopa de nombres propios */}
                     {actividad === "sopa" && (
-            <div className="text-center">
-              {!actividadCompletada ? (
-                <>
-                  <div className="bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-400 rounded-xl p-6 shadow-lg mb-6 relative overflow-hidden">
-                    {/* Imágenes decorativas en las esquinas */}
-                    <div className="absolute top-1 left-1 text-3xl">📝</div>
-                    <div className="absolute top-1 right-1 text-3xl">🔤</div>
-                    <div className="absolute bottom-1 left-1 text-3xl">📚</div>
-                    <div className="absolute bottom-1 right-1 text-3xl">✏️</div>
+                        <div className="text-center">
+                            {!actividadCompletada ? (
+                                <>
+                                    <div className="bg-gradient-to-r from-indigo-400 via-purple-500 to-pink-400 rounded-xl p-6 shadow-lg mb-6 relative overflow-hidden">
+                                        {/* Imágenes decorativas en las esquinas */}
+                                        <div className="absolute top-1 left-1 text-3xl">📝</div>
+                                        <div className="absolute top-1 right-1 text-3xl">🔤</div>
+                                        <div className="absolute bottom-1 left-1 text-3xl">📚</div>
+                                        <div className="absolute bottom-1 right-1 text-3xl">✏️</div>
 
-                    <h2 className="text-3xl font-bold text-white mb-2 flex items-center justify-center">
-                      <span className="mr-2">🎯</span>
-                      Clasificación de Mayúsculas
-                      <span className="ml-2">🔍</span>
-                    </h2>
-                    <p className="text-lg text-white mb-2">
-                      ¡Clasifica las palabras según si deben llevar mayúscula o no!
-                    </p>
-                    <div className="flex justify-center">
-                      <div className="flex items-center space-x-1">
-                        {[...Array(5)].map((_, i) => (
-                          <span key={i} className={`text-2xl ${i < Math.ceil((Object.values(categorias).flat().length) / 12 * 5) ? "text-yellow-300" : "text-gray-300"}`}>
-                            ⭐
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
+                                        <h2 className="text-3xl font-bold text-white mb-2 flex items-center justify-center">
+                                            <span className="mr-2">🎯</span>
+                                            Clasificación de Mayúsculas
+                                            <span className="ml-2">🔍</span>
+                                        </h2>
+                                        <p className="text-lg text-white mb-2">
+                                            ¡Clasifica las palabras según si deben llevar mayúscula o no!
+                                        </p>
+                                        <div className="flex justify-center">
+                                            <div className="flex items-center space-x-1">
+                                                {[...Array(5)].map((_, i) => (
+                                                    <span key={i} className={`text-2xl ${i < Math.ceil((Object.values(categorias).flat().length) / 12 * 5) ? "text-yellow-300" : "text-gray-300"}`}>
+                                                        ⭐
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
 
-                  {/* Palabras sin clasificar */}
-                  <div className="bg-blue-100 p-5 rounded-xl mb-6 shadow-md border-4 border-blue-300">
-                    <h3 className="text-xl font-bold text-purple-800 mb-4 flex items-center justify-center">
-                      <span className="mr-2">📦</span> Palabras para clasificar <span className="ml-2">📦</span>
-                    </h3>
-                    <div className="flex flex-wrap justify-center gap-3">
-                      {palabrasSinClasificar.map((palabra, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setPalabraSeleccionada(palabra)}
-                          className={`px-4 py-2 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105 cursor-pointer
-                            ${palabraSeleccionada === palabra 
-                              ? "bg-purple-500 text-white shadow-lg scale-105" 
-                              : "bg-white text-purple-800 shadow-md hover:shadow-lg"
-                            }`}
-                        >
-                          {palabra}
-                        </button>
-                      ))}
-                    </div>
-                    {palabrasSinClasificar.length === 0 && (
-                      <p className="text-purple-600 font-bold text-lg">¡Todas las palabras han sido clasificadas!</p>
+                                    {/* Palabras sin clasificar */}
+                                    <div className="bg-blue-100 p-5 rounded-xl mb-6 shadow-md border-4 border-blue-300">
+                                        <h3 className="text-xl font-bold text-purple-800 mb-4 flex items-center justify-center">
+                                            <span className="mr-2">📦</span> Palabras para clasificar <span className="ml-2">📦</span>
+                                        </h3>
+                                        <div className="flex flex-wrap justify-center gap-3">
+                                            {palabrasSinClasificar.map((palabra, index) => (
+                                                <button
+                                                    key={index}
+                                                    onClick={() => setPalabraSeleccionada(palabra)}
+                                                    className={`px-4 py-2 rounded-full font-bold text-lg transition-all duration-300 transform hover:scale-105 cursor-pointer
+                            ${palabraSeleccionada === palabra
+                                                            ? "bg-purple-500 text-white shadow-lg scale-105"
+                                                            : "bg-white text-purple-800 shadow-md hover:shadow-lg"
+                                                        }`}
+                                                >
+                                                    {palabra}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {palabrasSinClasificar.length === 0 && (
+                                            <p className="text-purple-600 font-bold text-lg">¡Todas las palabras han sido clasificadas!</p>
+                                        )}
+                                    </div>
+
+                                    {/* Categorías */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                                        {/* Categoría CON MAYÚSCULA */}
+                                        <div className="bg-green-100 p-5 rounded-xl shadow-md border-4 border-green-300">
+                                            <h3 className="text-xl font-bold text-green-800 mb-3 flex items-center justify-center">
+                                                <span className="mr-2">🔠</span> CON MAYÚSCULA <span className="ml-2">🔠</span>
+                                            </h3>
+                                            <div
+                                                className="min-h-[150px] bg-white rounded-lg p-3 border-2 border-dashed border-green-400 cursor-pointer hover:bg-green-50 transition-colors"
+                                                onClick={() => palabraSeleccionada && asignarPalabra('mayuscula')}
+                                            >
+                                                {categorias.mayuscula.length === 0 ? (
+                                                    <div className="text-center py-8">
+                                                        <p className="text-green-600 italic text-lg">Pulsa aquí las palabras</p>
+                                                        <p className="text-green-600 italic text-lg">que deben llevar mayúscula</p>
+                                                        <div className="text-2xl mt-2">⬆️</div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {categorias.mayuscula.map((palabra, index) => (
+                                                            <span
+                                                                key={index}
+                                                                className={`px-3 py-1 rounded-full text-sm font-bold transition-all duration-300
+                                  ${feedback[palabra] === true ? "bg-green-400 text-white animate-pulse" :
+                                                                        feedback[palabra] === false ? "bg-red-400 text-white animate-shake" :
+                                                                            "bg-green-200 text-green-800"}`}
+                                                            >
+                                                                {palabra}
+                                                                {feedback[palabra] === true && " ✓"}
+                                                                {feedback[palabra] === false && " ✗"}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="mt-3 text-xs text-green-700 italic text-center">
+                                                💡 Nombres propios, inicio de oración, etc.
+                                            </div>
+                                        </div>
+
+                                        {/* Categoría SIN MAYÚSCULA */}
+                                        <div className="bg-blue-100 p-5 rounded-xl shadow-md border-4 border-blue-300">
+                                            <h3 className="text-xl font-bold text-blue-800 mb-3 flex items-center justify-center">
+                                                <span className="mr-2">🔡</span> SIN MAYÚSCULA <span className="ml-2">🔡</span>
+                                            </h3>
+                                            <div
+                                                className="min-h-[150px] bg-white rounded-lg p-3 border-2 border-dashed border-blue-400 cursor-pointer hover:bg-blue-50 transition-colors"
+                                                onClick={() => palabraSeleccionada && asignarPalabra('minuscula')}
+                                            >
+                                                {categorias.minuscula.length === 0 ? (
+                                                    <div className="text-center py-8">
+                                                        <p className="text-blue-600 italic text-lg">Pulsa aquí las palabras</p>
+                                                        <p className="text-blue-600 italic text-lg">que van en minúscula</p>
+                                                        <div className="text-2xl mt-2">⬇️</div>
+                                                    </div>
+                                                ) : (
+                                                    <div className="flex flex-wrap gap-2">
+                                                        {categorias.minuscula.map((palabra, index) => (
+                                                            <span
+                                                                key={index}
+                                                                className={`px-3 py-1 rounded-full text-sm font-bold transition-all duration-300
+                                  ${feedback[palabra] === true ? "bg-green-400 text-white animate-pulse" :
+                                                                        feedback[palabra] === false ? "bg-red-400 text-white animate-shake" :
+                                                                            "bg-blue-200 text-blue-800"}`}
+                                                            >
+                                                                {palabra}
+                                                                {feedback[palabra] === true && " ✓"}
+                                                                {feedback[palabra] === false && " ✗"}
+                                                            </span>
+                                                        ))}
+                                                    </div>
+                                                )}
+                                            </div>
+                                            <div className="mt-3 text-xs text-blue-700 italic text-center">
+                                                💡 Sustantivos comunes, días, meses, etc.
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Instrucciones y progreso */}
+                                    <div className="bg-purple-100 p-5 rounded-xl shadow-md border-4 border-purple-300 mb-6">
+                                        <div className="flex items-center justify-center mb-3">
+                                            <span className="text-2xl mr-2">📊</span>
+                                            <span className="text-lg font-bold text-purple-800">
+                                                Progreso: {Object.values(categorias).flat().length} de 12 palabras clasificadas
+                                            </span>
+                                        </div>
+                                        {palabraSeleccionada && (
+                                            <div className="bg-purple-200 p-3 rounded-lg mb-3">
+                                                <p className="text-purple-800 font-bold">
+                                                    Palabra seleccionada: <span className="text-purple-600">"{palabraSeleccionada}"</span>
+                                                </p>
+                                                <p className="text-sm text-purple-600">
+                                                    Haz clic en la categoría donde quieres colocarla
+                                                </p>
+                                            </div>
+                                        )}
+                                        <div className="text-purple-700 text-sm italic text-center">
+                                            💡 Pista: Los nombres propios siempre van con mayúscula inicial
+                                        </div>
+                                    </div>
+
+                                    {/* Botones de acción */}
+                                    <div className="flex flex-wrap justify-center gap-4">
+                                        {Object.values(categorias).flat().length === 12 && (
+                                            <button
+                                                onClick={comprobarClasificacion}
+                                                className="bg-green-500 text-white px-8 py-4 rounded-full font-bold hover:bg-green-600 transition-transform hover:scale-105 shadow-md flex items-center gap-2"
+                                            >
+                                                <span>✅</span>
+                                                <span>Comprobar clasificación</span>
+                                            </button>
+                                        )}
+                                        <button
+                                            onClick={() => reiniciarClasificacion()}
+                                            className="bg-teal-400 text-white px-6 py-3 rounded-full font-bold hover:bg-teal-500 transition-colors flex items-center gap-2 cursor-pointer"
+                                        >
+                                            <span>🔄</span>
+                                            <span>Reiniciar juego</span>
+                                        </button>
+                                    </div>
+                                </>
+                            ) : (
+                                <div className="text-center py-8 bg-gradient-to-r from-purple-200 via-pink-200 to-blue-200 rounded-xl p-8 shadow-lg">
+                                    <div className="animate-bounce text-7xl mb-6">
+                                        {fallos === 0 ? "🎉" : fallos <= 2 ? "😊" : "😅"}
+                                    </div>
+                                    <h2 className="text-4xl font-bold text-purple-800 mb-4">
+                                        {fallos === 0 ? "¡PERFECTO!" : fallos <= 2 ? "¡BUEN TRABAJO!" : "¡SIGUE PRACTICANDO!"}
+                                    </h2>
+                                    <p className="text-2xl text-purple-600 mb-8">
+                                        {fallos === 0
+                                            ? "¡Has clasificado todas las mayúsculas correctamente! ¡Eres un experto en ortografía!"
+                                            : fallos <= 2
+                                                ? `Has tenido ${fallos} error${fallos > 1 ? 'es' : ''}. ¡Muy bien, casi perfecto!`
+                                                : `Has tenido ${fallos} errores. ¡No te preocupes, practica más y lo lograrás!`
+                                        }
+                                    </p>
+
+                                    <div className="flex justify-center mb-6">
+                                        {[...Array(5)].map((_, i) => (
+                                            <span key={i} className={`text-4xl animate-pulse ${fallos === 0 && i < 5 ? "text-yellow-400" :
+                                                    fallos <= 2 && i < 3 ? "text-yellow-400" :
+                                                        fallos > 2 && i < 1 ? "text-yellow-400" :
+                                                            "text-gray-300"
+                                                }`}>
+                                                ⭐
+                                            </span>
+                                        ))}
+                                    </div>
+
+                                    {/* Resumen de resultados */}
+                                    <div className="bg-white p-4 rounded-lg shadow-md mb-6 max-w-md mx-auto">
+                                        <h4 className="font-bold text-purple-800 mb-2">📊 Resumen:</h4>
+                                        <div className="flex justify-between text-sm">
+                                            <span className="text-green-600">✅ Correctas: {12 - fallos}</span>
+                                            <span className="text-red-600">❌ Incorrectas: {fallos}</span>
+                                            <span className="text-purple-600">📈 Precisión: {Math.round((12 - fallos) / 12 * 100)}%</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Mostrar resultados por categoría */}
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 max-w-4xl mx-auto">
+                                        <div className="bg-green-200 p-4 rounded-lg shadow-md">
+                                            <h4 className="font-bold text-green-800 mb-2">🔠 CON MAYÚSCULA</h4>
+                                            <div className="flex flex-wrap gap-1 justify-center">
+                                                {categorias.mayuscula.map((palabra, index) => (
+                                                    <span key={index} className={`text-sm px-2 py-1 rounded ${feedback[palabra] === true ? "bg-green-400 text-white" :
+                                                            feedback[palabra] === false ? "bg-red-300 text-red-800" :
+                                                                "bg-white text-green-800"
+                                                        }`}>
+                                                        {palabra}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <div className="bg-blue-200 p-4 rounded-lg shadow-md">
+                                            <h4 className="font-bold text-blue-800 mb-2">🔡 SIN MAYÚSCULA</h4>
+                                            <div className="flex flex-wrap gap-1 justify-center">
+                                                {categorias.minuscula.map((palabra, index) => (
+                                                    <span key={index} className={`text-sm px-2 py-1 rounded ${feedback[palabra] === true ? "bg-green-400 text-white" :
+                                                            feedback[palabra] === false ? "bg-red-300 text-red-800" :
+                                                                "bg-white text-blue-800"
+                                                        }`}>
+                                                        {palabra}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div className="flex flex-wrap justify-center gap-4">
+                                        <button
+                                            onClick={() => cambiarActividad(actividad)}
+                                            className="bg-teal-500 text-white px-8 py-4 rounded-full font-bold hover:bg-teal-600 transition-transform hover:scale-105 shadow-md flex items-center gap-2"
+                                        >
+                                            <span>🎮</span>
+                                            <span>¡Jugar de nuevo!</span>
+                                        </button>
+                                        <button
+                                            onClick={() => cambiarActividad("diferencias")}
+                                            className="bg-purple-600 text-white px-8 py-4 rounded-full font-bold hover:bg-purple-700 transition-transform hover:scale-105 shadow-md flex items-center gap-2"
+                                        >
+                                            <span>🏠</span>
+                                            <span>Volver a inicio</span>
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
                     )}
-                  </div>
-
-                  {/* Categorías */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                    {/* Categoría CON MAYÚSCULA */}
-                    <div className="bg-green-100 p-5 rounded-xl shadow-md border-4 border-green-300">
-                      <h3 className="text-xl font-bold text-green-800 mb-3 flex items-center justify-center">
-                        <span className="mr-2">🔠</span> CON MAYÚSCULA <span className="ml-2">🔠</span>
-                      </h3>
-                      <div 
-                        className="min-h-[150px] bg-white rounded-lg p-3 border-2 border-dashed border-green-400 cursor-pointer hover:bg-green-50 transition-colors"
-                        onClick={() => palabraSeleccionada && asignarPalabra('mayuscula')}
-                      >
-                        {categorias.mayuscula.length === 0 ? (
-                          <div className="text-center py-8">
-                            <p className="text-green-600 italic text-lg">Pulsa aquí las palabras</p>
-                            <p className="text-green-600 italic text-lg">que deben llevar mayúscula</p>
-                            <div className="text-2xl mt-2">⬆️</div>
-                          </div>
-                        ) : (
-                          <div className="flex flex-wrap gap-2">
-                            {categorias.mayuscula.map((palabra, index) => (
-                              <span 
-                                key={index}
-                                className={`px-3 py-1 rounded-full text-sm font-bold transition-all duration-300
-                                  ${feedback[palabra] === true ? "bg-green-400 text-white animate-pulse" : 
-                                    feedback[palabra] === false ? "bg-red-400 text-white animate-shake" : 
-                                    "bg-green-200 text-green-800"}`}
-                              >
-                                {palabra}
-                                {feedback[palabra] === true && " ✓"}
-                                {feedback[palabra] === false && " ✗"}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <div className="mt-3 text-xs text-green-700 italic text-center">
-                        💡 Nombres propios, inicio de oración, etc.
-                      </div>
-                    </div>
-
-                    {/* Categoría SIN MAYÚSCULA */}
-                    <div className="bg-blue-100 p-5 rounded-xl shadow-md border-4 border-blue-300">
-                      <h3 className="text-xl font-bold text-blue-800 mb-3 flex items-center justify-center">
-                        <span className="mr-2">🔡</span> SIN MAYÚSCULA <span className="ml-2">🔡</span>
-                      </h3>
-                      <div 
-                        className="min-h-[150px] bg-white rounded-lg p-3 border-2 border-dashed border-blue-400 cursor-pointer hover:bg-blue-50 transition-colors"
-                        onClick={() => palabraSeleccionada && asignarPalabra('minuscula')}
-                      >
-                        {categorias.minuscula.length === 0 ? (
-                          <div className="text-center py-8">
-                            <p className="text-blue-600 italic text-lg">Pulsa aquí las palabras</p>
-                            <p className="text-blue-600 italic text-lg">que van en minúscula</p>
-                            <div className="text-2xl mt-2">⬇️</div>
-                          </div>
-                        ) : (
-                          <div className="flex flex-wrap gap-2">
-                            {categorias.minuscula.map((palabra, index) => (
-                              <span 
-                                key={index}
-                                className={`px-3 py-1 rounded-full text-sm font-bold transition-all duration-300
-                                  ${feedback[palabra] === true ? "bg-green-400 text-white animate-pulse" : 
-                                    feedback[palabra] === false ? "bg-red-400 text-white animate-shake" : 
-                                    "bg-blue-200 text-blue-800"}`}
-                              >
-                                {palabra}
-                                {feedback[palabra] === true && " ✓"}
-                                {feedback[palabra] === false && " ✗"}
-                              </span>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                      <div className="mt-3 text-xs text-blue-700 italic text-center">
-                        💡 Sustantivos comunes, días, meses, etc.
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Instrucciones y progreso */}
-                  <div className="bg-purple-100 p-5 rounded-xl shadow-md border-4 border-purple-300 mb-6">
-                    <div className="flex items-center justify-center mb-3">
-                      <span className="text-2xl mr-2">📊</span>
-                      <span className="text-lg font-bold text-purple-800">
-                        Progreso: {Object.values(categorias).flat().length} de 12 palabras clasificadas
-                      </span>
-                    </div>
-                    {palabraSeleccionada && (
-                      <div className="bg-purple-200 p-3 rounded-lg mb-3">
-                        <p className="text-purple-800 font-bold">
-                          Palabra seleccionada: <span className="text-purple-600">"{palabraSeleccionada}"</span>
-                        </p>
-                        <p className="text-sm text-purple-600">
-                          Haz clic en la categoría donde quieres colocarla
-                        </p>
-                      </div>
-                    )}
-                    <div className="text-purple-700 text-sm italic text-center">
-                      💡 Pista: Los nombres propios siempre van con mayúscula inicial
-                    </div>
-                  </div>
-
-                  {/* Botones de acción */}
-                  <div className="flex flex-wrap justify-center gap-4">
-                    {Object.values(categorias).flat().length === 12 && (
-                      <button
-                        onClick={comprobarClasificacion}
-                        className="bg-green-500 text-white px-8 py-4 rounded-full font-bold hover:bg-green-600 transition-transform hover:scale-105 shadow-md flex items-center gap-2"
-                      >
-                        <span>✅</span>
-                        <span>Comprobar clasificación</span>
-                      </button>
-                    )}
-                    <button
-                      onClick={() => reiniciarClasificacion()}
-                      className="bg-teal-400 text-white px-6 py-3 rounded-full font-bold hover:bg-teal-500 transition-colors flex items-center gap-2 cursor-pointer"
-                    >
-                      <span>🔄</span>
-                      <span>Reiniciar juego</span>
-                    </button>
-                  </div>
-                </>
-              ) : (
-                <div className="text-center py-8 bg-gradient-to-r from-purple-200 via-pink-200 to-blue-200 rounded-xl p-8 shadow-lg">
-                  <div className="animate-bounce text-7xl mb-6">
-                    {fallos === 0 ? "🎉" : fallos <= 2 ? "😊" : "😅"}
-                  </div>
-                  <h2 className="text-4xl font-bold text-purple-800 mb-4">
-                    {fallos === 0 ? "¡PERFECTO!" : fallos <= 2 ? "¡BUEN TRABAJO!" : "¡SIGUE PRACTICANDO!"}
-                  </h2>
-                  <p className="text-2xl text-purple-600 mb-8">
-                    {fallos === 0 
-                      ? "¡Has clasificado todas las mayúsculas correctamente! ¡Eres un experto en ortografía!" 
-                      : fallos <= 2 
-                        ? `Has tenido ${fallos} error${fallos > 1 ? 'es' : ''}. ¡Muy bien, casi perfecto!`
-                        : `Has tenido ${fallos} errores. ¡No te preocupes, practica más y lo lograrás!`
-                    }
-                  </p>
-
-                  <div className="flex justify-center mb-6">
-                    {[...Array(5)].map((_, i) => (
-                      <span key={i} className={`text-4xl animate-pulse ${
-                        fallos === 0 && i < 5 ? "text-yellow-400" :
-                        fallos <= 2 && i < 3 ? "text-yellow-400" :
-                        fallos > 2 && i < 1 ? "text-yellow-400" :
-                        "text-gray-300"
-                      }`}>
-                        ⭐
-                      </span>
-                    ))}
-                  </div>
-
-                  {/* Resumen de resultados */}
-                  <div className="bg-white p-4 rounded-lg shadow-md mb-6 max-w-md mx-auto">
-                    <h4 className="font-bold text-purple-800 mb-2">📊 Resumen:</h4>
-                    <div className="flex justify-between text-sm">
-                      <span className="text-green-600">✅ Correctas: {12 - fallos}</span>
-                      <span className="text-red-600">❌ Incorrectas: {fallos}</span>
-                      <span className="text-purple-600">📈 Precisión: {Math.round((12 - fallos) / 12 * 100)}%</span>
-                    </div>
-                  </div>
-
-                  {/* Mostrar resultados por categoría */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8 max-w-4xl mx-auto">
-                    <div className="bg-green-200 p-4 rounded-lg shadow-md">
-                      <h4 className="font-bold text-green-800 mb-2">🔠 CON MAYÚSCULA</h4>
-                      <div className="flex flex-wrap gap-1 justify-center">
-                        {categorias.mayuscula.map((palabra, index) => (
-                          <span key={index} className={`text-sm px-2 py-1 rounded ${
-                            feedback[palabra] === true ? "bg-green-400 text-white" : 
-                            feedback[palabra] === false ? "bg-red-300 text-red-800" : 
-                            "bg-white text-green-800"
-                          }`}>
-                            {palabra}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                    <div className="bg-blue-200 p-4 rounded-lg shadow-md">
-                      <h4 className="font-bold text-blue-800 mb-2">🔡 SIN MAYÚSCULA</h4>
-                      <div className="flex flex-wrap gap-1 justify-center">
-                        {categorias.minuscula.map((palabra, index) => (
-                          <span key={index} className={`text-sm px-2 py-1 rounded ${
-                            feedback[palabra] === true ? "bg-green-400 text-white" : 
-                            feedback[palabra] === false ? "bg-red-300 text-red-800" : 
-                            "bg-white text-blue-800"
-                          }`}>
-                            {palabra}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap justify-center gap-4">
-                    <button
-                      onClick={() => cambiarActividad(actividad)}
-                      className="bg-teal-500 text-white px-8 py-4 rounded-full font-bold hover:bg-teal-600 transition-transform hover:scale-105 shadow-md flex items-center gap-2"
-                    >
-                      <span>🎮</span>
-                      <span>¡Jugar de nuevo!</span>
-                    </button>
-                    <button
-                      onClick={() => cambiarActividad("diferencias")}
-                      className="bg-purple-600 text-white px-8 py-4 rounded-full font-bold hover:bg-purple-700 transition-transform hover:scale-105 shadow-md flex items-center gap-2"
-                    >
-                      <span>🏠</span>
-                      <span>Volver a inicio</span>
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
                 </div>
             </div>
         </div>
