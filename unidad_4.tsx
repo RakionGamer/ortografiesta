@@ -256,6 +256,19 @@ const cartasJuego = [
   },
 ]
 
+interface Categorias {
+  significado: string[];
+  ortografia: string[];
+}
+
+interface Feedback {
+  [palabra: string]: boolean;
+}
+
+interface ImagenesEjemplos {
+  [palabra: string]: string;
+}
+
 // Palabras para sopa de letras
 const palabrasHomofonas = ["HOLA", "HAY", "TUBO", "VOTAR", "VACA", "CASA"]
 
@@ -293,10 +306,151 @@ export default function Unidad4() {
 
   const sopaRef = useRef<HTMLDivElement>(null)
   const { isMusicPlaying, isMuted, toggleMusic, toggleMute } = useAudio()
-  const [selectedAvatar, setSelectedAvatar] = useState("🐱")
-  const { progress, updateActivity } = useProgress("unidad4")
-  const [puntosUnidad, setPuntosUnidad] = useState(0)
-  const [estrellasUnidad, setEstrellasUnidad] = useState(0)
+  const [selectedAvatar, setSelectedAvatar] = useState("🐱");
+  const { progress, updateActivity } = useProgress("unidad4");
+  const [puntosUnidad, setPuntosUnidad] = useState(0);
+  const [estrellasUnidad, setEstrellasUnidad] = useState(0);
+  const [fallos, setFallos] = useState(0);
+  const [palabraSeleccionada, setPalabraSeleccionada] = useState<string | null>(null);
+  const [feedback, setFeedback] = useState<Feedback>({});
+
+
+
+  const palabrasHomofonas: string[] = [
+    "baca", "vaca", "casa", "caza", "haya", "halla",
+    "sierra", "cierra", "tubo", "tuvo", "hola", "ola"
+  ];
+
+  // Imágenes para cada palabra
+  const imagenesEjemplos: ImagenesEjemplos = {
+    "baca": "🚗", "vaca": "🐄", "casa": "🏠", "caza": "🏹",
+    "haya": "🌳", "halla": "🔍", "sierra": "🔧", "cierra": "🚪",
+    "tubo": "⚙️", "tuvo": "✋", "hola": "👋", "ola": "🌊"
+  };
+
+  // Estado inicial de palabras sin clasificar (solo cuando la actividad es "sopa")
+  const [palabrasSinClasificar, setPalabrasSinClasificar] = useState<string[]>(() => {
+    return actividad === "sopa" ? [...palabrasHomofonas] : [];
+  });
+
+  // Estado de las categorías con las palabras ya clasificadas
+  const [categorias, setCategorias] = useState<Categorias>(() => {
+    return {
+      significado: [],
+      ortografia: []
+    };
+  });
+
+  // Clasificación correcta de las palabras (para verificación)
+  const clasificacionCorrecta: Categorias = {
+    significado: ["baca", "vaca", "casa", "caza", "haya", "halla"],
+    ortografia: ["sierra", "cierra", "tubo", "tuvo", "hola", "ola"]
+  };
+
+  // Función para asignar una palabra a una categoría
+  const asignarPalabra = (categoria: keyof Categorias): void => {
+    if (palabraSeleccionada && palabrasSinClasificar.includes(palabraSeleccionada)) {
+      // Crear nueva copia de categorías
+      const nuevasCategorias: Categorias = {
+        significado: [...categorias.significado],
+        ortografia: [...categorias.ortografia]
+      };
+
+      // Agregar la palabra a la categoría seleccionada
+      nuevasCategorias[categoria] = [...nuevasCategorias[categoria], palabraSeleccionada];
+
+      // Actualizar estados
+      setCategorias(nuevasCategorias);
+      setPalabrasSinClasificar(prev => prev.filter(p => p !== palabraSeleccionada));
+      setPalabraSeleccionada(null);
+
+      console.log(`Palabra "${palabraSeleccionada}" asignada a "${categoria}"`);
+      console.log('Nuevas categorías:', nuevasCategorias);
+    }
+  };
+
+  // Función para comprobar la clasificación
+const comprobarClasificacion = (): void => {
+  const nuevoFeedback: Feedback = {};
+  let nuevosFallos = 0;
+
+  Object.entries(categorias).forEach(([categoria, palabras]) => {
+    palabras.forEach((palabra: string) => {
+      const esCorrecta = clasificacionCorrecta[categoria as keyof Categorias].includes(palabra);
+      nuevoFeedback[palabra] = esCorrecta;
+      if (!esCorrecta) nuevosFallos++;
+    });
+  });
+
+  setFeedback(nuevoFeedback);
+  setFallos(nuevosFallos);
+  setActividadCompletada(true);
+
+  const puntuacion = nuevosFallos === 0 ? 100
+                   : nuevosFallos <= 2 ? 80
+                   : 60;
+
+  if (nuevosFallos < 3) {
+    updateActivity("sopa", {
+      attempts: 1,
+      lastScore: puntuacion,
+      completed: true,
+      stars: 1,
+    });
+  }
+};
+
+
+  // Función para reiniciar la actividad
+  const reiniciarClasificacion = (): void => {
+    setPalabrasSinClasificar([...palabrasHomofonas]);
+    setCategorias({ significado: [], ortografia: [] });
+    setPalabraSeleccionada(null);
+    setFeedback({});
+    setFallos(0);
+    setActividadCompletada(false);
+  };
+
+  // Función para remover una palabra de una categoría
+  const removerPalabraDCategoria = (palabra: string, categoria: keyof Categorias): void => {
+    const nuevasCategorias: Categorias = {
+      significado: [...categorias.significado],
+      ortografia: [...categorias.ortografia]
+    };
+
+    nuevasCategorias[categoria] = nuevasCategorias[categoria].filter(p => p !== palabra);
+    setCategorias(nuevasCategorias);
+    setPalabrasSinClasificar(prev => [...prev, palabra]);
+
+    // Limpiar feedback si existe
+    if (feedback[palabra] !== undefined) {
+      const nuevoFeedback = { ...feedback };
+      delete nuevoFeedback[palabra];
+      setFeedback(nuevoFeedback);
+    }
+  };
+
+  // Función mejorada para cambiar actividad
+  const cambiarActividadClasificacion = (nuevaActividad: string): void => {
+    if (nuevaActividad === "sopa") {
+      reiniciarClasificacion();
+    }
+  };
+
+  useEffect(() => {
+    if (actividad === "sopa") {
+      reiniciarClasificacion();
+    }
+  }, [actividad]);
+
+
+
+
+
+
+
+
+
 
   useEffect(() => {
     const savedAvatar = localStorage.getItem("ortografia-avatar")
@@ -346,86 +500,104 @@ export default function Unidad4() {
 
   // Función para manejar respuesta en historias
   const handleRespuestaHistoria = (respuesta: string) => {
-    const historiaData = historias[historiaActual]
-    const opcionData = historiaData.opciones[opcionActual]
-    const esCorrecta = respuesta === opcionData.correcta
+    const historiaData = historias[historiaActual];
+    const opcionData = historiaData.opciones[opcionActual];
+    const esCorrecta = respuesta === opcionData.correcta;
 
-    const nuevasRespuestas = [...respuestasHistoria]
-    nuevasRespuestas[opcionActual] = respuesta
+    const nuevasRespuestas = [...respuestasHistoria];
+    nuevasRespuestas[opcionActual] = respuesta;
+    setRespuestasHistoria(nuevasRespuestas);
 
-    setRespuestasHistoria(nuevasRespuestas)
-    setMostrarResultado(esCorrecta)
-
+    setMostrarResultado(esCorrecta);
     if (esCorrecta) {
-      setPuntuacion((prev) => prev + 10)
+      setPuntuacion((prev) => prev + 10);
     }
 
-    setRespuestas([...respuestas, esCorrecta])
+    setRespuestas((r) => [...r, esCorrecta]);
+
+    const nuevosFallos = esCorrecta ? fallos : fallos + 1;
+    if (!esCorrecta) {
+      setFallos(n => n + 1);
+    }
 
     setTimeout(() => {
-      setMostrarResultado(null)
+      setMostrarResultado(null);
 
+      // Avanzo a la siguiente opción o historia
       if (opcionActual < historiaData.opciones.length - 1) {
-        setOpcionActual((prev) => prev + 1)
+        setOpcionActual((prev) => prev + 1);
       } else {
-        // Historia completada
+        // Fin de la historia actual
         if (historiaActual < historias.length - 1) {
-          setHistoriaActual((prev) => prev + 1)
-          setOpcionActual(0)
-          setRespuestasHistoria([])
+          setHistoriaActual((prev) => prev + 1);
+          setOpcionActual(0);
+          setRespuestasHistoria([]);
         } else {
-          setActividadCompletada(true)
+          // Actividad completada por completo
+          setActividadCompletada(true);
 
-          const respuestasCorrectas = [...respuestas, esCorrecta].filter(Boolean).length
-          const totalPreguntas = historias.reduce((acc, h) => acc + h.opciones.length, 0)
-          const porcentajeExito = (respuestasCorrectas / totalPreguntas) * 100
+          const respuestasCorrectas = [...respuestas, esCorrecta].filter(Boolean).length;
+          const totalPreguntas = historias.reduce(
+            (acc, h) => acc + h.opciones.length,
+            0
+          );
+          const porcentajeExito = (respuestasCorrectas / totalPreguntas) * 100;
 
-          updateActivity("completar", {
+          // Solo actualizar el progreso si hubo menos de 3 fallos
+          if (nuevosFallos < 3) {
+            updateActivity("completar", {
+              attempts: 1,
+              lastScore: porcentajeExito,
+              completed: true,
+              stars: porcentajeExito >= 80 ? 1 : 0,
+            });
+          }
+        }
+      }
+    }, 2000);
+  };
+
+
+  // Función para manejar respuesta en cartas
+  const handleRespuestaCarta = (respuesta: string) => {
+    const cartaData = cartasBarajadas[cartaActual];
+    const esCorrecta = respuesta === cartaData.respuesta;
+
+    setMostrarResultado(esCorrecta);
+    if (esCorrecta) {
+      setPuntuacion((prev) => prev + 15);
+    }
+
+    setRespuestas((r) => [...r, esCorrecta]);
+
+    const nuevosFallos = esCorrecta ? fallos : fallos + 1;
+    if (!esCorrecta) {
+      setFallos(n => n + 1);
+    }
+    setTimeout(() => {
+      setMostrarResultado(null);
+      setMostrarPista(false);
+
+      if (cartaActual < 9) {
+        setCartaActual((prev) => prev + 1);
+      } else {
+        // Actividad completada
+        setActividadCompletada(true);
+        const respuestasCorrectas = [...respuestas, esCorrecta].filter(Boolean).length;
+        const porcentajeExito = (respuestasCorrectas / 10) * 100;
+
+        if (nuevosFallos < 3) {
+          updateActivity("dictado", {
             attempts: 1,
             lastScore: porcentajeExito,
             completed: true,
             stars: porcentajeExito >= 80 ? 1 : 0,
-          })
-
+          });
         }
       }
-    }, 2000)
-  }
+    }, 2000);
+  };
 
-  // Función para manejar respuesta en cartas
-  const handleRespuestaCarta = (respuesta: string) => {
-    const cartaData = cartasBarajadas[cartaActual]
-    const esCorrecta = respuesta === cartaData.respuesta
-
-    setMostrarResultado(esCorrecta)
-
-    if (esCorrecta) {
-      setPuntuacion((prev) => prev + 15)
-    }
-
-    setRespuestas([...respuestas, esCorrecta])
-
-    setTimeout(() => {
-      setMostrarResultado(null)
-      setMostrarPista(false)
-
-      if (cartaActual < 9) {
-        setCartaActual((prev) => prev + 1)
-      } else {
-        setActividadCompletada(true)
-
-        const respuestasCorrectas = [...respuestas, esCorrecta].filter(Boolean).length
-        const porcentajeExito = (respuestasCorrectas / 10) * 100
-
-        updateActivity("dictado", {
-          attempts: 1,
-          lastScore: porcentajeExito,
-          completed: true,
-          stars: porcentajeExito >= 80 ? 1 : 0,
-        })
-      }
-    }, 2000)
-  }
 
   const cambiarActividad = (nuevaActividad: Actividad) => {
     if (actividad !== nuevaActividad && actividad === "diferencias") {
@@ -627,6 +799,18 @@ export default function Unidad4() {
     )
   }
 
+
+
+
+
+
+
+
+
+
+
+
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-teal-300 to-teal-200 overflow-hidden relative">
       <div className="container mx-auto px-4 py-8 relative z-10">
@@ -770,6 +954,9 @@ export default function Unidad4() {
                           </div>
                         </div>
 
+                        {/* Sistema de estrellas y fallos rediseñado */}
+
+
                         {/* Progreso de palabras */}
                         <div className="flex flex-col items-end gap-2">
                           <div className="flex gap-1.5">
@@ -777,10 +964,10 @@ export default function Unidad4() {
                               <div
                                 key={i}
                                 className={`w-3 h-3 rounded-full transition-all duration-300 ${i < opcionActual
-                                    ? (respuestasHistoria[i] === historias[historiaActual].opciones[i].correcta ? "bg-green-400 shadow-lg shadow-green-200" : "bg-red-400 shadow-lg shadow-red-200")
-                                    : i === opcionActual
-                                      ? "bg-blue-400 animate-pulse shadow-lg shadow-blue-200"
-                                      : "bg-gray-200"
+                                  ? (respuestasHistoria[i] === historias[historiaActual].opciones[i].correcta ? "bg-green-400 shadow-lg shadow-green-200" : "bg-red-400 shadow-lg shadow-red-200")
+                                  : i === opcionActual
+                                    ? "bg-blue-400 animate-pulse shadow-lg shadow-blue-200"
+                                    : "bg-gray-200"
                                   }`}
                               />
                             ))}
@@ -792,6 +979,54 @@ export default function Unidad4() {
                             />
                           </div>
                         </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center justify-center gap-6 mb-6">
+                      {/* Indicador de estrella mejorado */}
+                      <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border">
+                        <div className="relative">
+                          <Star
+                            className={`w-6 h-6 transition-all duration-300 ${fallos < 3
+                              ? "text-yellow-400 drop-shadow-sm"
+                              : "text-gray-300"
+                              }`}
+                            fill={fallos < 3 ? "currentColor" : "none"}
+                          />
+                          {fallos < 3 && (
+                            <div className="absolute -inset-1 bg-yellow-400 rounded-full opacity-20 animate-ping" />
+                          )}
+                        </div>
+                        <span
+                          className={`font-semibold text-sm transition-all duration-300 ${fallos < 3
+                            ? "text-yellow-600"
+                            : "text-gray-400 line-through"
+                            }`}
+                        >
+                          {fallos < 3 ? "¡Estrella disponible!" : "Estrella perdida"}
+                        </span>
+                      </div>
+
+                      {/* Contador de fallos mejorado */}
+                      <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border">
+                        <div className="flex gap-1">
+                          {[1, 2, 3].map((fallo) => (
+                            <div
+                              key={fallo}
+                              className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${fallo <= fallos
+                                ? "bg-red-400 border-red-400 scale-110"
+                                : "border-gray-300"
+                                }`}
+                            />
+                          ))}
+                        </div>
+                        <span className={`font-semibold text-sm ${fallos === 0 ? "text-green-600" :
+                          fallos === 1 ? "text-yellow-600" :
+                            fallos === 2 ? "text-orange-600" : "text-red-600"
+                          }`}>
+                          {fallos === 0 ? "¡Perfecto!" :
+                            fallos === 1 ? "1 fallo" :
+                              fallos === 2 ? "2 fallos" : "3 fallos"}
+                        </span>
                       </div>
                     </div>
 
@@ -831,12 +1066,12 @@ export default function Unidad4() {
                               {index < historias[historiaActual].opciones.length && (
                                 <span
                                   className={`inline-block mx-2 px-4 py-2 rounded-2xl font-bold text-lg mb-2 transition-all duration-300 transform ${respuestasHistoria[index]
-                                      ? respuestasHistoria[index] === historias[historiaActual].opciones[index].correcta
-                                        ? "bg-gradient-to-r from-green-400 to-green-500 text-white shadow-lg shadow-green-300/50 scale-105"
-                                        : "bg-gradient-to-r from-red-400 to-red-500 text-white shadow-lg shadow-red-300/50 scale-105"
-                                      : index === opcionActual
-                                        ? "bg-gradient-to-r from-yellow-300 to-yellow-400 text-yellow-800 animate-pulse shadow-lg shadow-yellow-300/50 scale-110"
-                                        : "bg-gray-200 text-gray-600 border-2 border-dashed border-gray-400 hover:border-blue-400 hover:bg-blue-50 transition-colors"
+                                    ? respuestasHistoria[index] === historias[historiaActual].opciones[index].correcta
+                                      ? "bg-gradient-to-r from-green-400 to-green-500 text-white shadow-lg shadow-green-300/50 scale-105"
+                                      : "bg-gradient-to-r from-red-400 to-red-500 text-white shadow-lg shadow-red-300/50 scale-105"
+                                    : index === opcionActual
+                                      ? "bg-gradient-to-r from-yellow-300 to-yellow-400 text-yellow-800 animate-pulse shadow-lg shadow-yellow-300/50 scale-110"
+                                      : "bg-gray-200 text-gray-600 border-2 border-dashed border-gray-400 hover:border-blue-400 hover:bg-blue-50 transition-colors"
                                     }`}
                                 >
                                   {respuestasHistoria[index] || "___"}
@@ -889,8 +1124,8 @@ export default function Unidad4() {
                     {mostrarResultado !== null && (
                       <div className="flex justify-center">
                         <div className={`flex flex-col items-center gap-4 px-8 py-6 rounded-3xl text-xl font-bold shadow-xl transform animate-in slide-in-from-bottom-4 duration-500 max-w-lg ${mostrarResultado
-                            ? "bg-gradient-to-r from-green-400 to-green-500 text-white shadow-green-300/50"
-                            : "bg-gradient-to-r from-red-400 to-red-500 text-white shadow-red-300/50"
+                          ? "bg-gradient-to-r from-green-400 to-green-500 text-white shadow-green-300/50"
+                          : "bg-gradient-to-r from-red-400 to-red-500 text-white shadow-red-300/50"
                           }`}>
                           <div className="flex items-center gap-3">
                             {mostrarResultado ? (
@@ -1017,10 +1252,10 @@ export default function Unidad4() {
                               <div
                                 key={i}
                                 className={`w-3 h-3 rounded-full transition-all duration-300 ${i < cartaActual
-                                    ? (respuestas[i] ? "bg-green-400 shadow-lg shadow-green-200" : "bg-red-400 shadow-lg shadow-red-200")
-                                    : i === cartaActual
-                                      ? "bg-teal-400 animate-pulse shadow-lg shadow-teal-200"
-                                      : "bg-gray-200"
+                                  ? (respuestas[i] ? "bg-green-400 shadow-lg shadow-green-200" : "bg-red-400 shadow-lg shadow-red-200")
+                                  : i === cartaActual
+                                    ? "bg-teal-400 animate-pulse shadow-lg shadow-teal-200"
+                                    : "bg-gray-200"
                                   }`}
                               />
                             ))}
@@ -1032,6 +1267,55 @@ export default function Unidad4() {
                             />
                           </div>
                         </div>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-6 mb-6">
+                      {/* Indicador de estrella mejorado */}
+                      <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border">
+                        <div className="relative">
+                          <Star
+                            className={`w-6 h-6 transition-all duration-300 ${fallos < 3
+                              ? "text-yellow-400 drop-shadow-sm"
+                              : "text-gray-300"
+                              }`}
+                            fill={fallos < 3 ? "currentColor" : "none"}
+                          />
+                          {fallos < 3 && (
+                            <div className="absolute -inset-1 bg-yellow-400 rounded-full opacity-20 animate-ping" />
+                          )}
+                        </div>
+                        <span
+                          className={`font-semibold text-sm transition-all duration-300 ${fallos < 3
+                            ? "text-yellow-600"
+                            : "text-gray-400 line-through"
+                            }`}
+                        >
+                          {fallos < 3 ? "¡Estrella disponible!" : "Estrella perdida"}
+                        </span>
+                      </div>
+
+                      {/* Contador de fallos mejorado */}
+                      <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm border">
+                        <div className="flex gap-1">
+                          {[1, 2, 3].map((fallo) => (
+                            <div
+                              key={fallo}
+                              className={`w-4 h-4 rounded-full border-2 transition-all duration-300 ${fallo <= fallos
+                                ? "bg-red-400 border-red-400 scale-110"
+                                : "border-gray-300"
+                                }`}
+                            />
+                          ))}
+                        </div>
+                        <span className={`font-semibold text-sm ${fallos === 0 ? "text-green-600" :
+                          fallos === 1 ? "text-yellow-600" :
+                            fallos === 2 ? "text-orange-600" : "text-red-600"
+                          }`}>
+                          {fallos === 0 ? "¡Perfecto!" :
+                            fallos === 1 ? "1 fallo" :
+                              fallos === 2 ? "2 fallos" : "3 fallos"}
+                        </span>
                       </div>
                     </div>
 
@@ -1128,8 +1412,8 @@ export default function Unidad4() {
                         {mostrarResultado !== null && (
                           <div className="flex justify-center">
                             <div className={`flex flex-col items-center gap-4 px-8 py-6 rounded-3xl text-xl font-bold shadow-xl transform animate-in slide-in-from-bottom-4 duration-500 max-w-lg ${mostrarResultado
-                                ? "bg-gradient-to-r from-green-400 to-green-500 text-white shadow-green-300/50"
-                                : "bg-gradient-to-r from-red-400 to-red-500 text-white shadow-red-300/50"
+                              ? "bg-gradient-to-r from-green-400 to-green-500 text-white shadow-green-300/50"
+                              : "bg-gradient-to-r from-red-400 to-red-500 text-white shadow-red-300/50"
                               }`}>
                               <div className="flex items-center gap-3">
                                 {mostrarResultado ? (
@@ -1242,117 +1526,241 @@ export default function Unidad4() {
             <div className="text-center">
               {!actividadCompletada ? (
                 <>
-                  <div className="bg-gradient-to-r from-teal-400 via-cyan-500 to-blue-500 rounded-xl p-6 shadow-lg mb-6 relative overflow-hidden">
-                    <div className="absolute top-1 left-1 text-3xl">👋</div>
-                    <div className="absolute top-1 right-1 text-3xl">🌊</div>
-                    <div className="absolute bottom-1 left-1 text-3xl">🚰</div>
-                    <div className="absolute bottom-1 right-1 text-3xl">🗳️</div>
+                  <div className="bg-gradient-to-r from-purple-400 via-pink-500 to-red-500 rounded-xl p-6 shadow-lg mb-6 relative overflow-hidden">
+                    <div className="absolute top-1 left-1 text-3xl">🏠</div>
+                    <div className="absolute top-1 right-1 text-3xl">🐄</div>
+                    <div className="absolute bottom-1 left-1 text-3xl">🌊</div>
+                    <div className="absolute bottom-1 right-1 text-3xl">🔧</div>
 
                     <h2 className="text-3xl font-bold text-white mb-2 flex items-center justify-center">
-                      <span className="mr-2">🔍</span>
-                      Sopa de Palabras Homófonas
+                      <span className="mr-2">📚</span>
+                      Clasificación de Palabras Homófonas
                       <span className="ml-2">✨</span>
                     </h2>
                     <p className="text-lg text-white mb-2">
-                      ¡Encuentra las palabras que suenan igual pero se escriben diferente!
+                      ¡Clasifica las palabras homófonas según sus características!
                     </p>
                   </div>
 
-                  <div className="flex flex-col md:flex-row gap-6 items-start">
-                    <div
-                      className="bg-teal-100 p-5 rounded-xl w-full md:w-auto shadow-md border-4 border-teal-300 relative"
-                      ref={sopaRef}
-                      onMouseLeave={handleCeldaMouseUp}
-                    >
-                      <div className="grid grid-cols-10 gap-1 mx-auto w-max">
-                        {sopaLetras.flatMap((fila, rowIndex) =>
-                          fila.map((letra, colIndex) => (
+
+
+                  <div className="flex flex-col lg:flex-row gap-6">
+                    {/* Palabras sin clasificar */}
+                    <div className="bg-gray-100 p-5 rounded-xl shadow-md border-4 border-gray-300 flex-1">
+                      <h3 className="text-xl font-bold text-gray-800 mb-4 flex items-center justify-center">
+                        <span className="mr-2">📝</span> Palabras para Clasificar ({palabrasSinClasificar.length}) <span className="ml-2">📝</span>
+                      </h3>
+                      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 min-h-[200px]">
+                        {palabrasSinClasificar.length > 0 ? (
+                          palabrasSinClasificar.map((palabra: string, index: number) => (
                             <div
-                              key={`${rowIndex}-${colIndex}`}
-                              className={`w-10 h-10 flex items-center justify-center font-bold text-lg rounded-md transition-all duration-200 select-none cursor-pointer transform hover:scale-110
-                        ${esCeldaPalabraEncontrada(rowIndex, colIndex)
-                                  ? "bg-teal-400 text-white animate-pulse"
-                                  : esCeldaSeleccionada(rowIndex, colIndex)
-                                    ? "bg-yellow-300 text-teal-800"
-                                    : "bg-white text-teal-800 shadow-sm"
+                              key={`${palabra}-${index}`}
+                              onClick={() => setPalabraSeleccionada(palabraSeleccionada === palabra ? null : palabra)}
+                              className={`p-3 rounded-lg cursor-pointer transition-all duration-200 transform hover:scale-105 border-2 ${palabraSeleccionada === palabra
+                                ? "bg-yellow-300 border-yellow-500 shadow-lg scale-105"
+                                : "bg-white border-gray-300 hover:border-purple-400 hover:shadow-md"
                                 }`}
-                              onMouseDown={() => handleCeldaMouseDown(rowIndex, colIndex)}
-                              onMouseEnter={() => handleCeldaMouseEnter(rowIndex, colIndex)}
-                              onMouseUp={handleCeldaMouseUp}
                             >
-                              {letra}
+                              <div className="text-2xl mb-1">{imagenesEjemplos[palabra] || "❓"}</div>
+                              <div className="font-bold text-gray-800">{palabra}</div>
                             </div>
-                          )),
+                          ))
+                        ) : (
+                          <div className="col-span-full text-gray-500 italic py-8">
+                            ¡Todas las palabras han sido clasificadas!
+                          </div>
                         )}
                       </div>
                     </div>
 
-                    <div className="bg-cyan-100 p-5 rounded-xl flex-1 shadow-md border-4 border-cyan-300">
-                      <h3 className="text-xl font-bold text-teal-800 mb-3 flex items-center justify-center">
-                        <span className="mr-2">🎯</span> ¡Encuentra estas palabras! <span className="ml-2">🎯</span>
-                      </h3>
-                      <div className="grid grid-cols-2 gap-3">
-                        {palabrasHomofonas.map((palabra, index) => {
-                          const iconos = ["👋", "✅", "🚰", "🗳️", "🐄", "🏠"]
-                          return (
-                            <div
-                              key={palabra}
-                              className={`px-4 py-2 rounded-full text-md font-bold transition-all duration-300 flex items-center justify-between ${palabrasEncontradas.includes(palabra)
-                                  ? "bg-teal-400 text-white line-through transform scale-95"
-                                  : "bg-white text-teal-800 shadow-sm hover:shadow-md hover:scale-105"
-                                }`}
-                            >
-                              <span>
-                                {palabrasEncontradas.includes(palabra) ? "✓ " : ""} {palabra}
-                              </span>
-                              <span className="text-xl ml-2">{iconos[index]}</span>
-                            </div>
-                          )
-                        })}
-                      </div>
-
-                      <div className="mt-6 bg-teal-200 p-3 rounded-lg text-teal-800 font-bold">
-                        <p className="flex items-center justify-center">
-                          <span className="text-xl mr-2">📊</span>
-                          ¡Has encontrado {palabrasEncontradas.length} de {palabrasHomofonas.length} palabras!
+                    {/* Categorías de clasificación */}
+                    <div className="flex flex-col gap-4 flex-1">
+                      {/* Categoría 1: Diferente Significado */}
+                      <div className="bg-blue-100 p-4 rounded-xl shadow-md border-4 border-blue-300">
+                        <h4 className="text-lg font-bold text-blue-800 mb-3 flex items-center justify-center">
+                          <span className="mr-2">💭</span> Diferente Significado ({categorias.significado.length}) <span className="ml-2">💭</span>
+                        </h4>
+                        <p className="text-xs text-blue-600 mb-3 italic">
+                          Palabras que suenan igual pero tienen significados completamente diferentes
                         </p>
+                        <div className="grid grid-cols-2 gap-2 min-h-[120px] mb-3">
+                          {categorias.significado.length > 0 ? (
+                            categorias.significado.map((palabra: string, index: number) => (
+                              <div
+                                key={`sig-${palabra}-${index}`}
+                                onClick={() => removerPalabraDCategoria(palabra, 'significado')}
+                                className={`p-2 rounded-lg text-sm font-bold text-center cursor-pointer transition-all flex flex-col items-center ${feedback[palabra] === true
+                                  ? "bg-green-400 text-white"
+                                  : feedback[palabra] === false
+                                    ? "bg-red-400 text-white"
+                                    : "bg-white text-blue-800 hover:bg-blue-50"
+                                  }`}
+                              >
+                                <div className="text-lg mb-1">{imagenesEjemplos[palabra] || "❓"}</div>
+                                <div>
+                                  {palabra}
+                                  {feedback[palabra] === true && " ✓"}
+                                  {feedback[palabra] === false && " ✗"}
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="col-span-full text-blue-400 italic py-4 text-center">
+                              Arrastra palabras aquí
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => asignarPalabra("significado")}
+                          disabled={!palabraSeleccionada}
+                          className="w-full bg-blue-500 text-white py-2 rounded-lg font-bold hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {palabraSeleccionada ? `Agregar "${palabraSeleccionada}"` : "Selecciona una palabra"}
+                        </button>
                       </div>
 
-                      <div className="mt-4 text-teal-700 text-sm italic">
-                        Recuerda: Estas palabras suenan igual pero se escriben diferente.
+                      {/* Categoría 2: Diferente Ortografía */}
+                      <div className="bg-green-100 p-4 rounded-xl shadow-md border-4 border-green-300">
+                        <h4 className="text-lg font-bold text-green-800 mb-3 flex items-center justify-center">
+                          <span className="mr-2">✍️</span> Diferente Ortografía ({categorias.ortografia.length}) <span className="ml-2">✍️</span>
+                        </h4>
+                        <p className="text-xs text-green-600 mb-3 italic">
+                          Palabras que suenan igual pero se escriben de manera diferente
+                        </p>
+                        <div className="grid grid-cols-2 gap-2 min-h-[120px] mb-3">
+                          {categorias.ortografia.length > 0 ? (
+                            categorias.ortografia.map((palabra: string, index: number) => (
+                              <div
+                                key={`ort-${palabra}-${index}`}
+                                onClick={() => removerPalabraDCategoria(palabra, 'ortografia')}
+                                className={`p-2 rounded-lg text-sm font-bold text-center cursor-pointer transition-all flex flex-col items-center ${feedback[palabra] === true
+                                  ? "bg-green-400 text-white"
+                                  : feedback[palabra] === false
+                                    ? "bg-red-400 text-white"
+                                    : "bg-white text-green-800 hover:bg-green-50"
+                                  }`}
+                              >
+                                <div className="text-lg mb-1">{imagenesEjemplos[palabra] || "❓"}</div>
+                                <div>
+                                  {palabra}
+                                  {feedback[palabra] === true && " ✓"}
+                                  {feedback[palabra] === false && " ✗"}
+                                </div>
+                              </div>
+                            ))
+                          ) : (
+                            <div className="col-span-full text-green-400 italic py-4 text-center">
+                              Arrastra palabras aquí
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => asignarPalabra("ortografia")}
+                          disabled={!palabraSeleccionada}
+                          className="w-full bg-green-500 text-white py-2 rounded-lg font-bold hover:bg-green-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
+                        >
+                          {palabraSeleccionada ? `Agregar "${palabraSeleccionada}"` : "Selecciona una palabra"}
+                        </button>
                       </div>
                     </div>
                   </div>
 
-                  <div className="mt-6">
+                  {/* Información de progreso */}
+                  <div className="mt-6 bg-purple-200 p-4 rounded-lg">
+                    <p className="text-purple-800 font-bold text-lg">
+                      <span className="text-xl mr-2">📊</span>
+                      Progreso: {Object.values(categorias).flat().length} de {palabrasHomofonas.length} palabras clasificadas
+                    </p>
+                    {palabraSeleccionada && (
+                      <p className="text-purple-700 mt-2">
+                        Palabra seleccionada: <span className="font-bold text-yellow-600">{palabraSeleccionada}</span>
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Botones de acción */}
+                  <div className="mt-6 flex justify-center gap-4">
+                    {Object.values(categorias).flat().length === palabrasHomofonas.length && (
+                      <button
+                        onClick={comprobarClasificacion}
+                        className="bg-purple-600 text-white px-8 py-3 rounded-full font-bold hover:bg-purple-700 transition-colors transform hover:scale-105 flex items-center gap-2 shadow-lg"
+                      >
+                        <span>✅</span>
+                        <span>Comprobar Clasificación</span>
+                      </button>
+                    )}
                     <button
-                      onClick={() => cambiarActividad(actividad)}
-                      className="bg-teal-500 text-white px-6 py-3 rounded-full font-bold hover:bg-teal-600 transition-colors flex items-center gap-2 mx-auto cursor-pointer"
+                      onClick={() => cambiarActividadClasificacion("sopa")}
+                      className="bg-gray-500 text-white px-6 py-3 rounded-full font-bold hover:bg-gray-600 transition-colors flex items-center gap-2"
                     >
                       <span>🔄</span>
-                      <span>Reiniciar juego</span>
+                      <span>Reiniciar</span>
                     </button>
                   </div>
                 </>
               ) : (
-                <div className="text-center py-8 bg-gradient-to-r from-teal-200 via-cyan-200 to-blue-200 rounded-xl p-8 shadow-lg">
+                <div className="text-center py-8 bg-gradient-to-r from-purple-200 via-pink-200 to-red-200 rounded-xl p-8 shadow-lg">
                   <div className="animate-bounce text-7xl mb-6">🎉</div>
-                  <h2 className="text-4xl font-bold text-teal-800 mb-4">¡Increíble trabajo!</h2>
-                  <p className="text-2xl text-teal-600 mb-8">
-                    Has encontrado todas las palabras homófonas. ¡Ahora sabes diferenciarlas perfectamente!
+                  <h2 className="text-4xl font-bold text-purple-800 mb-4">¡Excelente clasificación!</h2>
+                  <p className="text-2xl text-purple-600 mb-4">
+                    Has terminado de clasificar las palabras homófonas.
                   </p>
+
+                  {/* Mostrar resultados detallados */}
+                  <div className="bg-white p-6 rounded-lg mb-6 text-left max-w-3xl mx-auto shadow-inner">
+                    <h3 className="text-lg font-bold text-purple-800 mb-4 text-center">📋 Resultados Detallados</h3>
+
+                    <div className="grid md:grid-cols-2 gap-4 mb-4">
+                      <div className="bg-blue-50 p-3 rounded-lg">
+                        <h4 className="font-bold text-blue-800 mb-2">💭 Diferente Significado:</h4>
+                        {categorias.significado.map((palabra: string) => (
+                          <div key={palabra} className={`text-sm mb-1 flex items-center ${feedback[palabra] ? 'text-green-600' : 'text-red-600'}`}>
+                            <span className="mr-2">{imagenesEjemplos[palabra]}</span>
+                            {feedback[palabra] ? '✓' : '✗'} {palabra}
+                          </div>
+                        ))}
+                      </div>
+
+                      <div className="bg-green-50 p-3 rounded-lg">
+                        <h4 className="font-bold text-green-800 mb-2">✍️ Diferente Ortografía:</h4>
+                        {categorias.ortografia.map((palabra: string) => (
+                          <div key={palabra} className={`text-sm mb-1 flex items-center ${feedback[palabra] ? 'text-green-600' : 'text-red-600'}`}>
+                            <span className="mr-2">{imagenesEjemplos[palabra]}</span>
+                            {feedback[palabra] ? '✓' : '✗'} {palabra}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    <div className="text-center border-t pt-4">
+                      <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <span className="text-green-600 font-bold text-lg">{Object.values(feedback).filter(v => v === true).length}</span>
+                          <br />Correctas
+                        </div>
+                        <div>
+                          <span className="text-red-600 font-bold text-lg">{fallos}</span>
+                          <br />Incorrectas
+                        </div>
+                        <div>
+                          <span className="text-blue-600 font-bold text-lg">{Math.round(((Object.values(feedback).filter(v => v === true).length) / palabrasHomofonas.length) * 100)}%</span>
+                          <br />Precisión
+                        </div>
+                      </div>
+                    </div>
+                  </div>
 
                   <div className="flex justify-center gap-4">
                     <button
-                      onClick={() => cambiarActividad(actividad)}
-                      className="bg-teal-500 text-white px-8 py-4 rounded-full font-bold hover:bg-teal-600 transition-transform hover:scale-105 shadow-md flex items-center gap-2"
+                      onClick={() => cambiarActividadClasificacion("sopa")}
+                      className="bg-purple-500 text-white px-8 py-4 rounded-full font-bold hover:bg-purple-600 transition-transform hover:scale-105 shadow-md flex items-center gap-2"
                     >
                       <span>🎮</span>
-                      <span>¡Jugar de nuevo!</span>
+                      <span>¡Clasificar de nuevo!</span>
                     </button>
                     <button
-                      onClick={() => cambiarActividad("diferencias")}
-                      className="bg-cyan-600 text-white px-8 py-4 rounded-full font-bold hover:bg-cyan-700 transition-transform hover:scale-105 shadow-md flex items-center gap-2"
+                      onClick={() => cambiarActividadClasificacion("diferencias")}
+                      className="bg-pink-600 text-white px-8 py-4 rounded-full font-bold hover:bg-pink-700 transition-transform hover:scale-105 shadow-md flex items-center gap-2"
                     >
                       <span>🏠</span>
                       <span>Volver a reglas</span>
